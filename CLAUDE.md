@@ -32,7 +32,9 @@ Word prediction (Hungarian word endings make typing tiring), Bluetooth speaker a
 - **First technical prototype**: minimal app that speaks typed text with `imre`, tested on the cheapest Android phone available, to measure real speed.
 
 ## Stack
-Kotlin, Jetpack Compose, sherpa-onnx (Piper ONNX models bundled; sherpa-onnx is the on-device runtime, Piper provides the voices, espeak-ng handles text→phonemes), local storage.
+Flutter (Dart), sherpa-onnx via its official `sherpa_onnx` Flutter package (Piper ONNX models bundled; sherpa-onnx is the on-device runtime, Piper provides the voices, espeak-ng handles text→phonemes), local storage.
+
+Flutter was chosen over Kotlin/Compose to keep iOS open later. Android is still the only target for now: don't spend effort on iOS until it's actually feasible. Platform-specific bits (emergency call/SMS, bell notifications, audio routing) go behind small platform channels/plugins so an iOS version only has to fill those in. Known iOS differences: SMS can't be sent in the background (the user has to confirm each message), and the App Store distribution model doesn't match F-Droid.
 
 ## Status
 Validation phase.
