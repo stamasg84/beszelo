@@ -1,6 +1,6 @@
 # Mondom
 
-(Repo and folder name: `beszelo`. App name: **Mondom** ("I say it"), chosen because it has no accents and is pronounceable internationally. Application ID: `io.github.stamasg84.mondom`. Never change it after publishing.)
+(GitHub repo: `stamasg84/mondom`, renamed from `beszelo`; the local folder is still `beszelo`. App name: **Mondom** ("I say it"), chosen because it has no accents and is pronounceable internationally. Application ID: `io.github.stamasg84.mondom`. Never change it after publishing.)
 
 Free, ad-free, open-source Android speech aid (AAC) for literate adults who lost their speech (ALS, especially bulbar; also stroke, laryngectomy, MS). Hungarian-first.
 
@@ -26,7 +26,7 @@ Word prediction (Hungarian word endings make typing tiring), Bluetooth speaker a
 
 ## Voice delivery & performance
 - **No voices bundled in the APK** (decided 2026-11-01, replacing the earlier "bundle imre + berta" plan). One small APK serves every market. On first launch a picker offers the curated voices for the UI language plus **"Android alapértelmezett" (system TTS)**, which works offline immediately, so the app is never mute, even on bad hospital wifi. Piper voices (~60 MB each) are downloaded once and work offline afterwards. Each voice has a short sample (streamed) so families can listen before downloading.
-- **Voice catalog**: `voices/catalog.json` in this repo, fetched from raw.githubusercontent.com, with a bundled copy as fallback. The repo is private for now, so the remote fetch only works once the catalog is publicly hosted (repo made public, or a separate public catalog repo); until then the bundled copy is used. It is the curated allowlist (only listed voices can be downloaded, so only license-checked voices are offered) and holds URL, size, sha256, license and sample URL per voice. URLs point at sherpa-onnx's `tts-models` GitHub release; we don't host model files. Mirror them in our own releases only if needed (URL breakage, or `.tar.bz2` extraction too slow on cheap phones). Don't rename the GitHub repo once released apps fetch the catalog from it. F-Droid-friendly (no Play asset packs).
+- **Voice catalog**: `voices/catalog.json` in this repo, fetched from raw.githubusercontent.com, with a bundled copy as fallback. The repo is public (since 2026-11-01), so the remote fetch works. It is the curated allowlist (only listed voices can be downloaded, so only license-checked voices are offered) and holds URL, size, sha256, license and sample URL per voice. URLs point at sherpa-onnx's `tts-models` GitHub release; we don't host model files. Mirror them in our own releases only if needed (URL breakage, or `.tar.bz2` extraction too slow on cheap phones). Don't rename the GitHub repo once released apps fetch the catalog from it. F-Droid-friendly (no Play asset packs).
 - Piper medium runs faster than real time on ordinary phones (estimated RTF ~0.1–0.3 on mid-range; not yet measured), so no strong hardware is needed.
 - **Pre-generate tile audio**: synthesize each tile's sentence once (on create/edit or voice change) and cache the WAV, so tapping a tile plays instantly on any phone, the same way message-banking recordings are played.
 - Load the TTS model in the background at app start (loading takes ~1–2 s).

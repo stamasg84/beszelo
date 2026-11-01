@@ -92,13 +92,13 @@ Decision: no voices are bundled in the APK. On first launch the user picks a voi
 Done → commit.
 
 ### [ ] T10 (Agent): Voice catalog + Piper downloads
-- `voices/catalog.json` in the repo. The remote URL is a single constant in `catalog.dart` (`raw.githubusercontent.com/...`, from wherever the catalog is publicly hosted; see CLAUDE.md). While the repo is private the remote fetch fails, and the app must silently use the bundled copy. Format:
+- `voices/catalog.json` in the repo. The remote URL is a single constant in `catalog.dart` (`https://raw.githubusercontent.com/stamasg84/mondom/main/voices/catalog.json`). If the remote fetch fails (offline, URL broken), the app must silently use the bundled copy. Format:
   ```json
   { "schemaVersion": 1,
     "voices": [ { "id": "hu_HU-imre-medium", "language": "hu", "gender": "male", "label": "Imre",
                   "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-imre-medium.tar.bz2",
                   "sizeBytes": 0, "sha256": "...", "modelFile": "hu_HU-imre-medium.onnx",
-                  "sampleUrl": "https://raw.githubusercontent.com/stamasg84/beszelo/main/voices/samples/hu_HU-imre-medium.wav",
+                  "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/hu_HU-imre-medium.wav",
                   "license": "MIT", "minAppVersion": "1.0.0" } ],
     "sampleText": { "hu": "Szia! Kérek egy pohár vizet. Segítenél felállni?",
                     "en": "Hi! Could I have a glass of water, please? Can you help me stand up?" } }
