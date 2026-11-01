@@ -1,0 +1,39 @@
+{
+  "@@locale": "hu",
+  "appTitle": "Mondom",
+  "@appTitle": { "description": "App name, shown in the app bar and task switcher." },
+  "textHint": "Írj ide…",
+  "@textHint": { "description": "Placeholder in the free-text field." },
+  "loading": "Betöltés…",
+  "@loading": { "description": "Shown instead of the speak button while the voice model is loading." },
+  "speak": "Beszélj",
+  "@speak": { "description": "Button that speaks the typed text." },
+  "repeat": "Ismétlés",
+  "@repeat": { "description": "Button that replays the last spoken phrase." },
+  "modelLoadTime": "Modell betöltés: {ms} ms",
+  "@modelLoadTime": {
+    "description": "Timing info: how long loading the voice model took.",
+    "placeholders": { "ms": { "type": "int" } }
+  },
+  "synthesisStats": "Szintézis: {synthMs} ms, hang: {audioMs} ms, RTF: {rtf}",
+  "@synthesisStats": {
+    "description": "Timing info for the last synthesis (real-time factor, RTF).",
+    "placeholders": {
+      "synthMs": { "type": "int" },
+      "audioMs": { "type": "int" },
+      "rtf": { "type": "String" }
+    }
+  },
+  "tuning": "Hangolás",
+  "@tuning": { "description": "Title of the expandable voice tuning section (prototype only)." },
+  "tuningLength": "Hossz",
+  "@tuningLength": { "description": "Slider label: speech length scale (prototype only)." },
+  "tuningNoise": "Zaj",
+  "@tuningNoise": { "description": "Slider label: noise scale (prototype only)." },
+  "tuningNoiseW": "Zaj W",
+  "@tuningNoiseW": { "description": "Slider label: noise width (prototype only)." },
+  "tuningApply": "Alkalmaz (újratöltés)",
+  "@tuningApply": { "description": "Button applying the tuning values by reloading the model (prototype only)." },
+  "tuningReset": "Alapértelmezett",
+  "@tuningReset": { "description": "Button resetting tuning sliders to defaults (prototype only)." }
+}

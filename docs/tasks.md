@@ -11,7 +11,7 @@ Mark tasks done by changing `[ ]` to `[x]`. When a phase is finished, move it to
 
 Decision: no voices are bundled in the APK. On first launch the user picks a voice. The system TTS ("Android alapértelmezett") works offline right away; Piper voices are downloaded once. The downloadable voices are listed in a curated catalog JSON in this repo, pointing at sherpa-onnx's `tts-models` release. See `docs/architecture.md` "Voices".
 
-### [ ] T7 (Agent): Localization setup
+### [x] T7 (Agent): Localization setup
 - Add `flutter_localizations` (SDK) and `intl`; set `generate: true` in `pubspec.yaml`; add `l10n.yaml` with `arb-dir: lib/l10n`, `template-arb-file: app_hu.arb`, `output-localization-file: app_localizations.dart`.
 - Move every user-visible string of the current screen into `lib/l10n/app_hu.arb` (with `@key` descriptions). Add `app_en.arb` with English translations so the fallback path is exercised.
 - `MaterialApp`: `localizationsDelegates`, `supportedLocales`. Hungarian when the phone is Hungarian, English otherwise.

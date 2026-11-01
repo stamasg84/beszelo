@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+import 'l10n/app_localizations.dart';
 import 'tts/tts_engine.dart';
 
 void main() => runApp(const MondomApp());
@@ -11,7 +12,14 @@ class MondomApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mondom',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      // Hungarian phones get Hungarian; everything else falls back to English.
+      localeResolutionCallback: (locale, supported) =>
+          locale?.languageCode == 'hu'
+              ? const Locale('hu')
+              : const Locale('en'),
       theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
       home: const HomeScreen(),
     );
@@ -139,11 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final ready = _engine.isLoaded && !_loading && !_busy;
     final last = _last;
     const small = TextStyle(fontSize: 12);
     return Scaffold(
-      appBar: AppBar(title: const Text('Mondom')),
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -156,38 +165,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 8,
                 style: const TextStyle(fontSize: 26),
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Írj ide…',
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: l10n.textHint,
                 ),
               ),
               const SizedBox(height: 12),
               if (_loading)
-                const Center(
-                  child: Text('Betöltés…', style: TextStyle(fontSize: 24)),
+                Center(
+                  child: Text(l10n.loading,
+                      style: const TextStyle(fontSize: 24)),
                 )
               else
                 FilledButton(
                   onPressed: ready ? _speak : null,
-                  child: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('Beszélj', style: TextStyle(fontSize: 32)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.speak,
+                        style: const TextStyle(fontSize: 32)),
                   ),
                 ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: (ready && _lastWav != null) ? _repeat : null,
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text('Ismétlés', style: TextStyle(fontSize: 24)),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(l10n.repeat,
+                      style: const TextStyle(fontSize: 24)),
                 ),
               ),
               const SizedBox(height: 12),
-              Text('Modell betöltés: ${_engine.loadMs} ms', style: small),
+              Text(l10n.modelLoadTime(_engine.loadMs), style: small),
               if (last != null)
                 Text(
-                  'Szintézis: ${last.synthMs} ms, hang: ${last.audioMs} ms, '
-                  'RTF: ${last.rtf.toStringAsFixed(2)}',
+                  l10n.synthesisStats(
+                      last.synthMs, last.audioMs, last.rtf.toStringAsFixed(2)),
                   style: small,
                 ),
               if (_error != null)
@@ -197,14 +209,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(_error!, style: const TextStyle(color: Colors.red)),
                 ),
               ExpansionTile(
-                title: const Text('Hangolás'),
+                title: Text(l10n.tuning),
                 tilePadding: EdgeInsets.zero,
                 children: [
-                  _slider('Hossz', _length, 0.7, 1.5,
+                  _slider(l10n.tuningLength, _length, 0.7, 1.5,
                       (v) => setState(() => _length = v)),
-                  _slider('Zaj', _noise, 0.3, 1.0,
+                  _slider(l10n.tuningNoise, _noise, 0.3, 1.0,
                       (v) => setState(() => _noise = v)),
-                  _slider('Zaj W', _noiseW, 0.3, 1.0,
+                  _slider(l10n.tuningNoiseW, _noiseW, 0.3, 1.0,
                       (v) => setState(() => _noiseW = v)),
                   Row(
                     children: [
@@ -212,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: (_dirty && !_loading && !_busy)
                             ? _applyTuning
                             : null,
-                        child: const Text('Alkalmaz (újratöltés)'),
+                        child: Text(l10n.tuningApply),
                       ),
                       TextButton(
                         onPressed: () => setState(() {
@@ -220,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           _noise = 0.667;
                           _noiseW = 0.8;
                         }),
-                        child: const Text('Alapértelmezett'),
+                        child: Text(l10n.tuningReset),
                       ),
                     ],
                   ),
