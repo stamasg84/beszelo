@@ -6,6 +6,30 @@ import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 
 import 'voice_assets.dart';
 
+/// Voice tuning parameters. Fixed at model creation time in sherpa-onnx.
+class TtsTuning {
+  const TtsTuning({
+    this.lengthScale = 1.0,
+    this.noiseScale = 0.667,
+    this.noiseScaleW = 0.8,
+  });
+
+  final double lengthScale;
+  final double noiseScale;
+  final double noiseScaleW;
+}
+
+/// Result of one synthesis: WAV path plus timings.
+class SynthResult {
+  const SynthResult(this.path, this.synthMs, this.audioMs);
+
+  final String path;
+  final int synthMs;
+  final int audioMs;
+
+  double get rtf => audioMs == 0 ? 0 : synthMs / audioMs;
+}
+
 /// Wraps sherpa-onnx OfflineTts for the bundled imre voice.
 /// Prototype: runs on the UI isolate (synthesis blocks the UI).
 class TtsEngine {
@@ -14,10 +38,16 @@ class TtsEngine {
   sherpa.OfflineTts? _tts;
   int _counter = 0;
 
+  /// Duration of the last [load] call in ms.
+  int loadMs = 0;
+
   bool get isLoaded => _tts != null;
 
-  Future<void> load() async {
+  /// (Re)creates the OfflineTts with [tuning]. Frees any previous instance.
+  Future<void> load([TtsTuning tuning = const TtsTuning()]) async {
     final sw = Stopwatch()..start();
+    _tts?.free();
+    _tts = null;
     sherpa.initBindings();
     final dir = await VoiceAssets.prepare(_voiceDir);
     final config = sherpa.OfflineTtsConfig(
@@ -26,17 +56,21 @@ class TtsEngine {
           model: '$dir/hu_HU-imre-medium.onnx',
           tokens: '$dir/tokens.txt',
           dataDir: '$dir/espeak-ng-data',
+          lengthScale: tuning.lengthScale,
+          noiseScale: tuning.noiseScale,
+          noiseScaleW: tuning.noiseScaleW,
         ),
         numThreads: 2,
         debug: false,
       ),
     );
     _tts = sherpa.OfflineTts(config);
-    debugPrint('TTS load: ${sw.elapsedMilliseconds} ms');
+    loadMs = sw.elapsedMilliseconds;
+    debugPrint('TTS load: $loadMs ms');
   }
 
-  /// Synthesizes [text] and returns the path of the written WAV file.
-  Future<String> synthesizeToWav(String text) async {
+  /// Synthesizes [text], writes a WAV file and returns its path and timings.
+  Future<SynthResult> synthesizeToWav(String text) async {
     final tts = _tts;
     if (tts == null) throw StateError('TTS not loaded');
     final sw = Stopwatch()..start();
@@ -55,7 +89,7 @@ class TtsEngine {
     final audioMs = audio.samples.length * 1000 ~/ audio.sampleRate;
     debugPrint('TTS synth: $synthMs ms for $audioMs ms of audio '
         '(RTF ${(synthMs / audioMs).toStringAsFixed(2)})');
-    return path;
+    return SynthResult(path, synthMs, audioMs);
   }
 
   void dispose() {

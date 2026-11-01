@@ -46,7 +46,7 @@ If it crashes or stays silent: copy the terminal output from the first red/`E/` 
 Result (Pixel 6a): works after the sherpa_onnx 1.x pin; synthesis ~115 ms for the test sentence, load time decent.
 Done → commit.
 
-### [ ] T5 (Agent): Text field, timings on screen, voice tuning
+### [x] T5 (Agent): Text field, timings on screen, voice tuning
 - Main screen: a large multi-line `TextField` (font ≥ 24), a large "Beszélj" button below it, and an "Ismétlés" button (replays the last WAV without re-synthesizing).
 - Show the timings on screen in small text: model load ms; for the last utterance, synthesis ms, audio duration ms and RTF (= synthesis / duration).
 - An expandable "Hangolás" section with sliders: `lengthScale` 0.7–1.5 (default 1.0), `noiseScale` 0.3–1.0 (default 0.667), `noiseScaleW` 0.3–1.0 (default 0.8). These values are fixed at model creation, so changing them reloads `OfflineTts` and shows the reload time.
