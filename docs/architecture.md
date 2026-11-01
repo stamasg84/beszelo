@@ -1,6 +1,6 @@
 # Architecture
 
-Product context, constraints and stack: see `CLAUDE.md`. This file covers only how the code is organized. It's intentionally thin until the prototype (tasks T1–T6 in `docs/tasks.md`) has validated the TTS pipeline. Expect it to change.
+Product context, constraints and stack: see `CLAUDE.md`. This file covers only how the code is organized. It's intentionally thin until the prototype (tasks T1–T6 in `docs/done.md`) has validated the TTS pipeline. Expect it to change.
 
 ## TTS pipeline
 

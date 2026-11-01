@@ -41,7 +41,7 @@ Flutter was chosen over Kotlin/Compose to keep iOS open later. Android is still 
 ## Working docs
 - `docs/architecture.md`: code layout, TTS pipeline, Android asset gotcha.
 - `docs/TODO.md`: loose ideas and reminders not yet in a task (e.g. APK size / per-ABI builds).
-- `docs/tasks.md`: task breakdown. Agent tasks are run by Sonnet sessions; "You" tasks are manual tests by the human (new to Flutter; tests on a Pixel 6a).
+- `docs/tasks.md`: open tasks (current phase). Finished phases go to `docs/done.md`. Agent tasks are run by Sonnet sessions; "You" tasks are manual tests by the human (new to Flutter; tests on a Pixel 6a).
 
 ## Status
 Validation phase.
