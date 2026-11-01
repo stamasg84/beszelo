@@ -9,14 +9,14 @@ Mark tasks done by changing `[ ]` to `[x]`.
 
 ## Prototype: speak typed text with imre
 
-### [ ] T1 (Agent): Scaffold the Flutter app
+### [x] T1 (Agent): Scaffold the Flutter app
 - Run `flutter create --platforms android --org io.github.stamasg84 --project-name mondom .` in the repo root. Don't touch `CLAUDE.md` or `docs/`.
 - Replace the counter demo in `lib/main.dart` with a single screen: title "Mondom", centered text "Szia!". Update `test/widget_test.dart` to match.
 - In `android/app/build.gradle(.kts)`: `minSdk = 24`. App label "Mondom" in `AndroidManifest.xml`.
 - Append `assets/voices/` to `.gitignore`.
 - **Checks:** `flutter analyze` (no issues), `flutter test` (passes). No APK build here: the human builds in T2 via `flutter run`.
 
-### [ ] T2 (You): Run the app on the Pixel
+### [x] T2 (You): Run the app on the Pixel
 1. Phone: Settings → System → Developer options → turn on **USB debugging**.
 2. Connect via USB. On the phone, accept "Allow USB debugging?" (tick "Always allow").
 3. `flutter devices` should list the Pixel 6a.
