@@ -26,22 +26,24 @@ Mark tasks done by changing `[ ]` to `[x]`.
 If the phone isn't listed: try another cable or USB port; pull down the notification shade → USB → "File transfer"; Android Studio → SDK Manager → SDK Tools → install **Google USB Driver**. If it shows as "unauthorized": Developer options → Revoke USB debugging authorizations, then replug.
 Done → commit: `git add -A && git commit -m "Scaffold Flutter app"`.
 
-### [ ] T3 (Agent): Speak a hardcoded sentence with imre
+### [x] T3 (Agent): Speak a hardcoded sentence with imre
 - `tool/fetch_voices.ps1`: download `https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-imre-medium.tar.bz2` (check that the URL exists; if it doesn't, find the correct name in the `tts-models` release) and extract it into `assets/voices/` (Windows `tar -xf` handles .bz2). Make it idempotent: skip the download if the folder exists. Run it.
 - `pubspec.yaml`: add `sherpa_onnx`, `path_provider`, `audioplayers`. Register the assets. Flutter asset dirs are **not recursive**, so every subfolder of `espeak-ng-data/` needs its own entry. Generate the list from the actual extracted tree.
 - `lib/tts/voice_assets.dart`: copy the voice folder to app support storage (see architecture.md "Android gotcha"). The copy list comes from `AssetManifest` (`AssetManifest.loadFromAssetBundle`), filtered by prefix.
 - `lib/tts/tts_engine.dart`: `initBindings()`, build `OfflineTts` with `vits: model/tokens/dataDir`, `numThreads: 2`. Expose `Future<void> load()` and `Future<String> synthesizeToWav(String text)`, which writes to the temp dir with sherpa-onnx's `writeWave`.
 - UI: a "Beszélj" button that speaks "Szia! Kérek egy pohár vizet." It is disabled until the model is loaded, and the screen shows "Betöltés…" while loading. Use `debugPrint` to log load ms and synthesis ms.
 - Mirror the official `flutter-examples/tts` example for API usage.
+- **Phonemization gotcha (found in T4):** `sherpa_onnx` 2.x (2.0.0+) removed the built-in espeak-ng phonemizer; `dataDir` is ignored, so Piper fails with "phoneme_codepoints is empty, no lexicon, and no frontend available" (and then `IntegerDivisionByZeroException` in the RTF log). `pubspec.yaml` is therefore pinned to `sherpa_onnx: ^1.13.8`, the last 1.x. **TODO: move to the latest sherpa_onnx** by phonemizing ourselves (e.g. `piper_phonemize` / espeak-ng via our own plugin, passing `OfflineTtsGenerationConfig.phonemeCodepoints`), or with a lexicon. Check licensing (espeak-ng is GPL-3.0, fine for Mondom) and that Hungarian output matches the 1.x output.
 - **Checks:** `flutter analyze`, then `flutter build apk --debug 2>&1 | tail -40` (native deps and asset config break here; read only the tail). Report the APK size (`build/app/outputs/flutter-apk/`).
 
-### [ ] T4 (You): Hear imre on the phone
+### [x] T4 (You): Hear imre on the phone
 1. Run `.\tool\fetch_voices.ps1` once, if `assets\voices\` is empty.
 2. `flutter run --profile`. Profile mode gives realistic speed; debug mode is slower.
 3. Wait for "Betöltés…" to disappear, then tap **Beszélj**.
 4. Note: Did it speak? Is the pronunciation correct? Load time and synthesis time (from the terminal log lines).
 
 If it crashes or stays silent: copy the terminal output from the first red/`E/` line onward and paste it into a Claude session along with "T4 failed".
+Result (Pixel 6a): works after the sherpa_onnx 1.x pin; synthesis ~115 ms for the test sentence, load time decent.
 Done → commit.
 
 ### [ ] T5 (Agent): Text field, timings on screen, voice tuning

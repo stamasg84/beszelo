@@ -34,6 +34,9 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  sherpa_onnx: ^1.13.8  # 2.x dropped built-in espeak-ng; Piper needs it
+  path_provider: ^2.1.6
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +59,46 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/voices/vits-piper-hu_HU-imre-medium/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/aav/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/art/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/azc/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/bat/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/bnt/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/ccs/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/cel/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/cus/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/dra/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/esx/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/gmq/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/gmw/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/grk/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/inc/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/ine/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/ira/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/iro/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/itc/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/jpx/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/map/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/miz/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/myn/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/poz/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/roa/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/sai/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/sem/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/sit/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/tai/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/trk/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/urj/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/zle/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/zls/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/lang/zlw/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/voices/
+    - assets/voices/vits-piper-hu_HU-imre-medium/espeak-ng-data/voices/!v/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
