@@ -1,4 +1,6 @@
-# Beszélő
+# Mondom
+
+(Repo and folder name: `beszelo`. App name: **Mondom** ("I say it"), chosen because it has no accents and is pronounceable internationally. Application ID: `io.github.stamasg84.mondom`. Never change it after publishing.)
 
 Free, ad-free, open-source Android speech aid (AAC) for literate adults who lost their speech (ALS, especially bulbar; also stroke, laryngectomy, MS). Hungarian-first.
 
@@ -18,7 +20,7 @@ Word prediction (Hungarian word endings make typing tiring), Bluetooth speaker a
 
 ## Constraints / gotchas
 - Android apps can't inject audio into a cellular call. For 112, use speakerphone playback or rely on SMS + location (Android sends location to 112 automatically via AML). Check whether Hungary's 112 accepts SMS.
-- Voice licenses: `imre` and `berta` are MIT (checked); `anna` still to check. MIT is compatible with GPL-3.0 bundling, but keep the attribution/license text in the app's "About" screen. espeak-ng (used by sherpa-onnx as the phonemizer) is GPL-3.0, so Beszélő should be GPL-3.0; sherpa-onnx itself is Apache-2.0.
+- Voice licenses: `imre` and `berta` are MIT (checked); `anna` still to check. MIT is compatible with GPL-3.0 bundling, but keep the attribution/license text in the app's "About" screen. espeak-ng (used by sherpa-onnx as the phonemizer) is GPL-3.0, so Mondom should be GPL-3.0; sherpa-onnx itself is Apache-2.0.
 - No accounts, no network needed, all data stored locally.
 - Piper voices have flat intonation. To soften it: tune `length_scale` / `noise_scale` / `noise_w` in sherpa-onnx, and punctuate the preloaded phrases ("Kérek vizet!", "Segítenél?"), since Piper uses punctuation for intonation. Larger expressive models (e.g. XTTS-v2) are too heavy for phones and non-commercially licensed.
 
@@ -36,11 +38,15 @@ Flutter (Dart), sherpa-onnx via its official `sherpa_onnx` Flutter package (Pipe
 
 Flutter was chosen over Kotlin/Compose to keep iOS open later. Android is still the only target for now: don't spend effort on iOS until it's actually feasible. Platform-specific bits (emergency call/SMS, bell notifications, audio routing) go behind small platform channels/plugins so an iOS version only has to fill those in. Known iOS differences: SMS can't be sent in the background (the user has to confirm each message), and the App Store distribution model doesn't match F-Droid.
 
+## Working docs
+- `docs/architecture.md`: code layout, TTS pipeline, Android asset gotcha.
+- `docs/tasks.md`: task breakdown. Agent tasks are run by Sonnet sessions; "You" tasks are manual tests by the human (new to Flutter; tests on a Pixel 6a).
+
 ## Status
 Validation phase.
 
 Findings so far:
-- **Cboard** (tried on Android): closest existing app. Picture + caption tiles, custom tiles and folders, custom text. Gaps: no free-text typing for saying something custom; speaks with the system TTS (female Hungarian voice); recording custom audio for tiles is locked behind a sign-in/"join". Cboard is open source, but targets picture-based communication (largely children); Beszélő is typing-first for literate adults, so it's a separate app with Cboard's tile/folder editing as a reference.
+- **Cboard** (tried on Android): closest existing app. Picture + caption tiles, custom tiles and folders, custom text. Gaps: no free-text typing for saying something custom; speaks with the system TTS (female Hungarian voice); recording custom audio for tiles is locked behind a sign-in/"join". Cboard is open source, but targets picture-based communication (largely children); Mondom is typing-first for literate adults, so it's a separate app with Cboard's tile/folder editing as a reference.
 - **Voices** (listened to the Piper samples): `berta` is about as good as Google's female voice. `imre` is acceptable but flat, "like an untalented actor reading from paper." Open question for users: is a flat male voice preferable to a lively female one?
 
 Next: ask in a Hungarian ALS Facebook group / speech therapists (logopédusok) what's missing. Play `imre` next to Google's female voice and ask which they'd rather use. Ask "did you know you can change the voice?" (expect mostly no).
