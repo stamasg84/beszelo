@@ -38,16 +38,23 @@ lib/
   audio/player.dart       # thin wrapper over audioplayers
   ui/                     # screens/widgets (prototype: one screen)
   # later: tiles/, history/, recordings/, emergency/ (platform channel), storage/
-assets/voices/<voice-dir>/  # gitignored, filled by tool/fetch_voices.ps1
-tool/fetch_voices.ps1       # downloads + extracts voice models
+assets/catalog.json         # bundled fallback copy of voices/catalog.json (tool/sync_catalog.ps1)
+voices/catalog.json         # curated downloadable voices (see CLAUDE.md "Voice delivery")
+# until T10: assets/voices/ + tool/fetch_voices.ps1 bundle imre for development
 ```
 
 Rules:
 - Android only (`flutter create --platforms android`). No iOS work yet.
-- **Voice model files are never committed** (gitignored). `tool/fetch_voices.ps1` downloads them. The app must build after running it.
-- Keep dependencies minimal: `sherpa_onnx`, `path_provider`, `audioplayers`. Ask before adding others.
+- **Voice model files are never committed or bundled.** Installed at runtime into `<appSupport>/voices/<id>/`, with one shared `<appSupport>/voices/espeak-ng-data/`.
+- Keep dependencies minimal. Approved: `sherpa_onnx`, `path_provider`, `audioplayers`, `flutter_localizations`, `intl`, `flutter_tts`, `shared_preferences`, `http`, `archive`, `crypto`, `package_info_plus`. Ask before adding others.
 - UI strings in Hungarian. Code, comments and docs in English.
 - Hungarian-first, not Hungarian-only. In the prototype, hardcoded strings are fine. After it, all UI strings move to Flutter's standard `gen-l10n` (ARB files, `hu` as the template locale). Never hardcode language-specific assumptions in logic. Language-specific things include preloaded phrases, the voice list and the emergency number, so treat them as per-locale data.
 
 ## Decided later (not in prototype)
-Storage (JSON files vs sqlite), state management (start with plain `setState`), tile audio cache layout, voice picker, licenses/About screen.
+Storage (JSON files vs sqlite), state management (start with plain `setState`), tile audio cache layout, licenses/About screen.
+
+## Voices
+- `Voice` (id, language, gender, label, kind) + `VoiceEngine` interface (`load`, `synthesizeToWav`, `dispose`). Everything above this layer (UI, tiles, history) only sees `VoiceEngine` and WAV paths.
+- `PiperEngine`: sherpa-onnx, loads an installed voice dir. `SystemEngine`: Android TTS via `flutter_tts`, also writes WAV files so playback/caching is uniform.
+- `catalog.dart`: remote catalog JSON (one URL constant) → bundled `assets/catalog.json` fallback. Only catalog voices can be downloaded. Skips unknown `schemaVersion` and entries with a newer `minAppVersion`.
+- `voice_installer.dart`: download to temp → verify sha256 → extract in a background isolate → move into place. Nothing half-installed ever appears.
