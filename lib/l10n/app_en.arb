@@ -6,11 +6,5 @@
   "speak": "Speak",
   "repeat": "Repeat",
   "modelLoadTime": "Model load: {ms} ms",
-  "synthesisStats": "Synthesis: {synthMs} ms, audio: {audioMs} ms, RTF: {rtf}",
-  "tuning": "Tuning",
-  "tuningLength": "Length",
-  "tuningNoise": "Noise",
-  "tuningNoiseW": "Noise W",
-  "tuningApply": "Apply (reload)",
-  "tuningReset": "Default"
+  "synthesisStats": "Synthesis: {synthMs} ms, audio: {audioMs} ms, RTF: {rtf}"
 }

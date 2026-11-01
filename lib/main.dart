@@ -1,8 +1,12 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
-import 'tts/tts_engine.dart';
+import 'voices/piper_engine.dart';
+import 'voices/system_engine.dart';
+import 'voices/voice.dart';
+import 'voices/voice_engine.dart';
 
 void main() => runApp(const MondomApp());
 
@@ -34,35 +38,62 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _engine = TtsEngine();
+  static const _prefKey = 'voiceId';
+
+  VoiceEngine? _engine;
   final _player = AudioPlayer();
   final _controller = TextEditingController();
 
+  Voice _voice = Voice.imre;
   bool _loading = true;
   bool _busy = false;
   String? _error;
   String? _lastWav;
   SynthResult? _last;
 
-  // Tuning applied to the loaded model, and the current slider values.
-  TtsTuning _applied = const TtsTuning();
-  double _length = 1.0;
-  double _noise = 0.667;
-  double _noiseW = 0.8;
-
   @override
   void initState() {
     super.initState();
-    _load();
+    _init();
   }
 
-  Future<void> _load() async {
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _voice = Voice.byId(prefs.getString(_prefKey));
+    await _loadVoice();
+  }
+
+  VoiceEngine _createEngine(Voice v) => switch (v.kind) {
+        VoiceKind.system => SystemEngine(v),
+        VoiceKind.piper => PiperEngine(
+            voiceDirName: 'vits-piper-hu_HU-imre-medium',
+            modelFile: 'hu_HU-imre-medium.onnx',
+          ),
+      };
+
+  Future<void> _loadVoice() async {
+    setState(() => _loading = true);
+    // Let the UI repaint before a blocking model load.
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    _engine?.dispose();
+    _engine = null;
     try {
-      await _engine.load(_applied);
+      final engine = _createEngine(_voice);
+      await engine.load();
+      _engine = engine;
+      _error = null;
     } catch (e) {
       _error = '$e';
     }
     if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _selectVoice(Voice? v) async {
+    if (v == null || v.id == _voice.id) return;
+    _voice = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefKey, v.id);
+    await _loadVoice();
   }
 
   Future<void> _speak() async {
@@ -72,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Let the button repaint as disabled before the blocking synthesis.
     await Future<void>.delayed(const Duration(milliseconds: 50));
     try {
-      final result = await _engine.synthesizeToWav(text);
+      final result = await _engine!.synthesizeToWav(text);
       _last = result;
       _lastWav = result.path;
       _error = null;
@@ -94,61 +125,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  bool get _dirty =>
-      _length != _applied.lengthScale ||
-      _noise != _applied.noiseScale ||
-      _noiseW != _applied.noiseScaleW;
-
-  Future<void> _applyTuning() async {
-    final tuning = TtsTuning(
-      lengthScale: _length,
-      noiseScale: _noise,
-      noiseScaleW: _noiseW,
-    );
-    setState(() => _loading = true);
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    try {
-      await _engine.load(tuning);
-      _applied = tuning;
-      _error = null;
-    } catch (e) {
-      _error = '$e';
-    }
-    if (mounted) setState(() => _loading = false);
-  }
-
   @override
   void dispose() {
     _controller.dispose();
     _player.dispose();
-    _engine.dispose();
+    _engine?.dispose();
     super.dispose();
-  }
-
-  Widget _slider(String label, double value, double min, double max,
-      ValueChanged<double> onChanged) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 130,
-          child: Text('$label ${value.toStringAsFixed(2)}'),
-        ),
-        Expanded(
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final ready = _engine.isLoaded && !_loading && !_busy;
+    final ready = (_engine?.isLoaded ?? false) && !_loading && !_busy;
     final last = _last;
     const small = TextStyle(fontSize: 12);
     return Scaffold(
@@ -159,6 +147,16 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              DropdownButton<Voice>(
+                value: _voice,
+                isExpanded: true,
+                onChanged: (_loading || _busy) ? null : _selectVoice,
+                items: [
+                  for (final v in Voice.temporary)
+                    DropdownMenuItem(value: v, child: Text(v.label)),
+                ],
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: _controller,
                 minLines: 4,
@@ -195,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(l10n.modelLoadTime(_engine.loadMs), style: small),
+              Text(l10n.modelLoadTime((_engine?.loadMs ?? 0)), style: small),
               if (last != null)
                 Text(
                   l10n.synthesisStats(
@@ -208,36 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child:
                       Text(_error!, style: const TextStyle(color: Colors.red)),
                 ),
-              ExpansionTile(
-                title: Text(l10n.tuning),
-                tilePadding: EdgeInsets.zero,
-                children: [
-                  _slider(l10n.tuningLength, _length, 0.7, 1.5,
-                      (v) => setState(() => _length = v)),
-                  _slider(l10n.tuningNoise, _noise, 0.3, 1.0,
-                      (v) => setState(() => _noise = v)),
-                  _slider(l10n.tuningNoiseW, _noiseW, 0.3, 1.0,
-                      (v) => setState(() => _noiseW = v)),
-                  Row(
-                    children: [
-                      FilledButton.tonal(
-                        onPressed: (_dirty && !_loading && !_busy)
-                            ? _applyTuning
-                            : null,
-                        child: Text(l10n.tuningApply),
-                      ),
-                      TextButton(
-                        onPressed: () => setState(() {
-                          _length = 1.0;
-                          _noise = 0.667;
-                          _noiseW = 0.8;
-                        }),
-                        child: Text(l10n.tuningReset),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             ],
           ),
         ),

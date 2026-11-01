@@ -32,9 +32,12 @@ Native code (sherpa-onnx/espeak-ng) needs real filesystem paths and can't read i
 ```
 lib/
   main.dart               # app entry, MaterialApp
-  tts/
-    voice_assets.dart     # copy voice files from assets to app storage, return paths
-    tts_engine.dart       # load OfflineTts, synthesize(text) → wav path + timings
+  voices/
+    voice.dart            # Voice (id, language, gender, label, kind system|piper)
+    voice_engine.dart     # abstract VoiceEngine + SynthResult; the only API callers use
+    piper_engine.dart     # sherpa-onnx OfflineTts for one Piper voice (lengthScale 1.2)
+    system_engine.dart    # flutter_tts synthesizeToFile → WAV, same playback path
+    voice_assets.dart     # copy bundled voice files to app storage (removed in T10)
   audio/player.dart       # thin wrapper over audioplayers
   ui/                     # screens/widgets (prototype: one screen)
   # later: tiles/, history/, recordings/, emergency/ (platform channel), storage/

@@ -33,22 +33,4 @@ class AppLocalizationsHu extends AppLocalizations {
   String synthesisStats(int synthMs, int audioMs, String rtf) {
     return 'Szintézis: $synthMs ms, hang: $audioMs ms, RTF: $rtf';
   }
-
-  @override
-  String get tuning => 'Hangolás';
-
-  @override
-  String get tuningLength => 'Hossz';
-
-  @override
-  String get tuningNoise => 'Zaj';
-
-  @override
-  String get tuningNoiseW => 'Zaj W';
-
-  @override
-  String get tuningApply => 'Alkalmaz (újratöltés)';
-
-  @override
-  String get tuningReset => 'Alapértelmezett';
 }

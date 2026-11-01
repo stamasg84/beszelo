@@ -33,22 +33,4 @@ class AppLocalizationsEn extends AppLocalizations {
   String synthesisStats(int synthMs, int audioMs, String rtf) {
     return 'Synthesis: $synthMs ms, audio: $audioMs ms, RTF: $rtf';
   }
-
-  @override
-  String get tuning => 'Tuning';
-
-  @override
-  String get tuningLength => 'Length';
-
-  @override
-  String get tuningNoise => 'Noise';
-
-  @override
-  String get tuningNoiseW => 'Noise W';
-
-  @override
-  String get tuningApply => 'Apply (reload)';
-
-  @override
-  String get tuningReset => 'Default';
 }

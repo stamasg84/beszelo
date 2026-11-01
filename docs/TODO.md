@@ -13,3 +13,6 @@ The catalog points at sherpa-onnx's `tts-models` release (`.tar.bz2`, each with 
 
 ## int8 voice models
 Check whether sherpa-onnx has int8 variants of the Hungarian Piper voices (~1/3 size). If they sound the same, use them in the catalog (faster download).
+
+## flutter_tts applies the Kotlin Gradle Plugin (build warning)
+Builds warn: "Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_tts. Future versions of Flutter will fail to build if your app uses plugins that apply KGP." `flutter_tts` 4.2.5 (latest as of 2026-11-01) hasn't migrated to Built-in Kotlin. Harmless for now. When upgrading Flutter, check for a newer `flutter_tts`; if there is none, replace it with our own small platform channel around Android's `TextToSpeech.synthesizeToFile` (used by `SystemEngine`).

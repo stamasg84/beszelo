@@ -139,42 +139,6 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Szintézis: {synthMs} ms, hang: {audioMs} ms, RTF: {rtf}'**
   String synthesisStats(int synthMs, int audioMs, String rtf);
-
-  /// Title of the expandable voice tuning section (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Hangolás'**
-  String get tuning;
-
-  /// Slider label: speech length scale (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Hossz'**
-  String get tuningLength;
-
-  /// Slider label: noise scale (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Zaj'**
-  String get tuningNoise;
-
-  /// Slider label: noise width (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Zaj W'**
-  String get tuningNoiseW;
-
-  /// Button applying the tuning values by reloading the model (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Alkalmaz (újratöltés)'**
-  String get tuningApply;
-
-  /// Button resetting tuning sliders to defaults (prototype only).
-  ///
-  /// In hu, this message translates to:
-  /// **'Alapértelmezett'**
-  String get tuningReset;
 }
 
 class _AppLocalizationsDelegate

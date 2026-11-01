@@ -17,7 +17,7 @@ Decision: no voices are bundled in the APK. On first launch the user picks a voi
 - `MaterialApp`: `localizationsDelegates`, `supportedLocales`. Hungarian when the phone is Hungarian, English otherwise.
 - **Checks:** `flutter analyze`, `flutter test` (update the widget test to pump with the delegates).
 
-### [ ] T8 (Agent): Voice abstraction + system TTS
+### [x] T8 (Agent): Voice abstraction + system TTS
 - Add `flutter_tts` and `shared_preferences`.
 - `lib/voices/voice.dart`: `Voice` (id, languageCode e.g. `hu`, gender `male|female|unknown`, label, `VoiceKind { system, piper }`).
 - `lib/voices/voice_engine.dart`: abstract `VoiceEngine { Future<void> load(); Future<SynthResult> synthesizeToWav(String text); void dispose(); }`. All callers (UI, later tiles) use only this.
@@ -27,7 +27,7 @@ Decision: no voices are bundled in the APK. On first launch the user picks a voi
 - Remove the "Hangolás" section (the noise sliders made no audible difference). Keep the timing text.
 - **Checks:** `flutter analyze`, `flutter test`. Report what `synthesizeToFile` needed on Android (permissions, path quirks).
 
-### [ ] T9 (You): Compare system voice and imre
+### [x] T9 (You): Compare system voice and imre
 1. `flutter run --profile`. Switch between the two voices and speak the same sentences.
 2. Check that the system voice works with airplane mode on (Google's Hungarian voice may need a one-time download in Android Settings → System → Languages → Text-to-speech).
 3. Note in `measurements.md`: system TTS synthesis time, and how imre at length 1.2 compares.
