@@ -98,9 +98,17 @@ Done → commit.
     "voices": [ { "id": "hu_HU-imre-medium", "language": "hu", "gender": "male", "label": "Imre",
                   "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-imre-medium.tar.bz2",
                   "sizeBytes": 0, "sha256": "...", "modelFile": "hu_HU-imre-medium.onnx",
-                  "sampleUrl": "...", "license": "MIT", "minAppVersion": "1.0.0" } ] }
+                  "sampleUrl": "https://raw.githubusercontent.com/stamasg84/beszelo/main/voices/samples/hu_HU-imre-medium.wav",
+                  "license": "MIT", "minAppVersion": "1.0.0" } ],
+    "sampleText": { "hu": "Szia! Kérek egy pohár vizet. Segítenél felállni?",
+                    "en": "Hi! Could I have a glass of water, please? Can you help me stand up?" } }
   ```
-  Entries: `imre`, `berta`, and `anna` **only if** its license is verified (check the Piper model card on HuggingFace `rhasspy/piper-voices`, `hu/hu_HU/anna/`, and report what it says). Get `sizeBytes`/`sha256` by downloading each file (`Get-FileHash`). `sampleUrl`: the voice's sample on the Piper samples site (https://rhasspy.github.io/piper-samples); verify each URL returns audio.
+  Entries: `imre`, `berta`, and `anna` **only if** its license is verified (check the Piper model card on HuggingFace `rhasspy/piper-voices`, `hu/hu_HU/anna/`, and report what it says). Get `sizeBytes`/`sha256` by downloading each file (`Get-FileHash`). The app also uses `sampleText` for the system voice preview (spoken live).
+- **Samples:** `tool/make_samples.ps1` generates `voices/samples/<voice-id>.wav` for every catalog voice, so previews sound exactly like the app:
+  - Uses the Python `sherpa-onnx` package **pinned to the same 1.x version as the app** (2.x dropped espeak-ng), installed into a venv under `tool/.venv` (gitignored). The Python part goes in `tool/make_samples.py`; the `.ps1` only sets up the venv and calls it.
+  - For each voice: download/extract its archive (cache under `tool/.cache/`, gitignored; verify sha256), synthesize the catalog's `sampleText` for the voice's language with `lengthScale` 1.2 (same as the app), write a mono 16-bit WAV.
+  - Idempotent: skip voices whose sample exists unless `-Force`.
+  - Run it and commit the WAVs (expect ~200 KB each; report the sizes). Verify each `sampleUrl` path matches a generated file. (The raw URLs only work once the repo is public; until then previews fail gracefully in the picker.)
 - Copy the same file to `assets/catalog.json` as the bundled fallback (add a tiny `tool/sync_catalog.ps1` that does the copy, and note it in architecture.md).
 - `lib/voices/catalog.dart`: fetch the remote catalog (short timeout), fall back to the bundled one. Ignore unknown `schemaVersion`s and entries whose `minAppVersion` is newer than the app.
 - `lib/voices/voice_installer.dart`: download to a temp file with progress (stream, bytes received / `sizeBytes`), verify the sha256, extract the `.tar.bz2` **in a background isolate** (`archive` package), and move it into `<appSupport>/voices/<id>/` only when complete. Keep **one shared** `<appSupport>/voices/espeak-ng-data/` (extract it from the first voice, skip it for later ones). Support cancel; a failed or cancelled download leaves nothing behind. Provide `isInstalled(id)` and `delete(id)`.
@@ -111,7 +119,7 @@ Done → commit.
 
 ### [ ] T11 (Agent): First-run voice picker
 - Shown on first launch (no saved voice) and from a settings icon on the main screen.
-- Lists catalog voices for the UI language first, then "Más nyelvek" (expandable), and always "Android alapértelmezett". Each row: label, gender, size ("63 MB"), ▶ sample (streams `sampleUrl`; the system voice previews by speaking a short sentence), and a state: *Letöltés* / progress bar + *Mégse* / *Kiválasztva*. Installed voices can be deleted.
+- Lists catalog voices for the UI language first, then "Más nyelvek" (expandable), and always "Android alapértelmezett". Each row: label, gender, size ("63 MB"), ▶ sample (streams `sampleUrl`; if it fails, show a short "A minta nem érhető el" message; the system voice previews by speaking the catalog's `sampleText` for its language), and a state: *Letöltés* / progress bar + *Mégse* / *Kiválasztva*. Installed voices can be deleted.
 - "Kihagyás" selects the system voice. If the catalog can't be fetched and there's no network, the system voice is still selectable and the screen says downloads need internet.
 - Replaces T8's temporary dropdown. All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (widget test: the picker renders with a fake catalog; skip selects the system voice).
