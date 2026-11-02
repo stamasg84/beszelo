@@ -1,12 +1,15 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
+import 'voices/catalog.dart';
 import 'voices/piper_engine.dart';
 import 'voices/system_engine.dart';
 import 'voices/voice.dart';
 import 'voices/voice_engine.dart';
+import 'voices/voice_installer.dart';
 
 void main() => runApp(const MondomApp());
 
@@ -44,7 +47,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final _player = AudioPlayer();
   final _controller = TextEditingController();
 
-  Voice _voice = Voice.imre;
+  final _installer = VoiceInstaller();
+  Catalog _catalog = Catalog.empty;
+  InstallCancelToken? _cancelToken;
+  double? _downloadProgress;
+
+  // Temporary: T11 replaces the dropdown with the voice picker.
+  Voice _voice = Voice.systemHu;
   bool _loading = true;
   bool _busy = false;
   String? _error;
@@ -59,15 +68,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
-    _voice = Voice.byId(prefs.getString(_prefKey));
+    await _installer.cleanupStaging();
+    final info = await PackageInfo.fromPlatform();
+    _catalog = await CatalogRepository(appVersion: info.version).load();
+    final saved = _catalog.byId(prefs.getString(_prefKey) ?? '');
+    _voice = (saved != null && await _installer.isInstalled(saved.id))
+        ? saved.toVoice()
+        : Voice.systemHu;
     await _loadVoice();
   }
 
-  VoiceEngine _createEngine(Voice v) => switch (v.kind) {
+  Future<VoiceEngine> _createEngine(Voice v) async => switch (v.kind) {
         VoiceKind.system => SystemEngine(v),
         VoiceKind.piper => PiperEngine(
-            voiceDirName: 'vits-piper-hu_HU-imre-medium',
-            modelFile: 'hu_HU-imre-medium.onnx',
+            voiceDir: await _installer.voiceDir(v.id),
+            espeakDataDir: await _installer.espeakDataDir(),
+            modelFile: _catalog.byId(v.id)!.modelFile,
           ),
       };
 
@@ -78,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _engine?.dispose();
     _engine = null;
     try {
-      final engine = _createEngine(_voice);
+      final engine = await _createEngine(_voice);
       await engine.load();
       _engine = engine;
       _error = null;
@@ -90,10 +106,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _selectVoice(Voice? v) async {
     if (v == null || v.id == _voice.id) return;
+    final entry = _catalog.byId(v.id);
+    if (entry != null && !await _installer.isInstalled(v.id)) {
+      if (!await _download(entry)) return;
+    }
     _voice = v;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKey, v.id);
     await _loadVoice();
+  }
+
+  /// Returns true when the voice is installed afterwards.
+  Future<bool> _download(CatalogVoice entry) async {
+    final token = InstallCancelToken();
+    setState(() {
+      _cancelToken = token;
+      _downloadProgress = 0;
+      _error = null;
+    });
+    try {
+      await _installer.install(
+        entry,
+        cancel: token,
+        onProgress: (received, total) {
+          if (mounted) setState(() => _downloadProgress = received / total);
+        },
+      );
+      return true;
+    } on InstallCancelledException {
+      return false;
+    } catch (e) {
+      if (mounted) setState(() => _error = '$e');
+      return false;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cancelToken = null;
+          _downloadProgress = null;
+        });
+      }
+    }
   }
 
   Future<void> _speak() async {
@@ -150,12 +202,26 @@ class _HomeScreenState extends State<HomeScreen> {
               DropdownButton<Voice>(
                 value: _voice,
                 isExpanded: true,
-                onChanged: (_loading || _busy) ? null : _selectVoice,
+                onChanged: (_loading || _busy || _cancelToken != null)
+                    ? null
+                    : _selectVoice,
                 items: [
-                  for (final v in Voice.temporary)
+                  for (final v in [
+                    Voice.systemHu,
+                    ..._catalog.forLanguage('hu').map((c) => c.toVoice()),
+                  ])
                     DropdownMenuItem(value: v, child: Text(v.label)),
                 ],
               ),
+              if (_downloadProgress != null)
+                Row(children: [
+                  Expanded(
+                      child: LinearProgressIndicator(value: _downloadProgress)),
+                  TextButton(
+                    onPressed: _cancelToken?.cancel,
+                    child: Text(l10n.cancel),
+                  ),
+                ]),
               const SizedBox(height: 12),
               TextField(
                 controller: _controller,

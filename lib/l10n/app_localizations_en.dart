@@ -33,4 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String synthesisStats(int synthMs, int audioMs, String rtf) {
     return 'Synthesis: $synthMs ms, audio: $audioMs ms, RTF: $rtf';
   }
+
+  @override
+  String get cancel => 'Cancel';
 }

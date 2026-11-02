@@ -43,5 +43,9 @@
         "type": "String"
       }
     }
+  },
+  "cancel": "Mégse",
+  "@cancel": {
+    "description": "Cancels a running voice download."
   }
 }

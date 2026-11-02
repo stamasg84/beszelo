@@ -33,7 +33,7 @@ Decision: no voices are bundled in the APK. On first launch the user picks a voi
 3. Note in `measurements.md`: system TTS synthesis time, and how imre at length 1.2 compares.
 Done → commit.
 
-### [ ] T10 (Agent): Voice catalog + Piper downloads
+### [x] T10 (Agent): Voice catalog + Piper downloads
 - `voices/catalog.json` in the repo. The remote URL is a single constant in `catalog.dart` (`https://raw.githubusercontent.com/stamasg84/mondom/main/voices/catalog.json`). If the remote fetch fails (offline, URL broken), the app must silently use the bundled copy. Format:
   ```json
   { "schemaVersion": 1,

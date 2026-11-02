@@ -20,6 +20,12 @@ class Voice {
   final String label;
   final VoiceKind kind;
 
+  @override
+  bool operator ==(Object other) => other is Voice && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   /// The system voice ("Android alapértelmezett") for [languageCode].
   static const systemHu = Voice(
     id: 'system-hu',
@@ -29,17 +35,4 @@ class Voice {
     kind: VoiceKind.system,
   );
 
-  static const imre = Voice(
-    id: 'hu_HU-imre-medium',
-    languageCode: 'hu',
-    gender: VoiceGender.male,
-    label: 'Imre',
-    kind: VoiceKind.piper,
-  );
-
-  /// Temporary hardcoded list; T10/T11 replace it with the catalog.
-  static const temporary = [imre, systemHu];
-
-  static Voice byId(String? id) =>
-      temporary.firstWhere((v) => v.id == id, orElse: () => imre);
 }

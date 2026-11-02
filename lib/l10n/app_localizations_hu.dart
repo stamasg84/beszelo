@@ -33,4 +33,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String synthesisStats(int synthMs, int audioMs, String rtf) {
     return 'Szintézis: $synthMs ms, hang: $audioMs ms, RTF: $rtf';
   }
+
+  @override
+  String get cancel => 'Mégse';
 }

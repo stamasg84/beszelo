@@ -49,3 +49,7 @@ app.*.map.json
 
 # Voice models (fetched by tool/fetch_voices.ps1)
 assets/voices/
+
+# Sample generation
+tool/.venv/
+tool/.cache/

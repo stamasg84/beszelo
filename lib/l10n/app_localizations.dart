@@ -139,6 +139,12 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Szintézis: {synthMs} ms, hang: {audioMs} ms, RTF: {rtf}'**
   String synthesisStats(int synthMs, int audioMs, String rtf);
+
+  /// Cancels a running voice download.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mégse'**
+  String get cancel;
 }
 
 class _AppLocalizationsDelegate

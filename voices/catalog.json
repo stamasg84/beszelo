@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "voices": [
+    {
+      "id": "hu_HU-imre-medium",
+      "language": "hu",
+      "gender": "male",
+      "label": "Imre",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-imre-medium.tar.bz2",
+      "sizeBytes": 67218203,
+      "sha256": "7be44b928bb26b03e403660894cd8210828dd8a0e9dccc4bade4a1632fc4f8c4",
+      "modelFile": "hu_HU-imre-medium.onnx",
+      "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/hu_HU-imre-medium.wav",
+      "license": "MIT",
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "hu_HU-berta-medium",
+      "language": "hu",
+      "gender": "female",
+      "label": "Berta",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-berta-medium.tar.bz2",
+      "sizeBytes": 67178197,
+      "sha256": "a00ba073fa7f8e1b2be58f881b24892e2dca16c3c5979ee4ea4bc6ccdd89dbc0",
+      "modelFile": "hu_HU-berta-medium.onnx",
+      "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/hu_HU-berta-medium.wav",
+      "license": "MIT",
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "hu_HU-anna-medium",
+      "language": "hu",
+      "gender": "female",
+      "label": "Anna",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-hu_HU-anna-medium.tar.bz2",
+      "sizeBytes": 67167701,
+      "sha256": "c67b13e57b71eca19098fe499afc35ebce8f63a0b524017c786af2025821216a",
+      "modelFile": "hu_HU-anna-medium.onnx",
+      "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/hu_HU-anna-medium.wav",
+      "license": "CC0",
+      "minAppVersion": "1.0.0"
+    }
+  ],
+  "sampleText": {
+    "hu": "Szia! Kérek egy pohár vizet. Segítenél felállni?",
+    "en": "Hi! Could I have a glass of water, please? Can you help me stand up?"
+  }
+}

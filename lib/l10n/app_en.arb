@@ -6,5 +6,6 @@
   "speak": "Speak",
   "repeat": "Repeat",
   "modelLoadTime": "Model load: {ms} ms",
-  "synthesisStats": "Synthesis: {synthMs} ms, audio: {audioMs} ms, RTF: {rtf}"
+  "synthesisStats": "Synthesis: {synthMs} ms, audio: {audioMs} ms, RTF: {rtf}",
+  "cancel": "Cancel"
 }

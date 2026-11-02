@@ -4,21 +4,22 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 
-import 'voice_assets.dart';
 import 'voice_engine.dart';
 
 /// Wraps sherpa-onnx OfflineTts for one Piper voice directory.
 /// Runs on the UI isolate for now (synthesis blocks the UI; T13 fixes that).
 class PiperEngine implements VoiceEngine {
   PiperEngine({
-    required this.voiceDirName,
+    required this.voiceDir,
+    required this.espeakDataDir,
     required this.modelFile,
     this.lengthScale = 1.2,
   });
 
-  /// Folder name under the bundled assets (T10 replaces this with an
-  /// installed directory path).
-  final String voiceDirName;
+  /// Installed voice directory (model, tokens.txt) and the shared
+  /// espeak-ng-data directory, see `VoiceInstaller`.
+  final String voiceDir;
+  final String espeakDataDir;
   final String modelFile;
 
   /// 1.2 sounds best for imre (see measurements.md).
@@ -39,13 +40,13 @@ class PiperEngine implements VoiceEngine {
     _tts?.free();
     _tts = null;
     sherpa.initBindings();
-    final dir = await VoiceAssets.prepare(voiceDirName);
+    final dir = voiceDir;
     final config = sherpa.OfflineTtsConfig(
       model: sherpa.OfflineTtsModelConfig(
         vits: sherpa.OfflineTtsVitsModelConfig(
           model: '$dir/$modelFile',
           tokens: '$dir/tokens.txt',
-          dataDir: '$dir/espeak-ng-data',
+          dataDir: espeakDataDir,
           lengthScale: lengthScale,
         ),
         numThreads: 2,
