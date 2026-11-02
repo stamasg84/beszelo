@@ -9,7 +9,7 @@ Existing apps (Cboard, Speech Assistant AAC, Spoken, Proloquo4Text) rely on the 
 
 ## Core features (MVP)
 - **Sentence lists** instead of tiles: everything the user can say with one tap lives in a list of whole sentences. The preloaded everyday phrases ("Kérek vizet!", "Éhes vagyok.", "Segíts felállni!", "Várj, gépelek.") are one list; the user adds more (e.g. "Orvos", "Éjszaka"). See `docs/architecture.md` "Sentence lists".
-- Free-text area with a speak button on the main screen (not hidden in a menu), plus repeat last phrase and history
+- Free-text area with a speak button on the main screen (not hidden in a menu); pressing it again with the same text repeats it instantly (no separate repeat button); plus history
 - Offline Hungarian male (`hu_HU-imre`) and female (`berta`, `anna` if licensed) Piper voices, downloaded in-app; system TTS as an always-available option; other languages via the catalog
 - Message banking: record your own voice for any sentence, played back in place of TTS. With ALS there's often a window between diagnosis and losing speech, and recordings made then are the most personal option. Plain on-device recording, no accounts, nothing paywalled (Cboard puts this behind a sign-in).
 - **Prepared conversations** ("Beszélgetés"): write the sentences ahead of time (e.g. the evening before a relative visits: "Ki kéne cserélni a villanykörtét.", "Légyszi vegyetek a boltban trappistát!", "Mi újság a suliban?") and say them one by one during the visit, with no typing and no awkward waiting. A prepared conversation is just a sentence list with "said" tracking and a "Következő" button. A differentiator: no other AAC app we've seen has this.
