@@ -16,3 +16,7 @@ Check whether sherpa-onnx has int8 variants of the Hungarian Piper voices (~1/3 
 
 ## flutter_tts applies the Kotlin Gradle Plugin (build warning)
 Builds warn: "Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): flutter_tts. Future versions of Flutter will fail to build if your app uses plugins that apply KGP." `flutter_tts` 4.2.5 (latest as of 2026-11-01) hasn't migrated to Built-in Kotlin. Harmless for now. When upgrading Flutter, check for a newer `flutter_tts`; if there is none, replace it with our own small platform channel around Android's `TextToSpeech.synthesizeToFile` (used by `SystemEngine`).
+
+
+## Audio caching (only if needed)
+Decided 2026-11-02 not to cache synthesized audio: generation on the Pixel 6a is under ~0.5 s, acceptable even mid-conversation, and a cache costs storage and complexity (invalidation on voice/speed change). If testing on cheap phones shows noticeable waits, add it: synthesize each sentence on save or voice change, store the WAV, play it on tap (the same path as message-banking recordings). A cheaper middle step: synthesize the *next* unsaid sentence of a prepared conversation in the background while the current one plays.

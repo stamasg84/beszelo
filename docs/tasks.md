@@ -22,7 +22,7 @@ Decision: no voices are bundled in the APK. On first launch the user picks a voi
 - `lib/voices/voice.dart`: `Voice` (id, languageCode e.g. `hu`, gender `male|female|unknown`, label, `VoiceKind { system, piper }`).
 - `lib/voices/voice_engine.dart`: abstract `VoiceEngine { Future<void> load(); Future<SynthResult> synthesizeToWav(String text); void dispose(); }`. All callers (UI, later tiles) use only this.
 - `PiperEngine`: refactor of the current `TtsEngine`. Takes the voice **directory path** and model file name instead of hardcoding imre. For now the path still comes from the bundled-asset copy (`VoiceAssets`); T10 replaces that with downloads. Default `lengthScale` = **1.2** (from `measurements.md`).
-- `SystemEngine`: `flutter_tts` with the voice's language. Synthesize to a WAV file (`synthesizeToFile`; check the current package API for writing to a full path and for awaiting completion) so playback, "Ismétlés" and later tile caching work the same way as with Piper.
+- `SystemEngine`: `flutter_tts` with the voice's language. Synthesize to a WAV file (`synthesizeToFile`; check the current package API for writing to a full path and for awaiting completion) so playback and "Ismétlés" work the same way as with Piper.
 - Temporary dropdown on the main screen: "Imre" / "Android alapértelmezett". Persist the choice with `shared_preferences` and load it at start.
 - Remove the "Hangolás" section (the noise sliders made no audible difference). Keep the timing text.
 - **Checks:** `flutter analyze`, `flutter test`. Report what `synthesizeToFile` needed on Android (permissions, path quirks).
@@ -82,9 +82,11 @@ Done → commit.
 ---
 
 ## Later (rough)
-- Tile grid with preloaded Hungarian phrases (per-locale data); pre-generated, cached WAV per tile, regenerated on voice change.
-- History of spoken phrases.
-- Message banking (record your own audio for a tile).
+- Sentence lists (see `docs/architecture.md` "Sentence lists"): data model + storage, main screen with pinned chips and rows, preloaded Hungarian everyday list (per-locale data), synthesized on tap (no cache, see `docs/TODO.md`).
+- List editing screen (one sentence per line, paste splitting, reorder).
+- Prepared conversations: `said` tracking, "Következő", reset.
+- History as an automatic list.
+- Message banking (record your own audio for a sentence).
 - Bell; emergency SMS with GPS (platform channel).
 - Speech speed setting (lengthScale) in settings.
 - About screen with licenses (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).
