@@ -1,0 +1,148 @@
+{
+  "lists": [
+    {
+      "seedKey": "everyday",
+      "title": "Alap",
+      "kind": "everyday",
+      "pinned": true,
+      "sentences": [
+        {
+          "seedKey": "water",
+          "text": "Kérek vizet!"
+        },
+        {
+          "seedKey": "food",
+          "text": "Éhes vagyok."
+        },
+        {
+          "seedKey": "drink",
+          "text": "Szomjas vagyok."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "Mennem kell a mosdóba."
+        },
+        {
+          "seedKey": "pain",
+          "text": "Fáj."
+        },
+        {
+          "seedKey": "pain-help",
+          "text": "Fájdalmaim vannak, kérek fájdalomcsillapítót."
+        },
+        {
+          "seedKey": "stand",
+          "text": "Segíts felállni!"
+        },
+        {
+          "seedKey": "position",
+          "text": "Segíts, kérlek, átfordulni!"
+        },
+        {
+          "seedKey": "sit",
+          "text": "Ültess fel, kérlek!"
+        },
+        {
+          "seedKey": "cold",
+          "text": "Fázom."
+        },
+        {
+          "seedKey": "hot",
+          "text": "Melegem van."
+        },
+        {
+          "seedKey": "blanket",
+          "text": "Kérek egy takarót!"
+        },
+        {
+          "seedKey": "glasses",
+          "text": "Add ide a szemüvegemet, kérlek!"
+        },
+        {
+          "seedKey": "phone",
+          "text": "Add ide a telefonomat, kérlek!"
+        },
+        {
+          "seedKey": "tv",
+          "text": "Kapcsold be a tévét, kérlek!"
+        },
+        {
+          "seedKey": "tv-off",
+          "text": "Kapcsold ki a tévét, kérlek!"
+        },
+        {
+          "seedKey": "light-on",
+          "text": "Kapcsold fel a villanyt, kérlek!"
+        },
+        {
+          "seedKey": "light-off",
+          "text": "Kapcsold le a villanyt, kérlek!"
+        },
+        {
+          "seedKey": "tired",
+          "text": "Fáradt vagyok."
+        },
+        {
+          "seedKey": "good",
+          "text": "Jól vagyok."
+        },
+        {
+          "seedKey": "yes",
+          "text": "Igen."
+        },
+        {
+          "seedKey": "no",
+          "text": "Nem."
+        },
+        {
+          "seedKey": "dont-know",
+          "text": "Nem tudom."
+        },
+        {
+          "seedKey": "thanks",
+          "text": "Köszönöm!"
+        },
+        {
+          "seedKey": "wait",
+          "text": "Várj, gépelek."
+        },
+        {
+          "seedKey": "repeat",
+          "text": "Ismételd meg, kérlek!"
+        },
+        {
+          "seedKey": "slower",
+          "text": "Lassabban, kérlek!"
+        },
+        {
+          "seedKey": "come",
+          "text": "Gyere ide, kérlek!"
+        },
+        {
+          "seedKey": "love",
+          "text": "Szeretlek."
+        }
+      ]
+    },
+    {
+      "seedKey": "example-conversation",
+      "title": "Példa beszélgetés",
+      "kind": "conversation",
+      "pinned": false,
+      "sentences": [
+        {
+          "seedKey": "bulb",
+          "text": "Ki kéne cserélni a villanykörtét."
+        },
+        {
+          "seedKey": "cheese",
+          "text": "Légyszi vegyetek a boltban trappistát!"
+        },
+        {
+          "seedKey": "school",
+          "text": "Mi újság a suliban?"
+        }
+      ]
+    }
+  ]
+}

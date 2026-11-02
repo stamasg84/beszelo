@@ -1,0 +1,148 @@
+{
+  "lists": [
+    {
+      "seedKey": "everyday",
+      "title": "Basics",
+      "kind": "everyday",
+      "pinned": true,
+      "sentences": [
+        {
+          "seedKey": "water",
+          "text": "I'd like some water, please!"
+        },
+        {
+          "seedKey": "food",
+          "text": "I'm hungry."
+        },
+        {
+          "seedKey": "drink",
+          "text": "I'm thirsty."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "I need to go to the bathroom."
+        },
+        {
+          "seedKey": "pain",
+          "text": "It hurts."
+        },
+        {
+          "seedKey": "pain-help",
+          "text": "I'm in pain, I need some painkillers."
+        },
+        {
+          "seedKey": "stand",
+          "text": "Help me stand up!"
+        },
+        {
+          "seedKey": "position",
+          "text": "Help me turn over, please!"
+        },
+        {
+          "seedKey": "sit",
+          "text": "Sit me up, please!"
+        },
+        {
+          "seedKey": "cold",
+          "text": "I'm cold."
+        },
+        {
+          "seedKey": "hot",
+          "text": "I'm hot."
+        },
+        {
+          "seedKey": "blanket",
+          "text": "I'd like a blanket, please!"
+        },
+        {
+          "seedKey": "glasses",
+          "text": "Hand me my glasses, please!"
+        },
+        {
+          "seedKey": "phone",
+          "text": "Hand me my phone, please!"
+        },
+        {
+          "seedKey": "tv",
+          "text": "Turn the TV on, please!"
+        },
+        {
+          "seedKey": "tv-off",
+          "text": "Turn the TV off, please!"
+        },
+        {
+          "seedKey": "light-on",
+          "text": "Turn the light on, please!"
+        },
+        {
+          "seedKey": "light-off",
+          "text": "Turn the light off, please!"
+        },
+        {
+          "seedKey": "tired",
+          "text": "I'm tired."
+        },
+        {
+          "seedKey": "good",
+          "text": "I'm doing fine."
+        },
+        {
+          "seedKey": "yes",
+          "text": "Yes."
+        },
+        {
+          "seedKey": "no",
+          "text": "No."
+        },
+        {
+          "seedKey": "dont-know",
+          "text": "I don't know."
+        },
+        {
+          "seedKey": "thanks",
+          "text": "Thank you!"
+        },
+        {
+          "seedKey": "wait",
+          "text": "Wait, I'm typing."
+        },
+        {
+          "seedKey": "repeat",
+          "text": "Please say that again!"
+        },
+        {
+          "seedKey": "slower",
+          "text": "Slower, please!"
+        },
+        {
+          "seedKey": "come",
+          "text": "Come here, please!"
+        },
+        {
+          "seedKey": "love",
+          "text": "I love you."
+        }
+      ]
+    },
+    {
+      "seedKey": "example-conversation",
+      "title": "Example conversation",
+      "kind": "conversation",
+      "pinned": false,
+      "sentences": [
+        {
+          "seedKey": "bulb",
+          "text": "The light bulb needs changing."
+        },
+        {
+          "seedKey": "cheese",
+          "text": "Please pick up some cheddar at the shop!"
+        },
+        {
+          "seedKey": "school",
+          "text": "How's school going?"
+        }
+      ]
+    }
+  ]
+}

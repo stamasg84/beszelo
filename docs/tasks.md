@@ -19,7 +19,7 @@ Goal: the real speaking screen. Everything speakable is a sentence list, stored 
 - Remove the now-unused ARB key(s) in both `app_hu.arb` and `app_en.arb`.
 - **Checks:** `flutter analyze`, `flutter test` (unit-test `Speaker` with a fake `VoiceEngine` that counts calls and a fake player: same text twice = 1 synthesis; whitespace-only difference = 1; different text = 2 and the old WAV is deleted; voice switch = re-synthesis).
 
-### [ ] T15 (Agent): Storage (drift) + seed data
+### [x] T15 (Agent): Storage (drift) + seed data
 - Add `drift`, `drift_flutter`; dev: `drift_dev`, `build_runner`. Commit the generated `*.g.dart` files (so a plain `flutter run` works without codegen). Note the regen command (`dart run build_runner build --delete-conflicting-outputs`) in architecture.md.
 - `lib/storage/database.dart` with the tables from architecture.md "Storage": `sentence_lists`, `sentences`. Schema version 1.
 - `assets/seed/hu.json`, `assets/seed/en.json` (format in architecture.md). Contents:

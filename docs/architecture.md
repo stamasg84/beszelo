@@ -74,7 +74,11 @@ SQLite via **drift** (typed tables/queries, migrations, reactive `watch` queries
 Tables (schema v1):
 - `sentence_lists`: `id` PK, `title`, `kind` (`everyday | conversation | history`), `pinned` bool, `position` int, `seedKey` nullable unique, `createdAt`.
 - `sentences`: `id` PK, `listId` FK (cascade delete), `text`, `position` int, `said` bool (default false), `recordingPath` nullable (message banking, later), `seedKey` nullable (unique per list), `spokenAt` nullable (history ordering), `createdAt`.
-- Exactly one `history` list; it can't be deleted or renamed, its title is localized via ARB at display time.
+- `app_meta`: key/value (`seedLanguage`: the language the DB was seeded with, used by restore).
+- Dart naming: the `sentences.text` column is the getter `body` (`text` clashes with drift's `Table.text()`), so `Sentence.body`.
+- Exactly one `history` list; it can't be deleted or renamed, its title is localized via ARB at display time. History is newest first by `position`: a new row gets `min(position) - 1` (negative values are fine), so moving to the top never shifts other rows.
+- Moving a sentence to another list drops its `seedKey` (it left its seed list); copies never have one.
+- Generated code (`database.g.dart`) is committed. Regenerate after changing tables: `dart run build_runner build --delete-conflicting-outputs`.
 
 Seed data: `assets/seed/<lang>.json`, inserted in drift's `onCreate` for the UI language (fallback `en`); afterwards they're ordinary rows the user can edit or delete. Changing the phone language later doesn't touch the DB.
 ```json
