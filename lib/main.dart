@@ -1,9 +1,9 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
+import 'speech/speaker.dart';
 import 'ui/voice_picker.dart';
 import 'voices/catalog.dart';
 import 'voices/piper_engine.dart';
@@ -26,8 +26,8 @@ class MondomApp extends StatelessWidget {
       // Hungarian phones get Hungarian; everything else falls back to English.
       localeResolutionCallback: (locale, supported) =>
           locale?.languageCode == 'hu'
-              ? const Locale('hu')
-              : const Locale('en'),
+          ? const Locale('hu')
+          : const Locale('en'),
       theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
       home: const HomeScreen(),
     );
@@ -44,23 +44,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   static const _prefKey = 'voiceId';
 
-  VoiceEngine? _engine;
-  final _player = AudioPlayer();
+  late final Speaker _speaker;
   final _controller = TextEditingController();
 
   final _installer = VoiceInstaller();
   Catalog _catalog = Catalog.empty;
 
   Voice _voice = Voice.system('hu');
-  bool _loading = true;
-  bool _busy = false;
-  String? _error;
-  String? _lastWav;
-  SynthResult? _last;
 
   @override
   void initState() {
     super.initState();
+    _speaker = Speaker(engineFactory: _createEngine)
+      ..addListener(() => setState(() {}));
     _init();
   }
 
@@ -80,94 +76,55 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       _voice = Voice.system(uiLang);
     }
-    await _loadVoice();
+    await _speaker.setVoice(_voice);
     // First launch: no voice chosen yet.
     if (savedId == null && mounted) _openPicker(firstRun: true);
   }
 
   void _openPicker({bool firstRun = false}) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => VoicePickerScreen(
-        catalog: _catalog,
-        installer: _installer,
-        selectedId: _voice.id,
-        firstRun: firstRun,
-        onSelect: _selectVoice,
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => VoicePickerScreen(
+          catalog: _catalog,
+          installer: _installer,
+          selectedId: _voice.id,
+          firstRun: firstRun,
+          onSelect: _selectVoice,
+        ),
       ),
-    ));
+    );
   }
 
   Future<VoiceEngine> _createEngine(Voice v) async => switch (v.kind) {
-        VoiceKind.system => SystemEngine(v),
-        VoiceKind.piper => PiperEngine(
-            voiceDir: await _installer.voiceDir(v.id),
-            espeakDataDir: await _installer.espeakDataDir(),
-            modelFile: _catalog.byId(v.id)!.modelFile,
-          ),
-      };
-
-  Future<void> _loadVoice() async {
-    setState(() => _loading = true);
-    _engine?.dispose();
-    _engine = null;
-    try {
-      final engine = await _createEngine(_voice);
-      await engine.load();
-      _engine = engine;
-      _error = null;
-    } catch (e) {
-      _error = '$e';
-    }
-    if (mounted) setState(() => _loading = false);
-  }
+    VoiceKind.system => SystemEngine(v),
+    VoiceKind.piper => PiperEngine(
+      voiceDir: await _installer.voiceDir(v.id),
+      espeakDataDir: await _installer.espeakDataDir(),
+      modelFile: _catalog.byId(v.id)!.modelFile,
+    ),
+  };
 
   Future<void> _selectVoice(Voice v) async {
     _voice = v;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKey, v.id);
-    await _loadVoice();
-  }
-
-  Future<void> _speak() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    setState(() => _busy = true);
-    try {
-      final result = await _engine!.synthesizeToWav(text);
-      _last = result;
-      _lastWav = result.path;
-      _error = null;
-      await _player.play(DeviceFileSource(result.path));
-    } catch (e) {
-      _error = '$e';
-    }
-    if (mounted) setState(() => _busy = false);
-  }
-
-  Future<void> _repeat() async {
-    final path = _lastWav;
-    if (path == null) return;
-    try {
-      await _player.stop();
-      await _player.play(DeviceFileSource(path));
-    } catch (e) {
-      setState(() => _error = '$e');
-    }
+    await _speaker.setVoice(v);
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _player.dispose();
-    _engine?.dispose();
+    _speaker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final ready = (_engine?.isLoaded ?? false) && !_loading && !_busy;
-    final last = _last;
+    final speaker = _speaker;
+    final ready = speaker.ready;
+    final last = speaker.lastResult;
+    final error = speaker.error;
     const small = TextStyle(fontSize: 12);
     return Scaffold(
       appBar: AppBar(
@@ -196,51 +153,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   hintText: l10n.textHint,
+                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) => value.text.isEmpty
+                        ? const SizedBox.shrink()
+                        : IconButton(
+                            iconSize: 36,
+                            tooltip: l10n.clearText,
+                            icon: const Icon(Icons.close),
+                            onPressed: _controller.clear,
+                          ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
-              if (_loading)
+              if (speaker.loading)
                 Center(
-                  child: Text(l10n.loading,
-                      style: const TextStyle(fontSize: 24)),
+                  child: Text(
+                    l10n.loading,
+                    style: const TextStyle(fontSize: 24),
+                  ),
                 )
               else
                 FilledButton(
-                  onPressed: ready ? _speak : null,
+                  onPressed: ready
+                      ? () => speaker.speak(_controller.text)
+                      : null,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: _busy
+                    child: speaker.busy
                         ? const SizedBox(
                             height: 44,
                             width: 44,
                             child: CircularProgressIndicator(strokeWidth: 4),
                           )
-                        : Text(l10n.speak,
-                            style: const TextStyle(fontSize: 32)),
+                        : Text(
+                            l10n.speak,
+                            style: const TextStyle(fontSize: 32),
+                          ),
                   ),
                 ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: (ready && _lastWav != null) ? _repeat : null,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(l10n.repeat,
-                      style: const TextStyle(fontSize: 24)),
-                ),
-              ),
               const SizedBox(height: 12),
-              Text(l10n.modelLoadTime((_engine?.loadMs ?? 0)), style: small),
+              Text(l10n.modelLoadTime(speaker.loadMs), style: small),
               if (last != null)
                 Text(
-                  l10n.synthesisStats(
-                      last.synthMs, last.audioMs, last.rtf.toStringAsFixed(2)),
+                  speaker.lastReplayed
+                      ? l10n.replayed
+                      : l10n.synthesisStats(
+                          last.synthMs,
+                          last.audioMs,
+                          last.rtf.toStringAsFixed(2),
+                        ),
                   style: small,
                 ),
-              if (_error != null)
+              if (error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child:
-                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                  child: Text(error, style: const TextStyle(color: Colors.red)),
                 ),
             ],
           ),

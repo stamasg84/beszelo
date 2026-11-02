@@ -19,10 +19,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get loading => 'Betöltés…';
 
   @override
-  String get speak => 'Beszélj';
+  String get speak => 'Mondd';
 
   @override
-  String get repeat => 'Ismétlés';
+  String get clearText => 'Szöveg törlése';
+
+  @override
+  String get replayed => 'Újrajátszva (szintézis nélkül)';
 
   @override
   String modelLoadTime(int ms) {

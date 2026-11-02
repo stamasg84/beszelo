@@ -12,13 +12,17 @@
   "@loading": {
     "description": "Shown instead of the speak button while the voice model is loading."
   },
-  "speak": "Beszélj",
+  "speak": "Mondd",
   "@speak": {
     "description": "Button that speaks the typed text."
   },
-  "repeat": "Ismétlés",
-  "@repeat": {
-    "description": "Button that replays the last spoken phrase."
+  "clearText": "Szöveg törlése",
+  "@clearText": {
+    "description": "Tooltip of the ✕ button that clears the text field."
+  },
+  "replayed": "Újrajátszva (szintézis nélkül)",
+  "@replayed": {
+    "description": "Timing line shown when the last phrase was replayed instead of synthesized."
   },
   "modelLoadTime": "Modell betöltés: {ms} ms",
   "@modelLoadTime": {

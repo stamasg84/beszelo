@@ -9,7 +9,7 @@ void main() {
     await tester.pumpWidget(const MondomApp());
     expect(find.text('Mondom'), findsOneWidget);
     expect(find.text('Betöltés…'), findsOneWidget);
-    expect(find.text('Ismétlés'), findsOneWidget);
+    expect(find.text('Ismétlés'), findsNothing);
   });
 
   testWidgets('other locales fall back to English', (tester) async {
@@ -17,6 +17,6 @@ void main() {
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(const MondomApp());
     expect(find.text('Loading…'), findsOneWidget);
-    expect(find.text('Repeat'), findsOneWidget);
+    expect(find.text('Repeat'), findsNothing);
   });
 }

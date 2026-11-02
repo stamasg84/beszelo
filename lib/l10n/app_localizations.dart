@@ -119,14 +119,20 @@ abstract class AppLocalizations {
   /// Button that speaks the typed text.
   ///
   /// In hu, this message translates to:
-  /// **'Beszélj'**
+  /// **'Mondd'**
   String get speak;
 
-  /// Button that replays the last spoken phrase.
+  /// Tooltip of the ✕ button that clears the text field.
   ///
   /// In hu, this message translates to:
-  /// **'Ismétlés'**
-  String get repeat;
+  /// **'Szöveg törlése'**
+  String get clearText;
+
+  /// Timing line shown when the last phrase was replayed instead of synthesized.
+  ///
+  /// In hu, this message translates to:
+  /// **'Újrajátszva (szintézis nélkül)'**
+  String get replayed;
 
   /// Timing info: how long loading the voice model took.
   ///

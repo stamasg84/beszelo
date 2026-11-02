@@ -22,7 +22,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speak => 'Speak';
 
   @override
-  String get repeat => 'Repeat';
+  String get clearText => 'Clear text';
+
+  @override
+  String get replayed => 'Replayed (no synthesis)';
 
   @override
   String modelLoadTime(int ms) {
