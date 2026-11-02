@@ -26,13 +26,14 @@ class Voice {
   @override
   int get hashCode => id.hashCode;
 
-  /// The system voice ("Android alapértelmezett") for [languageCode].
-  static const systemHu = Voice(
-    id: 'system-hu',
-    languageCode: 'hu',
-    gender: VoiceGender.unknown,
-    label: 'Android alapértelmezett',
-    kind: VoiceKind.system,
-  );
+  /// The system voice for [languageCode]. The label is a placeholder; UI
+  /// shows a localized name.
+  factory Voice.system(String languageCode) => Voice(
+        id: 'system-$languageCode',
+        languageCode: languageCode,
+        gender: VoiceGender.unknown,
+        label: 'Android',
+        kind: VoiceKind.system,
+      );
 
 }

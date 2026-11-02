@@ -23,6 +23,9 @@ class Sha256MismatchException implements Exception {
   String toString() => 'sha256 mismatch: expected $expected, got $actual';
 }
 
+/// Stage of [VoiceInstaller.install], for UI status text.
+enum InstallStage { downloading, verifying, extracting }
+
 /// Lets the UI cancel a running [VoiceInstaller.install].
 class InstallCancelToken {
   bool _cancelled = false;
@@ -37,6 +40,9 @@ class VoiceInstaller {
   VoiceInstaller({Directory? root, http.Client? client})
       : _root = root, // ignore: prefer_initializing_formals
         _client = client ?? http.Client();
+
+  /// Generous: cheap phones are slow, but a hang must end eventually.
+  static const extractTimeout = Duration(minutes: 5);
 
   static const espeakDirName = 'espeak-ng-data';
 
@@ -85,27 +91,32 @@ class VoiceInstaller {
     CatalogVoice voice, {
     void Function(int received, int total)? onProgress,
     InstallCancelToken? cancel,
+    void Function(InstallStage stage)? onStage,
   }) async {
     final r = await root;
-    final staging = Directory('${r.path}/.staging-${voice.id}');
-    if (staging.existsSync()) await staging.delete(recursive: true);
+    // Unique per attempt, so a stuck earlier attempt can never interfere.
+    final staging = Directory(
+        '${r.path}/.staging-${voice.id}-${DateTime.now().millisecondsSinceEpoch}');
     await staging.create(recursive: true);
     try {
       final archive = File('${staging.path}/voice.tar.bz2');
+      onStage?.call(InstallStage.downloading);
       var sw = Stopwatch()..start();
       await _download(voice, archive, onProgress, cancel);
       debugPrint('Voice ${voice.id}: download ${sw.elapsedMilliseconds} ms');
       _checkCancelled(cancel);
 
+      onStage?.call(InstallStage.verifying);
       final actual = (await sha256.bind(archive.openRead()).first).toString();
       if (actual != voice.sha256) {
         throw Sha256MismatchException(voice.sha256, actual);
       }
 
+      onStage?.call(InstallStage.extracting);
       sw = Stopwatch()..start();
       final extracted = '${staging.path}/extracted';
       final archivePath = archive.path;
-      await Isolate.run(() => extractVoiceArchive(archivePath, extracted));
+      await _extractInIsolate(archivePath, extracted, cancel);
       await archive.delete();
       debugPrint('Voice ${voice.id}: extraction ${sw.elapsedMilliseconds} ms');
       _checkCancelled(cancel);
@@ -152,6 +163,45 @@ class VoiceInstaller {
     }
   }
 
+  /// Runs the extraction in its own isolate that is killed on cancel or
+  /// after [extractTimeout], so a stuck extraction can't hang the install
+  /// (and the UI) forever.
+  Future<void> _extractInIsolate(
+      String archivePath, String destDir, InstallCancelToken? cancel) async {
+    final done = Completer<void>();
+    final results = ReceivePort();
+    final errors = ReceivePort();
+    results.listen((msg) {
+      if (done.isCompleted) return;
+      msg == null
+          ? done.complete()
+          : done.completeError(Exception('Extraction failed: $msg'));
+    });
+    errors.listen((msg) {
+      if (!done.isCompleted) done.completeError(Exception('Extraction: $msg'));
+    });
+    final poll = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if ((cancel?.isCancelled ?? false) && !done.isCompleted) {
+        done.completeError(InstallCancelledException());
+      }
+    });
+    final isolate = await Isolate.spawn(
+      _extractEntry,
+      [results.sendPort, archivePath, destDir],
+      onError: errors.sendPort,
+    );
+    try {
+      await done.future.timeout(extractTimeout, onTimeout: () {
+        throw TimeoutException('Extraction timed out', extractTimeout);
+      });
+    } finally {
+      poll.cancel();
+      isolate.kill(priority: Isolate.immediate);
+      results.close();
+      errors.close();
+    }
+  }
+
   void _checkCancelled(InstallCancelToken? cancel) {
     if (cancel?.isCancelled ?? false) throw InstallCancelledException();
   }
@@ -160,4 +210,14 @@ class VoiceInstaller {
 /// Extracts a `.tar.bz2` into [destDir]. Top-level so it can run in an isolate.
 Future<void> extractVoiceArchive(String archivePath, String destDir) async {
   await extractFileToDisk(archivePath, destDir, throwOnError: true);
+}
+
+Future<void> _extractEntry(List<Object> args) async {
+  final port = args[0] as SendPort;
+  try {
+    await extractVoiceArchive(args[1] as String, args[2] as String);
+    port.send(null);
+  } catch (e) {
+    port.send('$e');
+  }
 }

@@ -145,6 +145,114 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Mégse'**
   String get cancel;
+
+  /// Title of the voice picker screen.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hang kiválasztása'**
+  String get voicePickerTitle;
+
+  /// Tooltip of the app bar icon that opens the voice picker.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hang kiválasztása'**
+  String get voiceSettingsTooltip;
+
+  /// Expandable section with voices of other languages.
+  ///
+  /// In hu, this message translates to:
+  /// **'Más nyelvek'**
+  String get moreLanguages;
+
+  /// Name of the Android system TTS voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Android alapértelmezett'**
+  String get systemVoice;
+
+  /// Subtitle of the system voice row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Azonnal működik, internet nélkül is'**
+  String get systemVoiceInfo;
+
+  /// First-run button: skip choosing, use the system voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kihagyás'**
+  String get skip;
+
+  /// Button that downloads a voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Letöltés'**
+  String get download;
+
+  /// Button that selects an installed voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kiválasztás'**
+  String get select;
+
+  /// State label of the currently selected voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kiválasztva'**
+  String get selected;
+
+  /// Tooltip of the button that deletes a downloaded voice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hang törlése'**
+  String get deleteVoice;
+
+  /// Tooltip of the sample play button.
+  ///
+  /// In hu, this message translates to:
+  /// **'Minta meghallgatása'**
+  String get playSample;
+
+  /// Shown when a voice sample cannot be loaded.
+  ///
+  /// In hu, this message translates to:
+  /// **'A minta nem érhető el'**
+  String get sampleUnavailable;
+
+  /// Shown when the voice catalog could not be fetched.
+  ///
+  /// In hu, this message translates to:
+  /// **'A hangok letöltéséhez internet kell. Az Android alapértelmezett hang internet nélkül is működik.'**
+  String get downloadsNeedInternet;
+
+  /// Shown when a voice download fails.
+  ///
+  /// In hu, this message translates to:
+  /// **'A letöltés nem sikerült. Ellenőrizd az internetkapcsolatot.'**
+  String get downloadFailed;
+
+  /// Voice gender.
+  ///
+  /// In hu, this message translates to:
+  /// **'férfi'**
+  String get genderMale;
+
+  /// Voice gender.
+  ///
+  /// In hu, this message translates to:
+  /// **'női'**
+  String get genderFemale;
+
+  /// Download size.
+  ///
+  /// In hu, this message translates to:
+  /// **'{mb} MB'**
+  String voiceSizeMb(int mb);
+
+  /// Shown while a downloaded voice is verified and unpacked.
+  ///
+  /// In hu, this message translates to:
+  /// **'Telepítés… (ez eltarthat egy ideig)'**
+  String get installing;
 }
 
 class _AppLocalizationsDelegate

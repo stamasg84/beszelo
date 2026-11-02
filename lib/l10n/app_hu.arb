@@ -47,5 +47,82 @@
   "cancel": "Mégse",
   "@cancel": {
     "description": "Cancels a running voice download."
+  },
+  "voicePickerTitle": "Hang kiválasztása",
+  "@voicePickerTitle": {
+    "description": "Title of the voice picker screen."
+  },
+  "voiceSettingsTooltip": "Hang kiválasztása",
+  "@voiceSettingsTooltip": {
+    "description": "Tooltip of the app bar icon that opens the voice picker."
+  },
+  "moreLanguages": "Más nyelvek",
+  "@moreLanguages": {
+    "description": "Expandable section with voices of other languages."
+  },
+  "systemVoice": "Android alapértelmezett",
+  "@systemVoice": {
+    "description": "Name of the Android system TTS voice."
+  },
+  "systemVoiceInfo": "Azonnal működik, internet nélkül is",
+  "@systemVoiceInfo": {
+    "description": "Subtitle of the system voice row."
+  },
+  "skip": "Kihagyás",
+  "@skip": {
+    "description": "First-run button: skip choosing, use the system voice."
+  },
+  "download": "Letöltés",
+  "@download": {
+    "description": "Button that downloads a voice."
+  },
+  "select": "Kiválasztás",
+  "@select": {
+    "description": "Button that selects an installed voice."
+  },
+  "selected": "Kiválasztva",
+  "@selected": {
+    "description": "State label of the currently selected voice."
+  },
+  "deleteVoice": "Hang törlése",
+  "@deleteVoice": {
+    "description": "Tooltip of the button that deletes a downloaded voice."
+  },
+  "playSample": "Minta meghallgatása",
+  "@playSample": {
+    "description": "Tooltip of the sample play button."
+  },
+  "sampleUnavailable": "A minta nem érhető el",
+  "@sampleUnavailable": {
+    "description": "Shown when a voice sample cannot be loaded."
+  },
+  "downloadsNeedInternet": "A hangok letöltéséhez internet kell. Az Android alapértelmezett hang internet nélkül is működik.",
+  "@downloadsNeedInternet": {
+    "description": "Shown when the voice catalog could not be fetched."
+  },
+  "downloadFailed": "A letöltés nem sikerült. Ellenőrizd az internetkapcsolatot.",
+  "@downloadFailed": {
+    "description": "Shown when a voice download fails."
+  },
+  "genderMale": "férfi",
+  "@genderMale": {
+    "description": "Voice gender."
+  },
+  "genderFemale": "női",
+  "@genderFemale": {
+    "description": "Voice gender."
+  },
+  "voiceSizeMb": "{mb} MB",
+  "@voiceSizeMb": {
+    "description": "Download size.",
+    "placeholders": {
+      "mb": {
+        "type": "int"
+      }
+    }
+  },
+  "installing": "Telepítés… (ez eltarthat egy ideig)",
+  "@installing": {
+    "description": "Shown while a downloaded voice is verified and unpacked."
   }
 }

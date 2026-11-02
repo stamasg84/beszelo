@@ -36,4 +36,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get voicePickerTitle => 'Choose a voice';
+
+  @override
+  String get voiceSettingsTooltip => 'Choose a voice';
+
+  @override
+  String get moreLanguages => 'Other languages';
+
+  @override
+  String get systemVoice => 'Android default';
+
+  @override
+  String get systemVoiceInfo => 'Works right away, even offline';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get select => 'Select';
+
+  @override
+  String get selected => 'Selected';
+
+  @override
+  String get deleteVoice => 'Delete voice';
+
+  @override
+  String get playSample => 'Play sample';
+
+  @override
+  String get sampleUnavailable => 'The sample is not available';
+
+  @override
+  String get downloadsNeedInternet =>
+      'Downloading voices needs internet. The Android default voice works offline.';
+
+  @override
+  String get downloadFailed =>
+      'The download failed. Check your internet connection.';
+
+  @override
+  String get genderMale => 'male';
+
+  @override
+  String get genderFemale => 'female';
+
+  @override
+  String voiceSizeMb(int mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String get installing => 'Installing… (this can take a while)';
 }

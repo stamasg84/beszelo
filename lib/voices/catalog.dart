@@ -70,9 +70,16 @@ class CatalogVoice {
 }
 
 class Catalog {
-  const Catalog({required this.voices, required this.sampleText});
+  const Catalog({
+    required this.voices,
+    required this.sampleText,
+    this.isBundled = false,
+  });
 
   final List<CatalogVoice> voices;
+
+  /// True when the remote fetch failed and the bundled copy is used.
+  final bool isBundled;
 
   /// Sample sentence per language code (also spoken live for the system voice).
   final Map<String, String> sampleText;
@@ -156,7 +163,10 @@ class CatalogRepository {
     } catch (e) {
       debugPrint('Remote catalog unavailable, using bundled copy: $e');
     }
-    return Catalog.parse(await _loadBundled(), appVersion: appVersion) ??
-        Catalog.empty;
+    final bundled =
+        Catalog.parse(await _loadBundled(), appVersion: appVersion);
+    if (bundled == null) return Catalog.empty;
+    return Catalog(
+        voices: bundled.voices, sampleText: bundled.sampleText, isBundled: true);
   }
 }

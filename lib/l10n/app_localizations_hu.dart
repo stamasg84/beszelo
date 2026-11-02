@@ -36,4 +36,62 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get cancel => 'Mégse';
+
+  @override
+  String get voicePickerTitle => 'Hang kiválasztása';
+
+  @override
+  String get voiceSettingsTooltip => 'Hang kiválasztása';
+
+  @override
+  String get moreLanguages => 'Más nyelvek';
+
+  @override
+  String get systemVoice => 'Android alapértelmezett';
+
+  @override
+  String get systemVoiceInfo => 'Azonnal működik, internet nélkül is';
+
+  @override
+  String get skip => 'Kihagyás';
+
+  @override
+  String get download => 'Letöltés';
+
+  @override
+  String get select => 'Kiválasztás';
+
+  @override
+  String get selected => 'Kiválasztva';
+
+  @override
+  String get deleteVoice => 'Hang törlése';
+
+  @override
+  String get playSample => 'Minta meghallgatása';
+
+  @override
+  String get sampleUnavailable => 'A minta nem érhető el';
+
+  @override
+  String get downloadsNeedInternet =>
+      'A hangok letöltéséhez internet kell. Az Android alapértelmezett hang internet nélkül is működik.';
+
+  @override
+  String get downloadFailed =>
+      'A letöltés nem sikerült. Ellenőrizd az internetkapcsolatot.';
+
+  @override
+  String get genderMale => 'férfi';
+
+  @override
+  String get genderFemale => 'női';
+
+  @override
+  String voiceSizeMb(int mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String get installing => 'Telepítés… (ez eltarthat egy ideig)';
 }

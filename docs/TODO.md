@@ -20,3 +20,6 @@ Builds warn: "Your app uses the following plugins that apply Kotlin Gradle Plugi
 
 ## Audio caching (only if needed)
 Decided 2026-11-02 not to cache synthesized audio: generation on the Pixel 6a is under ~0.5 s, acceptable even mid-conversation, and a cache costs storage and complexity (invalidation on voice/speed change). If testing on cheap phones shows noticeable waits, add it: synthesize each sentence on save or voice change, store the WAV, play it on tap (the same path as message-banking recordings). A cheaper middle step: synthesize the *next* unsaid sentence of a prepared conversation in the background while the current one plays.
+
+## Test "Más nyelvek" with a non-Hungarian voice
+`voices/catalog.json` only has Hungarian voices, so the picker's expandable "Más nyelvek" section never appears in the real app (only covered by the fake-catalog widget test). Add a few voices in other languages (e.g. English; license-check each, get sha256/size, generate samples with `tool/make_samples.ps1`, add `sampleText` per language, run `tool/sync_catalog.ps1`), then test on the phone: the section shows, other-language voices download/select/delete, and an English UI lists English voices first.

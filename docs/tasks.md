@@ -59,19 +59,20 @@ Done → commit.
 - Add the `INTERNET` permission to the main `AndroidManifest.xml`.
 - **Checks:** `flutter analyze`, `flutter test` (unit-test catalog parsing/filtering and sha mismatch handling with a fake file), `flutter build apk --debug 2>&1 | tail -40`; report the new APK size. Log download and extraction ms with `debugPrint`.
 
-### [ ] T11 (Agent): First-run voice picker
+### [x] T11 (Agent): First-run voice picker
 - Shown on first launch (no saved voice) and from a settings icon on the main screen.
 - Lists catalog voices for the UI language first, then "Más nyelvek" (expandable), and always "Android alapértelmezett". Each row: label, gender, size ("63 MB"), ▶ sample (streams `sampleUrl`; if it fails, show a short "A minta nem érhető el" message; the system voice previews by speaking the catalog's `sampleText` for its language), and a state: *Letöltés* / progress bar + *Mégse* / *Kiválasztva*. Installed voices can be deleted.
 - "Kihagyás" selects the system voice. If the catalog can't be fetched and there's no network, the system voice is still selectable and the screen says downloads need internet.
 - Replaces T8's temporary dropdown. All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (widget test: the picker renders with a fake catalog; skip selects the system voice).
 
-### [ ] T12 (You): Test the first run
+### [x] T12 (You): Test the first run
 1. Uninstall the app from the phone, then `flutter run --profile`.
 2. Airplane mode on: the picker appears, the system voice works, downloads say they need internet.
 3. Network on: preview the samples, download imre (note download + extraction time from the log), select it, speak.
 4. Start downloading berta and cancel halfway. Start again and turn off wifi midway. The app must stay usable and no broken voice may appear.
 5. Close and reopen: the chosen voice is remembered.
+6. Intermittent bug hunt (seen once with `flutter run`: after toggling airplane mode, Android Studio lost the device and the voice unpacking hung ("Telepítés") on every later try). Install a release build (`flutter build apk --release`, `flutter install`) with Android Studio closed. Toggle airplane mode on/off several times, then download a voice and let the screen sleep during the unpack. If it hangs, run `adb logcat -d > log.txt` over USB before restarting anything. "Mégse" must interrupt the unpack, and an unpack stuck for 5 min must end in an error, not spin forever.
 Done → commit.
 
 ### [ ] T13 (Agent): Background synthesis + sentence streaming

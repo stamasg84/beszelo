@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
+import 'ui/voice_picker.dart';
 import 'voices/catalog.dart';
 import 'voices/piper_engine.dart';
 import 'voices/system_engine.dart';
@@ -49,11 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _installer = VoiceInstaller();
   Catalog _catalog = Catalog.empty;
-  InstallCancelToken? _cancelToken;
-  double? _downloadProgress;
 
-  // Temporary: T11 replaces the dropdown with the voice picker.
-  Voice _voice = Voice.systemHu;
+  Voice _voice = Voice.system('hu');
   bool _loading = true;
   bool _busy = false;
   String? _error;
@@ -71,11 +69,32 @@ class _HomeScreenState extends State<HomeScreen> {
     await _installer.cleanupStaging();
     final info = await PackageInfo.fromPlatform();
     _catalog = await CatalogRepository(appVersion: info.version).load();
-    final saved = _catalog.byId(prefs.getString(_prefKey) ?? '');
-    _voice = (saved != null && await _installer.isInstalled(saved.id))
-        ? saved.toVoice()
-        : Voice.systemHu;
+    if (!mounted) return;
+    final uiLang = Localizations.localeOf(context).languageCode;
+    final savedId = prefs.getString(_prefKey);
+    final saved = _catalog.byId(savedId ?? '');
+    if (saved != null && await _installer.isInstalled(saved.id)) {
+      _voice = saved.toVoice();
+    } else if (savedId != null && savedId.startsWith('system-')) {
+      _voice = Voice.system(savedId.substring('system-'.length));
+    } else {
+      _voice = Voice.system(uiLang);
+    }
     await _loadVoice();
+    // First launch: no voice chosen yet.
+    if (savedId == null && mounted) _openPicker(firstRun: true);
+  }
+
+  void _openPicker({bool firstRun = false}) {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => VoicePickerScreen(
+        catalog: _catalog,
+        installer: _installer,
+        selectedId: _voice.id,
+        firstRun: firstRun,
+        onSelect: _selectVoice,
+      ),
+    ));
   }
 
   Future<VoiceEngine> _createEngine(Voice v) async => switch (v.kind) {
@@ -104,48 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
-  Future<void> _selectVoice(Voice? v) async {
-    if (v == null || v.id == _voice.id) return;
-    final entry = _catalog.byId(v.id);
-    if (entry != null && !await _installer.isInstalled(v.id)) {
-      if (!await _download(entry)) return;
-    }
+  Future<void> _selectVoice(Voice v) async {
     _voice = v;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKey, v.id);
     await _loadVoice();
-  }
-
-  /// Returns true when the voice is installed afterwards.
-  Future<bool> _download(CatalogVoice entry) async {
-    final token = InstallCancelToken();
-    setState(() {
-      _cancelToken = token;
-      _downloadProgress = 0;
-      _error = null;
-    });
-    try {
-      await _installer.install(
-        entry,
-        cancel: token,
-        onProgress: (received, total) {
-          if (mounted) setState(() => _downloadProgress = received / total);
-        },
-      );
-      return true;
-    } on InstallCancelledException {
-      return false;
-    } catch (e) {
-      if (mounted) setState(() => _error = '$e');
-      return false;
-    } finally {
-      if (mounted) {
-        setState(() {
-          _cancelToken = null;
-          _downloadProgress = null;
-        });
-      }
-    }
   }
 
   Future<void> _speak() async {
@@ -192,36 +174,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final last = _last;
     const small = TextStyle(fontSize: 12);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Text(l10n.appTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.voiceSettingsTooltip,
+            icon: const Icon(Icons.record_voice_over),
+            onPressed: _openPicker,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DropdownButton<Voice>(
-                value: _voice,
-                isExpanded: true,
-                onChanged: (_loading || _busy || _cancelToken != null)
-                    ? null
-                    : _selectVoice,
-                items: [
-                  for (final v in [
-                    Voice.systemHu,
-                    ..._catalog.forLanguage('hu').map((c) => c.toVoice()),
-                  ])
-                    DropdownMenuItem(value: v, child: Text(v.label)),
-                ],
-              ),
-              if (_downloadProgress != null)
-                Row(children: [
-                  Expanded(
-                      child: LinearProgressIndicator(value: _downloadProgress)),
-                  TextButton(
-                    onPressed: _cancelToken?.cancel,
-                    child: Text(l10n.cancel),
-                  ),
-                ]),
               const SizedBox(height: 12),
               TextField(
                 controller: _controller,
