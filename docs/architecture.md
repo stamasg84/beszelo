@@ -25,7 +25,7 @@ vits-piper-hu_HU-imre-medium/
 Native code (sherpa-onnx/espeak-ng) needs real filesystem paths. Voices are downloaded and extracted into `getApplicationSupportDirectory()/voices/` (see `VoiceInstaller`); nothing is read from Flutter assets. Use `flutter-examples/tts` in https://github.com/k2-fsa/sherpa-onnx as the reference for exact API names. The Dart API has quirks (e.g. the parameter really is spelled `maxNumSenetences`).
 
 ### Threading
-`generate()` is a synchronous FFI call and blocks the isolate it runs on. The prototype may run it on the UI isolate (the screen freezes during synthesis; acceptable for measuring). Later: a long-lived background isolate that owns its own `OfflineTts` instance (FFI pointers can't be sent between isolates), receiving text and returning WAV paths.
+`generate()` is a synchronous FFI call and blocks the isolate it runs on. `PiperEngine` therefore spawns a long-lived background isolate that owns the `OfflineTts` (FFI pointers can't cross isolates): it loads the model, then receives text and returns WAV paths. Requests are handled in order, so one sent mid-load waits for the load. `dispose()` makes the isolate free the model and exit; switching voices = dispose the old engine, create a new one. `SystemEngine` is already async (platform channel).
 
 ## Code layout (target)
 

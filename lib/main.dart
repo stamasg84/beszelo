@@ -108,8 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadVoice() async {
     setState(() => _loading = true);
-    // Let the UI repaint before a blocking model load.
-    await Future<void>.delayed(const Duration(milliseconds: 50));
     _engine?.dispose();
     _engine = null;
     try {
@@ -134,8 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     setState(() => _busy = true);
-    // Let the button repaint as disabled before the blocking synthesis.
-    await Future<void>.delayed(const Duration(milliseconds: 50));
     try {
       final result = await _engine!.synthesizeToWav(text);
       _last = result;
@@ -213,8 +209,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: ready ? _speak : null,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(l10n.speak,
-                        style: const TextStyle(fontSize: 32)),
+                    child: _busy
+                        ? const SizedBox(
+                            height: 44,
+                            width: 44,
+                            child: CircularProgressIndicator(strokeWidth: 4),
+                          )
+                        : Text(l10n.speak,
+                            style: const TextStyle(fontSize: 32)),
                   ),
                 ),
               const SizedBox(height: 8),

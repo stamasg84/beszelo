@@ -31,7 +31,7 @@ Word prediction (Hungarian word endings make typing tiring), Bluetooth speaker a
 - Piper medium runs faster than real time on ordinary phones (estimated RTF ~0.1–0.3 on mid-range; not yet measured), so no strong hardware is needed.
 - **No audio caching for now**: sentences are synthesized on tap. Generation on the Pixel 6a is under ~0.5 s, which is fine even mid-conversation, and skipping the cache saves storage and complexity. Pre-generating/caching WAVs is an optional fallback in `docs/TODO.md` if testing shows noticeable waits on cheap phones.
 - Load the TTS model in the background at app start (loading takes ~1–2 s).
-- For long typed text, synthesize sentence by sentence and start playing the first one right away.
+- Synthesis runs in a background isolate. Typed text is synthesized in one call, without splitting into sentences ourselves (the app isn't for long texts; streaming is in `docs/TODO.md` if cheap phones need it).
 - **First technical prototype**: minimal app that speaks typed text with `imre`, tested on the cheapest Android phone available, to measure real speed.
 
 ## Stack

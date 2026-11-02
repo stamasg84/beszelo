@@ -75,9 +75,11 @@ Done → commit.
 6. Intermittent bug hunt (seen once with `flutter run`: after toggling airplane mode, Android Studio lost the device and the voice unpacking hung ("Telepítés") on every later try). Install a release build (`flutter build apk --release`, `flutter install`) with Android Studio closed. Toggle airplane mode on/off several times, then download a voice and let the screen sleep during the unpack. If it hangs, run `adb logcat -d > log.txt` over USB before restarting anything. "Mégse" must interrupt the unpack, and an unpack stuck for 5 min must end in an error, not spin forever.
 Done → commit.
 
-### [ ] T13 (Agent): Background synthesis + sentence streaming
-- A long-lived background isolate owns the `PiperEngine` (FFI pointers can't cross isolates). The UI sends text and gets WAV paths back. Load the saved voice at app start.
-- Long text: split into sentences (`.`, `!`, `?`, `…`, newlines; keep the punctuation, Piper uses it for intonation), play the first as soon as it's ready, queue the rest.
+### [x] T13 (Agent): Background synthesis
+- A long-lived background isolate owns the `PiperEngine` (FFI pointers can't cross isolates). The UI sends text and gets WAV paths back. Load the saved voice at app start, so loading doesn't freeze the UI either.
+- Switching voices: dispose the old engine in the isolate and load the new one there. Requests that arrive while it's loading wait for the load.
+- The UI stays responsive during synthesis (show a progress indicator on the speak button).
+- No sentence splitting/streaming (decided 2026-11-02, see `docs/TODO.md`): the whole text is synthesized in one call.
 - **Checks:** `flutter analyze`, `flutter test`.
 
 ---
