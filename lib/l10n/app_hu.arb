@@ -72,10 +72,6 @@
   "@systemVoiceInfo": {
     "description": "Subtitle of the system voice row."
   },
-  "skip": "Kihagyás",
-  "@skip": {
-    "description": "First-run button: skip choosing, use the system voice."
-  },
   "download": "Letöltés",
   "@download": {
     "description": "Button that downloads a voice."

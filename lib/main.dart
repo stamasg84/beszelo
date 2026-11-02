@@ -102,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => VoicePickerScreen(
           catalog: _catalog,
           installer: _installer,
-          selectedId: _voice.id,
+          // First run: nothing is selected yet, so every row, including the
+          // system voice, has a button that picks it and closes the picker.
+          selectedId: firstRun ? '' : _voice.id,
           firstRun: firstRun,
           onSelect: _selectVoice,
         ),

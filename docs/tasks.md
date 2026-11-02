@@ -45,6 +45,23 @@ Goal: the real speaking screen. Everything speakable is a sentence list, stored 
 - All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (widget test with an in-memory DB and a fake `Speaker`: tapping a row speaks its text and adds it to history; chips switch lists; ▾ grid shows all lists and picking one shows it).
 
+### [x] T16a (Agent): First-run voice picker closes on selection
+Problem: on first launch the picker (`firstRun: true`) hides the back arrow, so after choosing a voice the only way out is "Kihagyás", which also overrides the choice with the system voice (`_skip` in `lib/ui/voice_picker.dart` calls `_select(_systemVoice)`).
+- First run: choosing a voice closes the picker and returns to the speaking screen. That covers both "Kiválaszt" on an installed/system voice and a finished download (`_download` already calls `_select` on success). Pop only after `onSelect` completes, and only if still `mounted`.
+- Remove the "Kihagyás" button, `_skip`, and the `skip` ARB key (hu + en). The "Android alapértelmezett" row's own select button already does what Kihagyás was for.
+- Leaving with the system back gesture without choosing stays allowed: the system voice is used, nothing is saved, and the picker shows again on the next launch (current `savedId == null` logic in `main.dart`, unchanged).
+- During a download on first run, nothing closes; cancelling the download leaves the picker open.
+- Opened from settings (`firstRun: false`): unchanged (stays open after selecting, back arrow to leave), since there the user may also download or delete voices.
+- **Checks:** `flutter analyze`, `flutter test`. Replace the `skip selects the system voice` test in `test/voice_picker_test.dart` with: first run, select system voice → `onSelect` called once and the picker route is popped; first run, a download finishing → selected and popped; not first run, select → not popped.
+
+### [x] T16b (Agent): Speaking from the history list doesn't reorder it
+Problem: tapping a row in Előzmények calls `addToHistory`, which moves that row to the top, so the list jumps under the user's finger (and a second tap on the same spot hits a different sentence).
+- Rule: **speaking a row while the history list is shown doesn't change history** (no move, no insert). In `_speak` in `lib/ui/speaking_screen.dart`, skip `addToHistory` when the call is a row tap and the current list is the history list. Free text and rows in every other list still call `addToHistory` as before (same text → moves to the top), since the user isn't looking at history then.
+- Free text typed while the history list is shown still goes in at the top (that's a new utterance; a shift there is expected).
+- Accepted trade-off: a phrase repeated only from history can eventually fall off at the 30 cap. That's fine; frequently used phrases belong in a real list ("Mentés listába", T18).
+- Add the rule as one sentence to the "History:" paragraph in architecture.md.
+- **Checks:** `flutter analyze`, `flutter test` (widget test: with history showing A, B, C (A newest), tapping C speaks C and the order stays A, B, C; tapping a row in Alap that matches C moves C to the top; free text while history is shown is added at the top).
+
 ### [ ] T17 (You): Try the speaking screen
 1. Uninstall the app (fresh DB), `flutter run --profile`.
 2. Use the Alap list for a few minutes as if you couldn't speak: are rows big enough, is anything missing or unnatural in the default phrases? Note changes to make in `assets/seed/hu.json`.

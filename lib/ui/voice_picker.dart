@@ -79,7 +79,7 @@ class VoicePickerScreen extends StatefulWidget {
   /// Makes [voice] the active voice (saves it and loads the engine).
   final Future<void> Function(Voice voice) onSelect;
 
-  /// Shows the "Kihagyás" button.
+  /// First launch: hides the back arrow and closes after a voice is chosen.
   final bool firstRun;
   final VoicePreviewer? previewer;
 
@@ -128,6 +128,7 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
   Future<void> _select(Voice v) async {
     setState(() => _selectedId = v.id);
     await widget.onSelect(v);
+    if (widget.firstRun && mounted) Navigator.of(context).pop();
   }
 
   Future<void> _download(CatalogVoice v) async {
@@ -181,11 +182,6 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
         () => _sampleError = AppLocalizations.of(context).sampleUnavailable,
       );
     }
-  }
-
-  Future<void> _skip() async {
-    await _select(_systemVoice);
-    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -251,15 +247,6 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
                 initiallyExpanded: _showOthers,
                 onExpansionChanged: (e) => _showOthers = e,
                 children: [for (final v in others) _catalogRow(v, l10n)],
-              ),
-            if (widget.firstRun)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: TextButton(
-                  key: const Key('skip'),
-                  onPressed: _downloadingId == null ? _skip : null,
-                  child: Text(l10n.skip, style: const TextStyle(fontSize: 20)),
-                ),
               ),
           ],
         ),

@@ -29,6 +29,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   late final Stream<List<SentenceList>> _lists;
   Stream<List<Sentence>>? _sentences;
   int? _currentId;
+  bool _currentIsHistory = false;
   int? _tappedId;
   bool _expanded = false;
 
@@ -47,12 +48,14 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
         lists.where((l) => l.seedKey == 'everyday').firstOrNull ??
         lists.firstOrNull;
     if (!mounted || initial == null) return;
-    _showList(initial.id, remember: false);
+    _showList(initial, remember: false);
   }
 
-  void _showList(int id, {bool remember = true}) {
+  void _showList(SentenceList list, {bool remember = true}) {
+    final id = list.id;
     setState(() {
       _currentId = id;
+      _currentIsHistory = list.kind == ListKind.history;
       _sentences = widget.repo.watchSentences(id);
       _expanded = false;
     });
@@ -63,7 +66,10 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
     final speaker = widget.speaker;
     if (!speaker.ready || text.trim().isEmpty) return;
     setState(() => _tappedId = rowId);
-    unawaited(widget.repo.addToHistory(text));
+    // Tapping a row in the history list must not reorder it under the finger.
+    if (rowId == null || !_currentIsHistory) {
+      unawaited(widget.repo.addToHistory(text));
+    }
     await speaker.speak(text);
     if (mounted) setState(() => _tappedId = null);
   }
@@ -148,7 +154,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                           vertical: 12,
                         ),
                         selected: l.id == _currentId,
-                        onSelected: (_) => _showList(l.id),
+                        onSelected: (_) => _showList(l),
                       ),
                     ),
                 ],
@@ -183,7 +189,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                         .primaryContainer,
                   )
                 : null,
-            onPressed: () => _showList(l.id),
+            onPressed: () => _showList(l),
             child: Text(
               _title(l10n, l),
               textAlign: TextAlign.center,

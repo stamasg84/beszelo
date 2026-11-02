@@ -56,6 +56,7 @@ void main() {
   late AppDatabase db;
   late ListsRepository repo;
   late _FakeSpeaker speaker;
+  WidgetTester? tester0;
 
   setUp(() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -106,6 +107,53 @@ void main() {
       return repo.watchSentences(history.id).first;
     });
     expect(rows!.map((s) => s.body), ['Kérek vizet!']);
+    await finish(tester);
+  });
+
+  Future<List<String>> historyBodies() async =>
+      (await tester0!.runAsync(() async {
+        final history = (await repo.watchLists().first).firstWhere(
+          (l) => l.kind == ListKind.history,
+        );
+        return (await repo.watchSentences(history.id).first)
+            .map((s) => s.body)
+            .toList();
+      }))!;
+
+  testWidgets('history: row tap leaves order; other lists and free text '
+      'move to top', (tester) async {
+    tester0 = tester;
+    await tester.runAsync(() async {
+      await repo.addToHistory('C');
+      await repo.addToHistory('B');
+      await repo.addToHistory('A');
+    });
+    await pumpScreen(tester);
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Előzmények'));
+    await settle(tester);
+    expect(await historyBodies(), ['A', 'B', 'C']);
+
+    await tester.tap(find.text('C'));
+    await settle(tester);
+    expect(speaker.spoken, ['C']);
+    expect(await historyBodies(), ['A', 'B', 'C']);
+
+    // Free text while history is shown goes in at the top.
+    await tester.enterText(find.byType(TextField), 'Új');
+    await tester.pump();
+    await tester.tap(find.text('Mondd'));
+    await settle(tester);
+    expect(await historyBodies(), ['Új', 'A', 'B', 'C']);
+
+    // A row in another list moves a matching history entry to the top.
+    await tester.runAsync(() => repo.addToHistory('Kérek vizet!'));
+    await tester.runAsync(() => repo.addToHistory('Új'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Alap'));
+    await settle(tester);
+    await tester.tap(find.text('Kérek vizet!'));
+    await settle(tester);
+    expect((await historyBodies()).first, 'Kérek vizet!');
+    tester0 = null;
     await finish(tester);
   });
 

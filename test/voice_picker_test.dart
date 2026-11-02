@@ -37,6 +37,22 @@ CatalogVoice cv(String id, String lang, VoiceGender g) => CatalogVoice(
   minAppVersion: '1.0.0',
 );
 
+class _InstantInstaller extends VoiceInstaller {
+  _InstantInstaller(Directory root) : super(root: root);
+  final done = <String>{};
+  @override
+  Future<bool> isInstalled(String id) async => done.contains(id);
+  @override
+  Future<void> install(
+    CatalogVoice voice, {
+    void Function(int received, int total)? onProgress,
+    InstallCancelToken? cancel,
+    void Function(InstallStage stage)? onStage,
+  }) async {
+    done.add(voice.id);
+  }
+}
+
 void main() {
   final catalog = Catalog(
     voices: [
@@ -47,7 +63,11 @@ void main() {
     sampleText: const {'hu': 'Szia, ez egy minta.'},
   );
 
-  Future<(FakePreviewer, List<Voice>)> pump(WidgetTester tester) async {
+  Future<(FakePreviewer, List<Voice>)> pump(
+    WidgetTester tester, {
+    bool firstRun = true,
+    bool instantInstall = false,
+  }) async {
     final previewer = FakePreviewer();
     final selected = <Voice>[];
     final dir = Directory.systemTemp.createTempSync('picker');
@@ -57,11 +77,19 @@ void main() {
         locale: const Locale('hu'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: VoicePickerScreen(
+        home: const Scaffold(body: Text('home')),
+      ),
+    );
+    final nav = tester.state<NavigatorState>(find.byType(Navigator));
+    nav.push(
+      MaterialPageRoute<void>(
+        builder: (_) => VoicePickerScreen(
           catalog: catalog,
-          installer: VoiceInstaller(root: dir),
+          installer: instantInstall
+              ? _InstantInstaller(dir)
+              : VoiceInstaller(root: dir),
           selectedId: '',
-          firstRun: true,
+          firstRun: firstRun,
           previewer: previewer,
           onSelect: (v) async => selected.add(v),
         ),
@@ -83,11 +111,49 @@ void main() {
     expect(find.text('Letöltés'), findsNWidgets(2));
   });
 
-  testWidgets('skip selects the system voice', (tester) async {
+  testWidgets('first run: selecting the system voice closes the picker', (
+    tester,
+  ) async {
     final (_, selected) = await pump(tester);
-    await tester.tap(find.byKey(const Key('skip')));
+    expect(find.byKey(const Key('skip')), findsNothing);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('voice-system')),
+        matching: find.text('Kiválasztás'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(selected.single.kind, VoiceKind.system);
+    expect(find.byType(VoicePickerScreen), findsNothing);
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('first run: a finished download selects the voice and closes', (
+    tester,
+  ) async {
+    final (_, selected) = await pump(tester, instantInstall: true);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('voice-imre')),
+        matching: find.text('Letöltés'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(selected.single.id, 'imre');
+    expect(find.byType(VoicePickerScreen), findsNothing);
+  });
+
+  testWidgets('not first run: selecting keeps the picker open', (tester) async {
+    final (_, selected) = await pump(tester, firstRun: false);
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('voice-system')),
+        matching: find.text('Kiválasztás'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(selected.single.kind, VoiceKind.system);
+    expect(find.byType(VoicePickerScreen), findsOneWidget);
   });
 
   testWidgets('system preview speaks the sample text; failed sample shows '

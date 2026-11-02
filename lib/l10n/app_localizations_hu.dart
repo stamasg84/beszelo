@@ -56,9 +56,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get systemVoiceInfo => 'Azonnal működik, internet nélkül is';
 
   @override
-  String get skip => 'Kihagyás';
-
-  @override
   String get download => 'Letöltés';
 
   @override

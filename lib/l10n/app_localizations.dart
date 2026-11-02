@@ -182,12 +182,6 @@ abstract class AppLocalizations {
   /// **'Azonnal működik, internet nélkül is'**
   String get systemVoiceInfo;
 
-  /// First-run button: skip choosing, use the system voice.
-  ///
-  /// In hu, this message translates to:
-  /// **'Kihagyás'**
-  String get skip;
-
   /// Button that downloads a voice.
   ///
   /// In hu, this message translates to:

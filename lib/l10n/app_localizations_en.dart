@@ -56,9 +56,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemVoiceInfo => 'Works right away, even offline';
 
   @override
-  String get skip => 'Skip';
-
-  @override
   String get download => 'Download';
 
   @override
