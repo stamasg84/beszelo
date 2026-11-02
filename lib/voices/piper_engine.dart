@@ -87,13 +87,13 @@ class PiperEngine implements VoiceEngine {
       case _LoadFailedMessage m:
         _ready?.completeError(StateError(m.error));
       case _SynthDone m:
-        _pending.remove(m.id)?.complete(SynthResult(
-              m.path,
-              m.synthMs,
-              m.audioMs,
-            ));
-        debugPrint('TTS synth: ${m.synthMs} ms for ${m.audioMs} ms of audio '
-            '(RTF ${(m.synthMs / (m.audioMs == 0 ? 1 : m.audioMs)).toStringAsFixed(2)})');
+        _pending
+            .remove(m.id)
+            ?.complete(SynthResult(m.path, m.synthMs, m.audioMs));
+        debugPrint(
+          'TTS synth: ${m.synthMs} ms for ${m.audioMs} ms of audio '
+          '(RTF ${(m.synthMs / (m.audioMs == 0 ? 1 : m.audioMs)).toStringAsFixed(2)})',
+        );
       case _SynthFailed m:
         _pending.remove(m.id)?.completeError(StateError(m.error));
     }
@@ -197,18 +197,20 @@ void _isolateMain(_InitMessage init) {
   try {
     final sw = Stopwatch()..start();
     sherpa.initBindings();
-    tts = sherpa.OfflineTts(sherpa.OfflineTtsConfig(
-      model: sherpa.OfflineTtsModelConfig(
-        vits: sherpa.OfflineTtsVitsModelConfig(
-          model: init.modelPath,
-          tokens: init.tokensPath,
-          dataDir: init.espeakDataDir,
-          lengthScale: init.lengthScale,
+    tts = sherpa.OfflineTts(
+      sherpa.OfflineTtsConfig(
+        model: sherpa.OfflineTtsModelConfig(
+          vits: sherpa.OfflineTtsVitsModelConfig(
+            model: init.modelPath,
+            tokens: init.tokensPath,
+            dataDir: init.espeakDataDir,
+            lengthScale: init.lengthScale,
+          ),
+          numThreads: 2,
+          debug: false,
         ),
-        numThreads: 2,
-        debug: false,
       ),
-    ));
+    );
     init.reply.send(_LoadedMessage(sw.elapsedMilliseconds));
   } catch (e) {
     init.reply.send(_LoadFailedMessage('$e'));

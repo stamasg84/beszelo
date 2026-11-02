@@ -26,5 +26,10 @@
   "genderMale": "male",
   "genderFemale": "female",
   "voiceSizeMb": "{mb} MB",
-  "installing": "Installing… (this can take a while)"
+  "installing": "Installing… (this can take a while)",
+  "historyTitle": "History",
+  "allLists": "All lists",
+  "editTooltip": "Edit",
+  "editComingSoon": "Editing is coming soon.",
+  "emptyListHint": "This list is empty. Edit: ✎"
 }

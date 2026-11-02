@@ -10,22 +10,21 @@ import 'package:mondom/storage/seed.dart';
 Future<Seed> _fileSeed(String lang) async {
   final f = File('assets/seed/$lang.json');
   if (!f.existsSync()) throw Exception('no seed $lang');
-  return Seed.fromJson(jsonDecode(f.readAsStringSync()) as Map<String, dynamic>);
+  return Seed.fromJson(
+    jsonDecode(f.readAsStringSync()) as Map<String, dynamic>,
+  );
 }
 
-AppDatabase _open(String lang) => AppDatabase(
-      NativeDatabase.memory(),
-      language: lang,
-      loadSeed: _fileSeed,
-    );
+AppDatabase _open(String lang) =>
+    AppDatabase(NativeDatabase.memory(), language: lang, loadSeed: _fileSeed);
 
 void main() {
   late AppDatabase db;
   late ListsRepository repo;
 
-  Future<SentenceList> listByKey(String key) => (db.select(db.sentenceLists)
-        ..where((l) => l.seedKey.equals(key)))
-      .getSingle();
+  Future<SentenceList> listByKey(String key) => (db.select(
+    db.sentenceLists,
+  )..where((l) => l.seedKey.equals(key))).getSingle();
   Future<List<Sentence>> sentencesOf(int id) async =>
       (await repo.watchSentences(id).first);
 
@@ -37,8 +36,11 @@ void main() {
 
   test('seeds hu, with history list', () async {
     final lists = await repo.watchLists().first;
-    expect(lists.map((l) => l.seedKey),
-        ['everyday', 'example-conversation', 'history']);
+    expect(lists.map((l) => l.seedKey), [
+      'everyday',
+      'example-conversation',
+      'history',
+    ]);
     expect(lists.first.title, 'Alap');
     expect(lists.first.pinned, isTrue);
     expect(lists[1].kind, ListKind.conversation);
@@ -116,7 +118,8 @@ void main() {
   test('restore leaves user-added sentences alone', () async {
     final e = await listByKey('everyday');
     await repo.addSentences(e.id, ['Saját mondat.']);
-    final water = (await sentencesOf(e.id)).firstWhere((x) => x.seedKey == 'water');
+    final water = (await sentencesOf(e.id))
+        .firstWhere((x) => x.seedKey == 'water');
     await repo.deleteSentence(water.id);
     await repo.restoreDefaultSentences(e.id);
     final s = await sentencesOf(e.id);
@@ -138,9 +141,9 @@ void main() {
   test('deleting a list cascades its sentences', () async {
     final c = await listByKey('example-conversation');
     await repo.deleteList(c.id);
-    final left = await (db.select(db.sentences)
-          ..where((s) => s.listId.equals(c.id)))
-        .get();
+    final left = await (db.select(
+      db.sentences,
+    )..where((s) => s.listId.equals(c.id))).get();
     expect(left, isEmpty);
   });
 
@@ -154,8 +157,13 @@ void main() {
     final id = await repo.createList('Orvos');
     final ids = await repo.addSentences(id, ['A.', 'B.', 'C.']);
     await repo.addSentences(id, ['X.', ' ', 'Y.'], at: 1);
-    expect((await sentencesOf(id)).map((s) => s.body),
-        ['A.', 'X.', 'Y.', 'B.', 'C.']);
+    expect((await sentencesOf(id)).map((s) => s.body), [
+      'A.',
+      'X.',
+      'Y.',
+      'B.',
+      'C.',
+    ]);
     await repo.reorderSentences(id, [ids[2], ids[0]]);
     expect((await sentencesOf(id)).map((s) => s.body).take(2), ['C.', 'A.']);
     final other = await repo.createList('Éjszaka');

@@ -31,18 +31,18 @@ class Seed {
 
   /// Format: see docs/architecture.md "Storage".
   factory Seed.fromJson(Map<String, dynamic> json) => Seed([
-        for (final l in json['lists'] as List)
-          SeedList(
-            seedKey: l['seedKey'] as String,
-            title: l['title'] as String,
-            kind: ListKind.values.byName(l['kind'] as String),
-            pinned: l['pinned'] as bool? ?? false,
-            sentences: [
-              for (final s in l['sentences'] as List)
-                SeedSentence(s['seedKey'] as String, s['text'] as String),
-            ],
-          ),
-      ]);
+    for (final l in json['lists'] as List)
+      SeedList(
+        seedKey: l['seedKey'] as String,
+        title: l['title'] as String,
+        kind: ListKind.values.byName(l['kind'] as String),
+        pinned: l['pinned'] as bool? ?? false,
+        sentences: [
+          for (final s in l['sentences'] as List)
+            SeedSentence(s['seedKey'] as String, s['text'] as String),
+        ],
+      ),
+  ]);
 }
 
 /// Loads the seed for a language code; throws if there is none.

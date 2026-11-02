@@ -44,29 +44,29 @@ class CatalogVoice {
   final String minAppVersion;
 
   factory CatalogVoice.fromJson(Map<String, dynamic> j) => CatalogVoice(
-        id: j['id'] as String,
-        language: j['language'] as String,
-        gender: VoiceGender.values.firstWhere(
-          (g) => g.name == j['gender'],
-          orElse: () => VoiceGender.unknown,
-        ),
-        label: j['label'] as String,
-        url: j['url'] as String,
-        sizeBytes: j['sizeBytes'] as int,
-        sha256: (j['sha256'] as String).toLowerCase(),
-        modelFile: j['modelFile'] as String,
-        sampleUrl: j['sampleUrl'] as String,
-        license: j['license'] as String,
-        minAppVersion: j['minAppVersion'] as String? ?? '0.0.0',
-      );
+    id: j['id'] as String,
+    language: j['language'] as String,
+    gender: VoiceGender.values.firstWhere(
+      (g) => g.name == j['gender'],
+      orElse: () => VoiceGender.unknown,
+    ),
+    label: j['label'] as String,
+    url: j['url'] as String,
+    sizeBytes: j['sizeBytes'] as int,
+    sha256: (j['sha256'] as String).toLowerCase(),
+    modelFile: j['modelFile'] as String,
+    sampleUrl: j['sampleUrl'] as String,
+    license: j['license'] as String,
+    minAppVersion: j['minAppVersion'] as String? ?? '0.0.0',
+  );
 
   Voice toVoice() => Voice(
-        id: id,
-        languageCode: language,
-        gender: gender,
-        label: label,
-        kind: VoiceKind.piper,
-      );
+    id: id,
+    languageCode: language,
+    gender: gender,
+    label: label,
+    kind: VoiceKind.piper,
+  );
 }
 
 class Catalog {
@@ -102,8 +102,9 @@ class Catalog {
           // Skip one broken entry, keep the rest.
         }
       }
-      final text = (json['sampleText'] as Map<String, dynamic>? ?? {})
-          .map((k, v) => MapEntry(k, v as String));
+      final text = (json['sampleText'] as Map<String, dynamic>? ?? {}).map(
+        (k, v) => MapEntry(k, v as String),
+      );
       return Catalog(voices: voices, sampleText: text);
     } catch (_) {
       return null;
@@ -142,9 +143,9 @@ class CatalogRepository {
     this.url = catalogUrl,
     this.timeout = const Duration(seconds: 5),
     Future<String> Function()? loadBundled,
-  })  : _client = client ?? http.Client(),
-        _loadBundled =
-            loadBundled ?? (() => rootBundle.loadString(bundledCatalogAsset));
+  }) : _client = client ?? http.Client(),
+       _loadBundled =
+           loadBundled ?? (() => rootBundle.loadString(bundledCatalogAsset));
 
   final String appVersion;
   final String url;
@@ -156,17 +157,21 @@ class CatalogRepository {
     try {
       final res = await _client.get(Uri.parse(url)).timeout(timeout);
       if (res.statusCode == 200) {
-        final catalog =
-            Catalog.parse(utf8.decode(res.bodyBytes), appVersion: appVersion);
+        final catalog = Catalog.parse(
+          utf8.decode(res.bodyBytes),
+          appVersion: appVersion,
+        );
         if (catalog != null) return catalog;
       }
     } catch (e) {
       debugPrint('Remote catalog unavailable, using bundled copy: $e');
     }
-    final bundled =
-        Catalog.parse(await _loadBundled(), appVersion: appVersion);
+    final bundled = Catalog.parse(await _loadBundled(), appVersion: appVersion);
     if (bundled == null) return Catalog.empty;
     return Catalog(
-        voices: bundled.voices, sampleText: bundled.sampleText, isBundled: true);
+      voices: bundled.voices,
+      sampleText: bundled.sampleText,
+      isBundled: true,
+    );
   }
 }

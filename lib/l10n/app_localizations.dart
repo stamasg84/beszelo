@@ -259,6 +259,36 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Telepítés… (ez eltarthat egy ideig)'**
   String get installing;
+
+  /// Title of the automatic history list (chip and list grid).
+  ///
+  /// In hu, this message translates to:
+  /// **'Előzmények'**
+  String get historyTitle;
+
+  /// Tooltip of the ▾ button that shows all lists.
+  ///
+  /// In hu, this message translates to:
+  /// **'Összes lista'**
+  String get allLists;
+
+  /// Tooltip of the app bar icon that opens the list editor.
+  ///
+  /// In hu, this message translates to:
+  /// **'Szerkesztés'**
+  String get editTooltip;
+
+  /// Temporary message until the editing screen exists.
+  ///
+  /// In hu, this message translates to:
+  /// **'A szerkesztés hamarosan elérhető.'**
+  String get editComingSoon;
+
+  /// Hint shown in an empty sentence list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Ez a lista üres. Szerkesztés: ✎'**
+  String get emptyListHint;
 }
 
 class _AppLocalizationsDelegate

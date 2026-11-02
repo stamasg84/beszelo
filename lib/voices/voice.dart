@@ -29,11 +29,10 @@ class Voice {
   /// The system voice for [languageCode]. The label is a placeholder; UI
   /// shows a localized name.
   factory Voice.system(String languageCode) => Voice(
-        id: 'system-$languageCode',
-        languageCode: languageCode,
-        gender: VoiceGender.unknown,
-        label: 'Android',
-        kind: VoiceKind.system,
-      );
-
+    id: 'system-$languageCode',
+    languageCode: languageCode,
+    gender: VoiceGender.unknown,
+    label: 'Android',
+    kind: VoiceKind.system,
+  );
 }

@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
 import 'speech/speaker.dart';
+import 'storage/database.dart';
+import 'storage/lists_repository.dart';
+import 'ui/speaking_screen.dart';
 import 'ui/voice_picker.dart';
 import 'voices/catalog.dart';
 import 'voices/piper_engine.dart';
@@ -15,7 +18,10 @@ import 'voices/voice_installer.dart';
 void main() => runApp(const MondomApp());
 
 class MondomApp extends StatelessWidget {
-  const MondomApp({super.key});
+  const MondomApp({super.key, this.home = const HomeScreen()});
+
+  /// Overridable for tests.
+  final Widget home;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,7 @@ class MondomApp extends StatelessWidget {
           ? const Locale('hu')
           : const Locale('en'),
       theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
-      home: const HomeScreen(),
+      home: home,
     );
   }
 }
@@ -45,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
   static const _prefKey = 'voiceId';
 
   late final Speaker _speaker;
-  final _controller = TextEditingController();
+  AppDatabase? _db;
+  ListsRepository? _repo;
 
   final _installer = VoiceInstaller();
   Catalog _catalog = Catalog.empty;
@@ -62,6 +69,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    final db = AppDatabase.open(
+      language: Localizations.localeOf(context).languageCode,
+    );
+    setState(() {
+      _db = db;
+      _repo = ListsRepository(db);
+    });
     await _installer.cleanupStaging();
     final info = await PackageInfo.fromPlatform();
     _catalog = await CatalogRepository(appVersion: info.version).load();
@@ -113,108 +128,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _db?.close();
     _speaker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final speaker = _speaker;
-    final ready = speaker.ready;
-    final last = speaker.lastResult;
-    final error = speaker.error;
-    const small = TextStyle(fontSize: 12);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.voiceSettingsTooltip,
-            icon: const Icon(Icons.record_voice_over),
-            onPressed: _openPicker,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 12),
-              TextField(
-                controller: _controller,
-                minLines: 4,
-                maxLines: 8,
-                style: const TextStyle(fontSize: 26),
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  hintText: l10n.textHint,
-                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _controller,
-                    builder: (context, value, _) => value.text.isEmpty
-                        ? const SizedBox.shrink()
-                        : IconButton(
-                            iconSize: 36,
-                            tooltip: l10n.clearText,
-                            icon: const Icon(Icons.close),
-                            onPressed: _controller.clear,
-                          ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (speaker.loading)
-                Center(
-                  child: Text(
-                    l10n.loading,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                )
-              else
-                FilledButton(
-                  onPressed: ready
-                      ? () => speaker.speak(_controller.text)
-                      : null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: speaker.busy
-                        ? const SizedBox(
-                            height: 44,
-                            width: 44,
-                            child: CircularProgressIndicator(strokeWidth: 4),
-                          )
-                        : Text(
-                            l10n.speak,
-                            style: const TextStyle(fontSize: 32),
-                          ),
-                  ),
-                ),
-              const SizedBox(height: 12),
-              Text(l10n.modelLoadTime(speaker.loadMs), style: small),
-              if (last != null)
-                Text(
-                  speaker.lastReplayed
-                      ? l10n.replayed
-                      : l10n.synthesisStats(
-                          last.synthMs,
-                          last.audioMs,
-                          last.rtf.toStringAsFixed(2),
-                        ),
-                  style: small,
-                ),
-              if (error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(error, style: const TextStyle(color: Colors.red)),
-                ),
-            ],
-          ),
-        ),
-      ),
+    final repo = _repo;
+    if (repo == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return SpeakingScreen(
+      speaker: _speaker,
+      repo: repo,
+      onOpenVoicePicker: _openPicker,
     );
   }
 }

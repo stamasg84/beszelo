@@ -1,0 +1,157 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mondom/main.dart';
+import 'package:mondom/speech/speaker.dart';
+import 'package:mondom/storage/database.dart';
+import 'package:mondom/storage/lists_repository.dart';
+import 'package:mondom/storage/seed.dart';
+import 'package:mondom/ui/speaking_screen.dart';
+import 'package:mondom/voices/voice.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class _FakeSpeaker extends Speaker {
+  _FakeSpeaker()
+    : super(
+        engineFactory: (Voice _) async => throw UnimplementedError(),
+        player: _NoPlayer(),
+      );
+  final spoken = <String>[];
+  @override
+  bool get ready => true;
+  @override
+  bool get loading => false;
+  @override
+  Future<void> speak(String text) async => spoken.add(text);
+}
+
+class _NoPlayer implements WavPlayer {
+  @override
+  Future<void> play(String path) async {}
+  @override
+  Future<void> stop() async {}
+  @override
+  void dispose() {}
+}
+
+Future<Seed> _fileSeed(String lang) async => Seed.fromJson(
+  jsonDecode(File('assets/seed/$lang.json').readAsStringSync())
+      as Map<String, dynamic>,
+);
+
+Future<void> settle(WidgetTester tester) async {
+  for (var i = 0; i < 5; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+  }
+}
+
+void main() {
+  late AppDatabase db;
+  late ListsRepository repo;
+  late _FakeSpeaker speaker;
+
+  setUp(() {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    SharedPreferences.setMockInitialValues({});
+    db = AppDatabase(
+      NativeDatabase.memory(),
+      language: 'hu',
+      loadSeed: _fileSeed,
+    );
+    repo = ListsRepository(db);
+    speaker = _FakeSpeaker();
+  });
+
+  // Disposes the tree so drift's stream timers are gone before the test ends.
+  Future<void> finish(WidgetTester tester) async {
+    await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+  }
+
+  Future<void> pumpScreen(WidgetTester tester) async {
+    tester.platformDispatcher.localesTestValue = const [Locale('hu', 'HU')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    await tester.pumpWidget(
+      MondomApp(
+        home: SpeakingScreen(speaker: speaker, repo: repo),
+      ),
+    );
+    await settle(tester);
+  }
+
+  testWidgets('opens on everyday list; tapping a row speaks and logs history', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    expect(find.text('Kérek vizet!'), findsOneWidget);
+
+    await tester.tap(find.text('Kérek vizet!'));
+    await settle(tester);
+    expect(speaker.spoken, ['Kérek vizet!']);
+
+    final rows = await tester.runAsync(() async {
+      final history = (await repo.watchLists().first).firstWhere(
+        (l) => l.kind == ListKind.history,
+      );
+      return repo.watchSentences(history.id).first;
+    });
+    expect(rows!.map((s) => s.body), ['Kérek vizet!']);
+    await finish(tester);
+  });
+
+  testWidgets('chips switch lists; grid shows all lists', (tester) async {
+    await pumpScreen(tester);
+    // Pinned: Alap + Előzmények; the example conversation is not a chip.
+    expect(find.widgetWithText(ChoiceChip, 'Alap'), findsOneWidget);
+    expect(find.widgetWithText(ChoiceChip, 'Előzmények'), findsOneWidget);
+    expect(find.widgetWithText(ChoiceChip, 'Példa beszélgetés'), findsNothing);
+
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Előzmények'));
+    await settle(tester);
+    expect(find.text('Kérek vizet!'), findsNothing);
+    expect(find.textContaining('Ez a lista üres'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Összes lista'));
+    await tester.pump();
+    expect(
+      find.widgetWithText(FilledButton, 'Példa beszélgetés'),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Példa beszélgetés'));
+    await settle(tester);
+    // Grid closed; the unpinned list is now a temporary chip.
+    expect(
+      find.widgetWithText(ChoiceChip, 'Példa beszélgetés'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(FilledButton, 'Példa beszélgetés'),
+      findsNothing,
+    );
+    await finish(tester);
+  });
+
+  testWidgets('free text: Mondd speaks, ✕ clears', (tester) async {
+    await pumpScreen(tester);
+    await tester.enterText(find.byType(TextField), 'Szia!');
+    await tester.pump();
+    await tester.tap(find.text('Mondd'));
+    await settle(tester);
+    expect(speaker.spoken, ['Szia!']);
+    expect(find.text('Szia!'), findsOneWidget); // text stays for repeat
+    await tester.tap(find.byTooltip('Szöveg törlése'));
+    await tester.pump();
+    expect(find.text('Szia!'), findsNothing);
+    await finish(tester);
+  });
+}

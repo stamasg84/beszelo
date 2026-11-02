@@ -24,18 +24,18 @@ class FakePreviewer implements VoicePreviewer {
 }
 
 CatalogVoice cv(String id, String lang, VoiceGender g) => CatalogVoice(
-      id: id,
-      language: lang,
-      gender: g,
-      label: id,
-      url: 'https://example.com/$id.tar.bz2',
-      sizeBytes: 63000000,
-      sha256: 'ab' * 32,
-      modelFile: '$id.onnx',
-      sampleUrl: 'https://example.com/$id.wav',
-      license: 'MIT',
-      minAppVersion: '1.0.0',
-    );
+  id: id,
+  language: lang,
+  gender: g,
+  label: id,
+  url: 'https://example.com/$id.tar.bz2',
+  sizeBytes: 63000000,
+  sha256: 'ab' * 32,
+  modelFile: '$id.onnx',
+  sampleUrl: 'https://example.com/$id.wav',
+  license: 'MIT',
+  minAppVersion: '1.0.0',
+);
 
 void main() {
   final catalog = Catalog(
@@ -52,25 +52,28 @@ void main() {
     final selected = <Voice>[];
     final dir = Directory.systemTemp.createTempSync('picker');
     addTearDown(() => dir.deleteSync(recursive: true));
-    await tester.pumpWidget(MaterialApp(
-      locale: const Locale('hu'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: VoicePickerScreen(
-        catalog: catalog,
-        installer: VoiceInstaller(root: dir),
-        selectedId: '',
-        firstRun: true,
-        previewer: previewer,
-        onSelect: (v) async => selected.add(v),
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('hu'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: VoicePickerScreen(
+          catalog: catalog,
+          installer: VoiceInstaller(root: dir),
+          selectedId: '',
+          firstRun: true,
+          previewer: previewer,
+          onSelect: (v) async => selected.add(v),
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
     return (previewer, selected);
   }
 
-  testWidgets('renders system voice, UI-language voices, other languages',
-      (tester) async {
+  testWidgets('renders system voice, UI-language voices, other languages', (
+    tester,
+  ) async {
     await pump(tester);
     expect(find.text('Android alapértelmezett'), findsOneWidget);
     expect(find.text('imre'), findsOneWidget);
@@ -90,15 +93,21 @@ void main() {
   testWidgets('system preview speaks the sample text; failed sample shows '
       'message', (tester) async {
     final (previewer, _) = await pump(tester);
-    await tester.tap(find.descendant(
+    await tester.tap(
+      find.descendant(
         of: find.byKey(const Key('voice-system')),
-        matching: find.byIcon(Icons.play_circle_outline)));
+        matching: find.byIcon(Icons.play_circle_outline),
+      ),
+    );
     await tester.pump();
     expect(previewer.spoken, ['Szia, ez egy minta.']);
 
-    await tester.tap(find.descendant(
+    await tester.tap(
+      find.descendant(
         of: find.byKey(const Key('voice-imre')),
-        matching: find.byIcon(Icons.play_circle_outline)));
+        matching: find.byIcon(Icons.play_circle_outline),
+      ),
+    );
     await tester.pump();
     expect(find.text('A minta nem érhető el'), findsOneWidget);
   });

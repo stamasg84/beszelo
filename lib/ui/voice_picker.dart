@@ -28,8 +28,9 @@ class DefaultVoicePreviewer implements VoicePreviewer {
   Future<bool> playSample(String url) async {
     try {
       await stop();
-      final res =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      final res = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 10));
       if (res.statusCode != 200 || res.bodyBytes.isEmpty) return false;
       await _player.play(BytesSource(res.bodyBytes));
       return true;
@@ -176,8 +177,9 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
     setState(() => _sampleError = null);
     final ok = await play();
     if (!ok && mounted) {
-      setState(() =>
-          _sampleError = AppLocalizations.of(context).sampleUnavailable);
+      setState(
+        () => _sampleError = AppLocalizations.of(context).sampleUnavailable,
+      );
     }
   }
 
@@ -191,8 +193,9 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
     final l10n = AppLocalizations.of(context);
     final lang = _uiLanguage;
     final mine = widget.catalog.forLanguage(lang);
-    final others =
-        widget.catalog.voices.where((v) => v.language != lang).toList();
+    final others = widget.catalog.voices
+        .where((v) => v.language != lang)
+        .toList();
     final sample = widget.catalog.sampleText[lang];
     final system = _systemVoice;
 
@@ -213,16 +216,18 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
             if (_message != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(_message!,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error)),
+                child: Text(
+                  _message!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ),
             if (_sampleError != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(_sampleError!,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error)),
+                child: Text(
+                  _sampleError!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ),
             _row(
               key: const Key('voice-system'),
@@ -263,9 +268,9 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
   }
 
   Widget _selectedLabel(AppLocalizations l10n) => Chip(
-        avatar: const Icon(Icons.check, size: 18),
-        label: Text(l10n.selected),
-      );
+    avatar: const Icon(Icons.check, size: 18),
+    label: Text(l10n.selected),
+  );
 
   Widget _catalogRow(CatalogVoice v, AppLocalizations l10n) {
     final installed = _installed.contains(v.id);
@@ -340,8 +345,8 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
               children: [
                 IconButton(
                   iconSize: 36,
-                  tooltip: playTooltip ??
-                      AppLocalizations.of(context).playSample,
+                  tooltip:
+                      playTooltip ?? AppLocalizations.of(context).playSample,
                   icon: const Icon(Icons.play_circle_outline),
                   onPressed: onPlay,
                 ),

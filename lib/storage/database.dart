@@ -39,8 +39,8 @@ class Sentences extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {listId, seedKey},
-      ];
+    {listId, seedKey},
+  ];
 }
 
 /// Key/value store for things that belong to the DB itself.
@@ -73,29 +73,29 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-          final (seedLanguage, seed) = await resolveSeed(language);
-          await into(appMeta).insert(
-            AppMetaCompanion.insert(key: _seedLanguageMetaKey, value: seedLanguage),
-          );
-          for (final (i, list) in seed.lists.indexed) {
-            await insertSeedList(list, i);
-          }
-          await into(sentenceLists).insert(
-            SentenceListsCompanion.insert(
-              title: 'History',
-              kind: ListKind.history,
-              pinned: const Value(true),
-              position: seed.lists.length,
-              seedKey: const Value(historySeedKey),
-            ),
-          );
-        },
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
+    onCreate: (m) async {
+      await m.createAll();
+      final (seedLanguage, seed) = await resolveSeed(language);
+      await into(appMeta).insert(
+        AppMetaCompanion.insert(key: _seedLanguageMetaKey, value: seedLanguage),
       );
+      for (final (i, list) in seed.lists.indexed) {
+        await insertSeedList(list, i);
+      }
+      await into(sentenceLists).insert(
+        SentenceListsCompanion.insert(
+          title: 'History',
+          kind: ListKind.history,
+          pinned: const Value(true),
+          position: seed.lists.length,
+          seedKey: const Value(historySeedKey),
+        ),
+      );
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   /// Seed for [lang], or for [fallbackSeedLanguage] if there is none.
   /// Returns the language actually used.
@@ -109,9 +109,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// Language the DB was seeded with (restore uses the same seed).
   Future<String> seedLanguage() async {
-    final row = await (select(appMeta)
-          ..where((t) => t.key.equals(_seedLanguageMetaKey)))
-        .getSingleOrNull();
+    final row = await (select(
+      appMeta,
+    )..where((t) => t.key.equals(_seedLanguageMetaKey))).getSingleOrNull();
     return row?.value ?? fallbackSeedLanguage;
   }
 

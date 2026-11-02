@@ -97,4 +97,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get installing => 'Installing… (this can take a while)';
+
+  @override
+  String get historyTitle => 'History';
+
+  @override
+  String get allLists => 'All lists';
+
+  @override
+  String get editTooltip => 'Edit';
+
+  @override
+  String get editComingSoon => 'Editing is coming soon.';
+
+  @override
+  String get emptyListHint => 'This list is empty. Edit: ✎';
 }

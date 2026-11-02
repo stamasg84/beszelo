@@ -97,4 +97,19 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get installing => 'Telepítés… (ez eltarthat egy ideig)';
+
+  @override
+  String get historyTitle => 'Előzmények';
+
+  @override
+  String get allLists => 'Összes lista';
+
+  @override
+  String get editTooltip => 'Szerkesztés';
+
+  @override
+  String get editComingSoon => 'A szerkesztés hamarosan elérhető.';
+
+  @override
+  String get emptyListHint => 'Ez a lista üres. Szerkesztés: ✎';
 }

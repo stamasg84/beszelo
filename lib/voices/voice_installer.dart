@@ -38,8 +38,8 @@ class InstallCancelToken {
 /// it is complete.
 class VoiceInstaller {
   VoiceInstaller({Directory? root, http.Client? client})
-      : _root = root, // ignore: prefer_initializing_formals
-        _client = client ?? http.Client();
+    : _root = root, // ignore: prefer_initializing_formals
+      _client = client ?? http.Client();
 
   /// Generous: cheap phones are slow, but a hang must end eventually.
   static const extractTimeout = Duration(minutes: 5);
@@ -59,8 +59,7 @@ class VoiceInstaller {
 
   Future<String> voiceDir(String id) async => '${(await root).path}/$id';
 
-  Future<String> espeakDataDir() async =>
-      '${(await root).path}/$espeakDirName';
+  Future<String> espeakDataDir() async => '${(await root).path}/$espeakDirName';
 
   Future<bool> isInstalled(String id) async {
     final r = (await root).path;
@@ -96,7 +95,8 @@ class VoiceInstaller {
     final r = await root;
     // Unique per attempt, so a stuck earlier attempt can never interfere.
     final staging = Directory(
-        '${r.path}/.staging-${voice.id}-${DateTime.now().millisecondsSinceEpoch}');
+      '${r.path}/.staging-${voice.id}-${DateTime.now().millisecondsSinceEpoch}',
+    );
     await staging.create(recursive: true);
     try {
       final archive = File('${staging.path}/voice.tar.bz2');
@@ -122,8 +122,7 @@ class VoiceInstaller {
       _checkCancelled(cancel);
 
       // The archive holds a single top-level folder.
-      final top =
-          Directory(extracted).listSync().whereType<Directory>().single;
+      final top = Directory(extracted).listSync().whereType<Directory>().single;
       final espeakTarget = Directory('${r.path}/$espeakDirName');
       final espeakSource = Directory('${top.path}/$espeakDirName');
       if (!espeakTarget.existsSync()) {
@@ -167,7 +166,10 @@ class VoiceInstaller {
   /// after [extractTimeout], so a stuck extraction can't hang the install
   /// (and the UI) forever.
   Future<void> _extractInIsolate(
-      String archivePath, String destDir, InstallCancelToken? cancel) async {
+    String archivePath,
+    String destDir,
+    InstallCancelToken? cancel,
+  ) async {
     final done = Completer<void>();
     final results = ReceivePort();
     final errors = ReceivePort();
@@ -185,15 +187,18 @@ class VoiceInstaller {
         done.completeError(InstallCancelledException());
       }
     });
-    final isolate = await Isolate.spawn(
-      _extractEntry,
-      [results.sendPort, archivePath, destDir],
-      onError: errors.sendPort,
-    );
+    final isolate = await Isolate.spawn(_extractEntry, [
+      results.sendPort,
+      archivePath,
+      destDir,
+    ], onError: errors.sendPort);
     try {
-      await done.future.timeout(extractTimeout, onTimeout: () {
-        throw TimeoutException('Extraction timed out', extractTimeout);
-      });
+      await done.future.timeout(
+        extractTimeout,
+        onTimeout: () {
+          throw TimeoutException('Extraction timed out', extractTimeout);
+        },
+      );
     } finally {
       poll.cancel();
       isolate.kill(priority: Isolate.immediate);

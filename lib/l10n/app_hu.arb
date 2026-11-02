@@ -128,5 +128,25 @@
   "installing": "Telepítés… (ez eltarthat egy ideig)",
   "@installing": {
     "description": "Shown while a downloaded voice is verified and unpacked."
+  },
+  "historyTitle": "Előzmények",
+  "@historyTitle": {
+    "description": "Title of the automatic history list (chip and list grid)."
+  },
+  "allLists": "Összes lista",
+  "@allLists": {
+    "description": "Tooltip of the ▾ button that shows all lists."
+  },
+  "editTooltip": "Szerkesztés",
+  "@editTooltip": {
+    "description": "Tooltip of the app bar icon that opens the list editor."
+  },
+  "editComingSoon": "A szerkesztés hamarosan elérhető.",
+  "@editComingSoon": {
+    "description": "Temporary message until the editing screen exists."
+  },
+  "emptyListHint": "Ez a lista üres. Szerkesztés: ✎",
+  "@emptyListHint": {
+    "description": "Hint shown in an empty sentence list."
   }
 }

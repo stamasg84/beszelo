@@ -10,18 +10,18 @@ import 'package:mondom/voices/catalog.dart';
 import 'package:mondom/voices/voice_installer.dart';
 
 Map<String, dynamic> entry(String id, {String minApp = '1.0.0'}) => {
-      'id': id,
-      'language': 'hu',
-      'gender': 'male',
-      'label': id,
-      'url': 'https://example.com/$id.tar.bz2',
-      'sizeBytes': 10,
-      'sha256': 'ab' * 32,
-      'modelFile': '$id.onnx',
-      'sampleUrl': 'https://example.com/$id.wav',
-      'license': 'MIT',
-      'minAppVersion': minApp,
-    };
+  'id': id,
+  'language': 'hu',
+  'gender': 'male',
+  'label': id,
+  'url': 'https://example.com/$id.tar.bz2',
+  'sizeBytes': 10,
+  'sha256': 'ab' * 32,
+  'modelFile': '$id.onnx',
+  'sampleUrl': 'https://example.com/$id.wav',
+  'license': 'MIT',
+  'minAppVersion': minApp,
+};
 
 String catalogJson({int schema = 1, List<Map<String, dynamic>>? voices}) =>
     jsonEncode({
@@ -59,17 +59,22 @@ void main() {
     });
 
     test('ignores unknown schemaVersion and garbage', () {
-      expect(Catalog.parse(catalogJson(schema: 2), appVersion: '1.0.0'), isNull);
+      expect(
+        Catalog.parse(catalogJson(schema: 2), appVersion: '1.0.0'),
+        isNull,
+      );
       expect(Catalog.parse('not json', appVersion: '1.0.0'), isNull);
     });
 
     test('drops entries needing a newer app and malformed entries', () {
       final c = Catalog.parse(
-        catalogJson(voices: [
-          entry('old'),
-          entry('new', minApp: '1.10.0'),
-          {'id': 'broken'},
-        ]),
+        catalogJson(
+          voices: [
+            entry('old'),
+            entry('new', minApp: '1.10.0'),
+            {'id': 'broken'},
+          ],
+        ),
         appVersion: '1.2.0',
       )!;
       expect(c.voices.map((v) => v.id), ['old']);
@@ -121,37 +126,48 @@ void main() {
     tearDown(() => root.deleteSync(recursive: true));
 
     VoiceInstaller installerServing(List<int> bytes) => VoiceInstaller(
-          root: Directory('${root.path}/voices'),
-          client: MockClient.streaming((req, _) async => http.StreamedResponse(
-                Stream.fromIterable([bytes.sublist(0, 5), bytes.sublist(5)]),
-                200,
-              )),
-        );
+      root: Directory('${root.path}/voices'),
+      client: MockClient.streaming(
+        (req, _) async => http.StreamedResponse(
+          Stream.fromIterable([bytes.sublist(0, 5), bytes.sublist(5)]),
+          200,
+        ),
+      ),
+    );
 
     test('installs, shares espeak data, deletes', () async {
       final bytes = fakeVoiceArchive('v1');
       final installer = installerServing(bytes);
       var last = 0;
-      await installer.install(voiceFor('v1', bytes),
-          onProgress: (r, t) => last = r);
+      await installer.install(
+        voiceFor('v1', bytes),
+        onProgress: (r, t) => last = r,
+      );
       expect(last, bytes.length);
       expect(await installer.isInstalled('v1'), isTrue);
-      expect(File('${await installer.voiceDir('v1')}/tokens.txt').existsSync(),
-          isTrue);
-      expect(File('${await installer.espeakDataDir()}/phondata').existsSync(),
-          isTrue);
+      expect(
+        File('${await installer.voiceDir('v1')}/tokens.txt').existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${await installer.espeakDataDir()}/phondata').existsSync(),
+        isTrue,
+      );
       // No staging leftovers.
-      expect(Directory('${root.path}/voices').listSync().map(lastSegment).toSet(),
-          {'v1', 'espeak-ng-data'});
+      expect(
+        Directory('${root.path}/voices').listSync().map(lastSegment).toSet(),
+        {'v1', 'espeak-ng-data'},
+      );
 
       // A second voice reuses the shared espeak data.
       final bytes2 = fakeVoiceArchive('v2');
       await installerServing(bytes2).install(voiceFor('v2', bytes2));
       expect(await installer.isInstalled('v2'), isTrue);
       expect(
-          Directory('${await installer.voiceDir('v2')}/espeak-ng-data')
-              .existsSync(),
-          isFalse);
+        Directory('${await installer.voiceDir('v2')}/espeak-ng-data')
+            .existsSync(),
+        isFalse,
+      );
 
       await installer.delete('v1');
       expect(await installer.isInstalled('v1'), isFalse);
@@ -174,8 +190,11 @@ void main() {
       final installer = installerServing(bytes);
       final token = InstallCancelToken();
       await expectLater(
-        installer.install(voiceFor('v1', bytes),
-            cancel: token, onProgress: (a, b) => token.cancel()),
+        installer.install(
+          voiceFor('v1', bytes),
+          cancel: token,
+          onProgress: (a, b) => token.cancel(),
+        ),
         throwsA(isA<InstallCancelledException>()),
       );
       expect(Directory('${root.path}/voices').listSync(), isEmpty);
@@ -184,10 +203,12 @@ void main() {
     test('network failure leaves nothing behind', () async {
       final installer = VoiceInstaller(
         root: Directory('${root.path}/voices'),
-        client: MockClient.streaming((req, _) async => http.StreamedResponse(
-              Stream<List<int>>.error(const SocketException('wifi off')),
-              200,
-            )),
+        client: MockClient.streaming(
+          (req, _) async => http.StreamedResponse(
+            Stream<List<int>>.error(const SocketException('wifi off')),
+            200,
+          ),
+        ),
       );
       await expectLater(
         installer.install(voiceFor('v1', [1, 2, 3])),
