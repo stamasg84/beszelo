@@ -81,6 +81,17 @@ Done → commit.
 - All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (unit-test the splitter thoroughly with Hungarian cases: ordinals, dates, `pl.`, `?!`, `...`, `…`, multiple newlines, no final punctuation; widget test: paste a paragraph → N sentences appear in the list).
 
+### [ ] T18a (Agent): List colors
+Each list has a color; its chip, its tile in the ▾ grid and all its sentence rows use it, so the user sees which list they're in without reading the chip row. See architecture.md "List colors".
+- Schema v2: `sentence_lists.color` nullable text = a **palette key** (e.g. `"blue"`), not an ARGB value. `null` = neutral. Migration: `addColumn`, then give existing lists their seed color (by `seedKey`) or the next palette color. Regenerate `*.g.dart`.
+- `lib/ui/list_colors.dart`: a fixed palette of ~8 keys (blue, green, orange, purple, teal, pink, yellow, brown) → `ListColor { chip, row, rowActive }` for light theme (dark theme: return darker tones from the same function, even if the app has no dark mode yet). All tones keep body text at WCAG AA contrast (≥ 4.5:1) with the normal text color, including the greyed-out `said` text (raise its alpha if needed). Unknown key → neutral (forward compatible).
+- Seed JSON: optional `"color"` per list (`everyday`: blue, `example-conversation`: orange). History is always neutral grey, no color option. `restoreDefaultLists` uses the seed color.
+- `createList` picks the first palette color not used by any list (round robin when all are used).
+- Speaking screen: chips filled with their list color, the selected chip additionally gets a thick dark border (color must not be the only cue); grid tiles likewise; rows use `row`, the tapped/speaking row uses `rowActive` + the existing spinner (not `primaryContainer` anymore).
+- Editor (T18): per list a "Szín" row with large swatches (≥ 48 dp, selected one with a check mark) plus "Nincs" (neutral). Repository: `setColor(listId, key?)`.
+- ARB (hu + en) for new strings; color names only as semantics labels for TalkBack.
+- **Checks:** `flutter analyze`, `flutter test` (migration v1→v2 test with drift's schema tools or a hand-built v1 DB; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color).
+
 ### [ ] T19 (Agent): Prepared conversations
 - In a `conversation` list, speaking a row (tap or Következő) sets its `said = true`.
 - **"Következő ▶"** button below the rows (conversation lists only, fixed position, large): speaks the first unsaid sentence in order. When all are said, it's disabled and shows "Minden elhangzott" with an "Újrakezdés" action next to it (confirm first; this is the one place the speaking screen changes data besides `said`).

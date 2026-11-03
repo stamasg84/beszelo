@@ -72,7 +72,7 @@ Licenses/About screen. State management: plain `setState` + drift `watch` stream
 SQLite via **drift** (typed tables/queries, migrations, reactive `watch` queries so e.g. a `said` change greys out a row without refresh code). Small settings (selected voice, last used list) stay in `shared_preferences`. The voice catalog stays JSON (read-only, hand-parsed; use `json_serializable` if more JSON types appear).
 
 Tables (schema v1):
-- `sentence_lists`: `id` PK, `title`, `kind` (`everyday | conversation | history`), `pinned` bool, `position` int, `seedKey` nullable unique, `createdAt`.
+- `sentence_lists`: `id` PK, `title`, `kind` (`everyday | conversation | history`), `pinned` bool, `position` int, `seedKey` nullable unique, `color` nullable (palette key, schema v2), `createdAt`.
 - `sentences`: `id` PK, `listId` FK (cascade delete), `text`, `position` int, `said` bool (default false), `recordingPath` nullable (message banking, later), `seedKey` nullable (unique per list), `spokenAt` nullable (history ordering), `createdAt`.
 - `app_meta`: key/value (`seedLanguage`: the language the DB was seeded with, used by restore).
 - Dart naming: the `sentences.text` column is the getter `body` (`text` clashes with drift's `Table.text()`), so `Sentence.body`.
@@ -128,6 +128,8 @@ Interaction rules (the user may have weak, slow or shaky hands):
 - **Chips: pinned lists only** (e.g. Alap, the current conversation, Előzmények). Switching between them is one tap, which matters mid-conversation ("Kérek vizet!" from Alap, then back to the conversation). The **▾** button expands the chip row into a large grid of all lists over the sentence area; picking one collapses it and shows that list (as a temporary chip if it isn't pinned). Lists can be pinned/unpinned.
 - The app opens on the last used list, so a conversation prepared in the evening is already open the next day.
 - The free-text field is always visible. Focusing it brings up the keyboard (which takes the space); closing the keyboard gives the space back to the list. No extra code needed.
+
+List colors (decided 2026-11-03): each list has a color from a small fixed palette, stored as a palette key (not ARGB, so tones can be tuned for contrast and a dark theme without touching data). The chip, the ▾ grid tile and every sentence row of that list are tinted with it, so the user always sees which list they're in. Color is never the only cue: the selected chip also has a thick border, and history is always neutral grey. All tones must keep row text at WCAG AA contrast. New lists get the next unused color; the user can change it in the editor.
 
 Editing mode (separate screen, used with no time pressure, e.g. the evening before a visit):
 - One row per sentence (not one big text box: rows keep sentence ids, so recordings and `said` survive edits). Tap to edit, drag to reorder, delete, later record message-banking audio. An "add" field at the bottom: typed or pasted text is split into sentences (after `.`, `!`, `?`, `…` only when followed by whitespace + uppercase or a newline/end, plus every newline; keep the punctuation, Piper uses it). The uppercase rule keeps Hungarian ordinals and dates together ("a 3. emeleten", "2026. 11. 02.").
