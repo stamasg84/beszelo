@@ -70,8 +70,46 @@ Problem: tapping a row in Előzmények calls `addToHistory`, which moves that ro
 5. Close and reopen: same list is open.
 Done → commit.
 
+### [ ] T17a (Agent): Seed in the speech language, seed language per list
+Problem: `onCreate` seeds from the UI language before any voice is picked, so a user who picks a voice in another language ("Más nyelvek") gets default sentences the voice can't pronounce, and restore keeps bringing them back. Read architecture.md "Storage", especially "Speech language", first.
+- **Schema v2:** `sentence_lists.seedLanguage` nullable text; the list's `seedKey` uniqueness becomes `(seedLanguage, seedKey)`. Migration v1→v2: `addColumn`, set `seedLanguage` = the old `app_meta.seedLanguage` value on every list with a `seedKey` except history, replace the meta row with `seeded = 1`. Rebuilding the table is needed if the old unique constraint on `seedKey` is a column constraint (drift's `TableMigration`). Regenerate `*.g.dart`.
+- **Deferred seeding:** `AppDatabase` no longer takes a `language`; `onCreate` creates only the history list. New repository methods: `isSeeded()`, `seedLanguages()` (distinct non-null `seedLanguage` of lists), `addSeedLists(String language)` (appends that seed's lists after the existing ones, with `seedLanguage` set, falling back to `en` via `resolveSeed`; sets `seeded = 1`). Seeding becomes a normal operation instead of being done in `onCreate`.
+- **main.dart:** in `_selectVoice`, if not seeded → `addSeedLists(v.language)`. If seeded and `v.language` isn't in `seedLanguages()`, a seed file exists for it, and it isn't in `declinedSeedLanguages` (`shared_preferences`) → dialog "Hozzáadjam a(z) <nyelv> alapértelmezett listákat?" with "Hozzáadás" / "Nem". Language name in the UI language (a small `languageName(code, uiLang)` helper with a map for the catalog languages is fine; unknown code → the code itself).
+- **Voice picker:** rows under "Más nyelvek" show the voice's language in the subtitle (e.g. "Svéd · Férfi · 67 MB"), using the same helper; otherwise a Swedish voice there is indistinguishable from a Hungarian one. When the first-run picker route is popped without a choice and the DB still isn't seeded → `addSeedLists(uiLang)`.
+- The speaking screen's "last used list, fallback `everyday`" must work when lists appear after the screen is built (fallback: the first `everyday` list by position, re-evaluated when the lists stream changes while no valid list is open).
+- **Restore:** `restoreDefaultSentences(listId)` uses the list's own `seedLanguage`. `restoreDefaultLists(language)` takes the current speech language and only re-creates that language's missing seed lists; the editor (T18) passes `Voice.language`.
+- Unit test: every language in `assets/catalog.json` has `assets/seed/<lang>.json`.
+- **Checks:** `flutter analyze`, `flutter test` (fresh DB has only history; `addSeedLists('hu')` then `('en')` gives both sets with no key clash; unknown language falls back to `en`; migration v1→v2 keeps all rows and sets `seedLanguage`; restore sentences uses the list's language; restore lists only touches the given language; widget/unit test for the decision in `_selectVoice`: not seeded → seed; seeded + new language → asks; declined → doesn't ask again; same language → nothing). `flutter build apk --debug 2>&1 | tail -40`.
+
+### [ ] T17b (You): Seeding by voice language
+1. Migration first: **don't uninstall** the build from T17. Note a few edits (a deleted and an added sentence), then `flutter run --profile` the new build over it: lists and sentences are unchanged, and "restore" still works on Alap.
+2. Uninstall, set the phone language to English, `flutter run --profile`. In the first-run picker choose Imre (under other languages): the lists are Hungarian (Alap…), the UI is English.
+3. Settings → voice → pick the English system voice: you're asked once whether to add the English default lists. Say no, switch to Imre and back to English: not asked again.
+4. Uninstall again, Hungarian phone, leave the first-run picker with the back gesture: Hungarian lists exist, and the picker shows again next launch.
+Done → commit.
+
+### [ ] T17c (Agent): Voice picker: language selector, system voice per language
+Do after T17a (uses its `languageName` helper and the speech-language rules). Read architecture.md "Voices" (voice picker) first. Replaces the "Más nyelvek" `ExpansionTile` in `lib/ui/voice_picker.dart`.
+- **Language selector** at the top, only if the catalog has more than one language: a full-width button ≥ 56 dp, "Nyelv: Magyar ▾". It opens a bottom sheet (or dialog) of large rows (≥ 56 dp), one per catalog language: "Svéd (Svenska)" (UI-language name + native name; add the native name to the helper), with a marker (✓ + "1 letöltve") on languages that have installed voices, so downloaded voices in other languages can still be found and deleted. UI language first, then the others alphabetically by their UI-language name.
+- **Default:** opened from settings → the selected voice's language; first run → the UI language. Changing the selector only filters the list; nothing is saved and no seed question is asked until a voice is picked.
+- **List for the chosen language:** the "Android alapértelmezett" row (`Voice.system(lang)`), then that language's catalog voices (rows as today). The `language` subtitle T17a added under "Más nyelvek" isn't needed anymore (the selector shows it); remove it if the rows are now always single-language.
+- **System voice availability** (new method on `SystemEngine` or a small `SystemTtsInfo` service, so tests can fake it): returns `installed | missingData | unsupported` for a language. Use `flutter_tts` (`isLanguageAvailable`, and on Android `isLanguageInstalled`, which tells an offline voice from a network-only one; check the current package API). Row states:
+  - `installed`: ▶ preview (speaks the catalog's `sampleText` for that language) and Kiválaszt.
+  - `missingData`: no Kiválaszt; text "A hang nincs letöltve a telefonon." and a button "Letöltés az Android beállításaiban", which opens the engine's install-voice-data screen (`TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA`) or, if that fails, the TTS settings (`com.android.settings.TTS_SETTINGS`). Needs a tiny platform channel or `android_intent_plus` (ask before adding the package). Re-check when the app resumes (`AppLifecycleState.resumed`), so the row turns selectable after the user installed the voice.
+  - `unsupported`: row hidden, except for the UI language, where it stays with "A telefon nem tud ezen a nyelven beszélni." so the picker never looks voiceless.
+  - If the check itself throws: treat as `installed` (today's behavior), so a quirky engine never hides the always-available voice.
+- An already selected system voice keeps working whatever the check says (it's only a hint for choosing).
+- ARB (hu + en) for new strings.
+- **Checks:** `flutter analyze`, `flutter test` (widget tests with a fake catalog of hu + sv and a fake availability service: selector hidden with one language; defaults to the UI language on first run and to the selected voice's language from settings; switching to Svéd shows the sv system row + NST + Alma and no Hungarian voices; `missingData` shows the hint and no select button; `unsupported` hides the row for sv but shows the hint for the UI language; the installed marker appears on a language with a downloaded voice; picking `system-sv` calls `onSelect` with language `sv`).
+
+### [ ] T17d (You): Voice picker by language
+1. Settings → voice: the selector shows "Magyar". Switch to Svéd: system row, NST, Alma. Play the samples.
+2. If the Swedish system row says the voice isn't downloaded: tap the button, install Swedish in Google's voice data, come back: the row is selectable now. Select it and type "Hej, hur mår du?": it speaks Swedish. Check it with airplane mode on (a network-only voice would fail here, which means `isLanguageInstalled` isn't telling the truth on this phone; note it).
+3. Download NST, switch the selector back to Magyar: Svéd shows the installed marker in the language list.
+Done → commit.
+
 ### [ ] T18 (Agent): Editing screen
-- Opened from the speaking screen's edit icon, for the current list. Lists overview: create, rename, delete (confirm dialog), pin/unpin, reorder; "Alapértelmezett listák visszaállítása" if any seed list is missing.
+- Opened from the speaking screen's edit icon, for the current list. Lists overview: create, rename, delete (confirm dialog), pin/unpin, reorder; "Alapértelmezett listák visszaállítása" if any seed list of the current speech language is missing (`restoreDefaultLists(voice.language)`, see T17a).
 - Per-list editor: one row per sentence (keeps sentence ids, so recordings and `said` survive edits). Tap a row = edit its text (dialog with a large multi-line field). Drag handle to reorder, delete icon (with undo snackbar). A large "Új mondat(ok)" field at the bottom: what's typed or pasted is split into sentences and appended.
 - **Splitting** (`lib/lists/split_sentences.dart`, pure function): split after `.`, `!`, `?`, `…` (and runs like `?!`, `...`) **only when followed by whitespace and an uppercase letter or a newline / end of text**, and on every newline. Keep the punctuation, trim, drop empties. This keeps Hungarian ordinals and dates together ("a 3. emeleten", "2026. 11. 02.") and abbreviations followed by lowercase ("pl. holnap").
 - "Alapértelmezett mondatok visszaállítása" on seeded lists, only shown when `hasMissingDefaults` is true.
@@ -83,7 +121,7 @@ Done → commit.
 
 ### [ ] T18a (Agent): List colors
 Each list has a color; its chip, its tile in the ▾ grid and all its sentence rows use it, so the user sees which list they're in without reading the chip row. See architecture.md "List colors".
-- Schema v2: `sentence_lists.color` nullable text = a **palette key** (e.g. `"blue"`), not an ARGB value. `null` = neutral. Migration: `addColumn`, then give existing lists their seed color (by `seedKey`) or the next palette color. Regenerate `*.g.dart`.
+- Schema v3 (v2 is T17a): `sentence_lists.color` nullable text = a **palette key** (e.g. `"blue"`), not an ARGB value. `null` = neutral. Migration: `addColumn`, then give existing lists their seed color (by `seedLanguage` + `seedKey`) or the next palette color. Regenerate `*.g.dart`.
 - `lib/ui/list_colors.dart`: a fixed palette of ~8 keys (blue, green, orange, purple, teal, pink, yellow, brown) → `ListColor { chip, row, rowActive }` for light theme (dark theme: return darker tones from the same function, even if the app has no dark mode yet). All tones keep body text at WCAG AA contrast (≥ 4.5:1) with the normal text color, including the greyed-out `said` text (raise its alpha if needed). Unknown key → neutral (forward compatible).
 - Seed JSON: optional `"color"` per list (`everyday`: blue, `example-conversation`: orange). History is always neutral grey, no color option. `restoreDefaultLists` uses the seed color.
 - `createList` picks the first palette color not used by any list (round robin when all are used).
@@ -91,7 +129,7 @@ Each list has a color; its chip, its tile in the ▾ grid and all its sentence r
 - App bar title on the speaking screen: the **current list's name** instead of the app name (history: its localized title), so the screen says which list is open in words as well as color. Long names: one line, ellipsized (the chip row and the rows themselves stay unchanged). The app name "Mondom" no longer appears on the speaking screen (it was the same word as the speak button).
 - Editor (T18): per list a "Szín" row with large swatches (≥ 48 dp, selected one with a check mark) plus "Nincs" (neutral). Repository: `setColor(listId, key?)`.
 - ARB (hu + en) for new strings; color names only as semantics labels for TalkBack.
-- **Checks:** `flutter analyze`, `flutter test` (migration v1→v2 test with drift's schema tools or a hand-built v1 DB; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color; the app bar shows the current list name and changes when switching lists).
+- **Checks:** `flutter analyze`, `flutter test` (migration v2→v3 test with drift's schema tools or a hand-built v2 DB, plus v1→v3; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color; the app bar shows the current list name and changes when switching lists).
 
 ### [ ] T19 (Agent): Prepared conversations
 - In a `conversation` list, speaking a row (tap or Következő) sets its `said = true`.

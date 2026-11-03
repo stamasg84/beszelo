@@ -1,0 +1,148 @@
+{
+  "lists": [
+    {
+      "seedKey": "everyday",
+      "title": "Vardag",
+      "kind": "everyday",
+      "pinned": true,
+      "sentences": [
+        {
+          "seedKey": "water",
+          "text": "Kan jag få lite vatten, tack?"
+        },
+        {
+          "seedKey": "food",
+          "text": "Jag är hungrig."
+        },
+        {
+          "seedKey": "drink",
+          "text": "Jag är törstig."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "Jag behöver gå på toaletten."
+        },
+        {
+          "seedKey": "pain",
+          "text": "Det gör ont."
+        },
+        {
+          "seedKey": "pain-help",
+          "text": "Jag har ont, jag behöver något smärtstillande."
+        },
+        {
+          "seedKey": "stand",
+          "text": "Hjälp mig att resa mig!"
+        },
+        {
+          "seedKey": "position",
+          "text": "Kan du hjälpa mig att vända mig?"
+        },
+        {
+          "seedKey": "sit",
+          "text": "Kan du hjälpa mig att sätta mig upp?"
+        },
+        {
+          "seedKey": "cold",
+          "text": "Jag fryser."
+        },
+        {
+          "seedKey": "hot",
+          "text": "Jag är för varm."
+        },
+        {
+          "seedKey": "blanket",
+          "text": "Kan jag få en filt, tack?"
+        },
+        {
+          "seedKey": "glasses",
+          "text": "Kan du ge mig mina glasögon?"
+        },
+        {
+          "seedKey": "phone",
+          "text": "Kan du ge mig min telefon?"
+        },
+        {
+          "seedKey": "tv",
+          "text": "Kan du sätta på tv:n?"
+        },
+        {
+          "seedKey": "tv-off",
+          "text": "Kan du stänga av tv:n?"
+        },
+        {
+          "seedKey": "light-on",
+          "text": "Kan du tända lampan?"
+        },
+        {
+          "seedKey": "light-off",
+          "text": "Kan du släcka lampan?"
+        },
+        {
+          "seedKey": "tired",
+          "text": "Jag är trött."
+        },
+        {
+          "seedKey": "good",
+          "text": "Jag mår bra."
+        },
+        {
+          "seedKey": "yes",
+          "text": "Ja."
+        },
+        {
+          "seedKey": "no",
+          "text": "Nej."
+        },
+        {
+          "seedKey": "dont-know",
+          "text": "Jag vet inte."
+        },
+        {
+          "seedKey": "thanks",
+          "text": "Tack!"
+        },
+        {
+          "seedKey": "wait",
+          "text": "Vänta, jag skriver."
+        },
+        {
+          "seedKey": "repeat",
+          "text": "Kan du säga det igen?"
+        },
+        {
+          "seedKey": "slower",
+          "text": "Långsammare, tack!"
+        },
+        {
+          "seedKey": "come",
+          "text": "Kan du komma hit?"
+        },
+        {
+          "seedKey": "love",
+          "text": "Jag älskar dig."
+        }
+      ]
+    },
+    {
+      "seedKey": "example-conversation",
+      "title": "Exempelsamtal",
+      "kind": "conversation",
+      "pinned": false,
+      "sentences": [
+        {
+          "seedKey": "bulb",
+          "text": "Glödlampan behöver bytas."
+        },
+        {
+          "seedKey": "cheese",
+          "text": "Kan ni köpa lite prästost i affären?"
+        },
+        {
+          "seedKey": "school",
+          "text": "Hur går det i skolan?"
+        }
+      ]
+    }
+  ]
+}

@@ -21,7 +21,7 @@ Word prediction (Hungarian word endings make typing tiring), Bluetooth speaker a
 
 ## Constraints / gotchas
 - Android apps can't inject audio into a cellular call. For 112, use speakerphone playback or rely on SMS + location (Android sends location to 112 automatically via AML). Check whether Hungary's 112 accepts SMS.
-- Voice licenses: `imre` and `berta` are MIT (checked); `anna` still to check. MIT is compatible with GPL-3.0 bundling, but keep the attribution/license text in the app's "About" screen. espeak-ng (used by sherpa-onnx as the phonemizer) is GPL-3.0, so Mondom should be GPL-3.0; sherpa-onnx itself is Apache-2.0.
+- Voice licenses: `imre` and `berta` are MIT (checked); `anna` still to check. Swedish (added 2026-11-03 for testing a second language, and a tester in Sweden): `sv_SE-nst` CC0, `sv_SE-alma` CC BY 4.0 (needs credit in "About"). MIT is compatible with GPL-3.0 bundling, but keep the attribution/license text in the app's "About" screen. espeak-ng (used by sherpa-onnx as the phonemizer) is GPL-3.0, so Mondom should be GPL-3.0; sherpa-onnx itself is Apache-2.0.
 - No accounts, all data stored locally. Network only for optional downloads (voices, the voice catalog); everything else works offline.
 - Piper voices have flat intonation. To soften it: tune `length_scale` / `noise_scale` / `noise_w` in sherpa-onnx, and punctuate the preloaded phrases ("Kérek vizet!", "Segítenél?"), since Piper uses punctuation for intonation. Larger expressive models (e.g. XTTS-v2) are too heavy for phones and non-commercially licensed.
 
@@ -49,6 +49,8 @@ Validation phase.
 
 Findings so far:
 - **Cboard** (tried on Android): closest existing app. Picture + caption tiles, custom tiles and folders, custom text. Gaps: no free-text typing for saying something custom; speaks with the system TTS (female Hungarian voice); recording custom audio for tiles is locked behind a sign-in/"join". Cboard is open source, but targets picture-based communication (largely children); Mondom is typing-first for literate adults, so it's a separate app built on text sentence lists rather than picture tiles (Cboard's editing UX is still a useful reference).
+- **Own use (2026-11-03):** after trying the speaking screen, it already feels much better than Cboard for ALS patients even without the extra voices (typing-first, whole-sentence lists, tap-again-to-repeat). So the pitch isn't only "a male voice": the whole app is free, no ads, no accounts, and message banking is free too (Cboard puts it behind a sign-in). Still to confirm with someone other than the developer.
+- **Other markets:** Google's system TTS has only a female voice for Slovak, Romanian, Serbian, Finnish and Ukrainian; Piper has a usable male voice for Romanian, Finnish and Ukrainian (see `docs/TODO.md`).
 - **Voices** (listened to the Piper samples): `berta` is about as good as Google's female voice. `imre` is acceptable but flat, "like an untalented actor reading from paper." Open question for users: is a flat male voice preferable to a lively female one?
 
 Next: get to a usable Play Store release first (decided 2026-11-03): no dialog with the ALS group before they can actually try the app, since feedback on a working app is far better than on a description, and first contact shouldn't be spent on something they can't install. The features still planned are cheap, so this isn't far off.

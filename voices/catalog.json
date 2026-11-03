@@ -39,10 +39,37 @@
       "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/hu_HU-anna-medium.wav",
       "license": "CC0",
       "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "sv_SE-nst-medium",
+      "language": "sv",
+      "gender": "male",
+      "label": "NST",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-sv_SE-nst-medium.tar.bz2",
+      "sizeBytes": 67144884,
+      "sha256": "5aed0f5ab75135fc3ba6a4f3567e171d72df753305b08a01ca42f79411587f67",
+      "modelFile": "sv_SE-nst-medium.onnx",
+      "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/sv_SE-nst-medium.wav",
+      "license": "CC0",
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "sv_SE-alma-medium",
+      "language": "sv",
+      "gender": "female",
+      "label": "Alma",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-sv_SE-alma-medium.tar.bz2",
+      "sizeBytes": 67154700,
+      "sha256": "4ab8212595575e52595bc95c37d0b4f79450c0f00b63496346cdc5941d913edc",
+      "modelFile": "sv_SE-alma-medium.onnx",
+      "sampleUrl": "https://raw.githubusercontent.com/stamasg84/mondom/main/voices/samples/sv_SE-alma-medium.wav",
+      "license": "CC-BY-4.0",
+      "minAppVersion": "1.0.0"
     }
   ],
   "sampleText": {
     "hu": "Szia! Kérek egy pohár vizet. Segítenél felállni?",
-    "en": "Hi! Could I have a glass of water, please? Can you help me stand up?"
+    "en": "Hi! Could I have a glass of water, please? Can you help me stand up?",
+    "sv": "Hej! Kan jag få ett glas vatten? Kan du hjälpa mig att resa mig?"
   }
 }
