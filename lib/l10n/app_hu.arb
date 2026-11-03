@@ -12,7 +12,7 @@
   "@loading": {
     "description": "Shown instead of the speak button while the voice model is loading."
   },
-  "speak": "Mondd",
+  "speak": "Mondom",
   "@speak": {
     "description": "Button that speaks the typed text."
   },

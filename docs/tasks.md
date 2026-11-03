@@ -14,7 +14,7 @@ Goal: the real speaking screen. Everything speakable is a sentence list, stored 
 ### [x] T14 (Agent): Speaker service, single "Mondd" button
 - New `lib/speech/speaker.dart`: `Speaker` owns the current `VoiceEngine` and the `AudioPlayer` (move that logic out of `main.dart`). API: `Future<void> speak(String text)`, `Future<void> setVoice(Voice v)`, `stop()`, plus `busy`/`lastResult` for the UI (a `ChangeNotifier` is fine).
 - **Last-utterance reuse:** `Speaker` remembers the last `(voice id, text)` → WAV path. Key = text trimmed with inner whitespace collapsed. Same key → stop current playback and replay the WAV from the start, without synthesizing. Different key → synthesize, then delete the previous WAV file (temp WAVs currently pile up in the temp dir). Switching voice clears the key. Only the last one is remembered; this is not a cache.
-- Main screen: remove "Ismétlés". Keep the text in the field after speaking; add a large ✕ (clear) button inside the field. Mondd with an unchanged text = replay.
+- Main screen: remove "Ismétlés". Keep the text in the field after speaking; add a large ✕ (clear) button inside the field. Mondom with an unchanged text = replay.
 - Keep the small timing text (show "replay" instead of synth ms when reused).
 - Remove the now-unused ARB key(s) in both `app_hu.arb` and `app_en.arb`.
 - **Checks:** `flutter analyze`, `flutter test` (unit-test `Speaker` with a fake `VoiceEngine` that counts calls and a fake player: same text twice = 1 synthesis; whitespace-only difference = 1; different text = 2 and the old WAV is deleted; voice switch = re-synthesis).
@@ -38,7 +38,7 @@ Goal: the real speaking screen. Everything speakable is a sentence list, stored 
 - Chip row: pinned lists in their order, plus the current list as a temporary chip if it isn't pinned, plus **▾**. ▾ toggles a large grid of all lists covering the sentence area; picking one closes it and shows that list.
 - Sentence rows: big (font ≥ 24, min height 72 dp, full-width tap target, text wraps, never truncated). Tap = `Speaker.speak(text)`. Visual feedback on the tapped row while it is synthesizing/playing. `said` rows greyed out but tappable (the `said` logic itself is T19).
 - Every speak (row or free text) calls `addToHistory`.
-- Bottom bar: the free-text field with ✕, and Mondd (from T14), always visible.
+- Bottom bar: the free-text field with ✕, and Mondom (from T14), always visible.
 - Opens on the last used list (fallback: the `everyday` list).
 - An edit icon in the app bar opens the editing screen (T18); until then, it can be a placeholder.
 - Empty list: a short hint text ("Ez a lista üres. Szerkesztés: ✎").
@@ -62,10 +62,10 @@ Problem: tapping a row in Előzmények calls `addToHistory`, which moves that ro
 - Add the rule as one sentence to the "History:" paragraph in architecture.md.
 - **Checks:** `flutter analyze`, `flutter test` (widget test: with history showing A, B, C (A newest), tapping C speaks C and the order stays A, B, C; tapping a row in Alap that matches C moves C to the top; free text while history is shown is added at the top).
 
-### [ ] T17 (You): Try the speaking screen
+### [x] T17 (You): Try the speaking screen
 1. Uninstall the app (fresh DB), `flutter run --profile`.
 2. Use the Alap list for a few minutes as if you couldn't speak: are rows big enough, is anything missing or unnatural in the default phrases? Note changes to make in `assets/seed/hu.json`.
-3. Tap the same row twice quickly: second tap replays at once. Type text, Mondd twice: second is instant.
+3. Tap the same row twice quickly: second tap replays at once. Type text, Mondom twice: second is instant.
 4. Switch between Alap / Előzmények / Példa beszélgetés: one tap, nothing jumps under your finger.
 5. Close and reopen: same list is open.
 Done → commit.
@@ -88,9 +88,10 @@ Each list has a color; its chip, its tile in the ▾ grid and all its sentence r
 - Seed JSON: optional `"color"` per list (`everyday`: blue, `example-conversation`: orange). History is always neutral grey, no color option. `restoreDefaultLists` uses the seed color.
 - `createList` picks the first palette color not used by any list (round robin when all are used).
 - Speaking screen: chips filled with their list color, the selected chip additionally gets a thick dark border (color must not be the only cue); grid tiles likewise; rows use `row`, the tapped/speaking row uses `rowActive` + the existing spinner (not `primaryContainer` anymore).
+- App bar title on the speaking screen: the **current list's name** instead of the app name (history: its localized title), so the screen says which list is open in words as well as color. Long names: one line, ellipsized (the chip row and the rows themselves stay unchanged). The app name "Mondom" no longer appears on the speaking screen (it was the same word as the speak button).
 - Editor (T18): per list a "Szín" row with large swatches (≥ 48 dp, selected one with a check mark) plus "Nincs" (neutral). Repository: `setColor(listId, key?)`.
 - ARB (hu + en) for new strings; color names only as semantics labels for TalkBack.
-- **Checks:** `flutter analyze`, `flutter test` (migration v1→v2 test with drift's schema tools or a hand-built v1 DB; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color).
+- **Checks:** `flutter analyze`, `flutter test` (migration v1→v2 test with drift's schema tools or a hand-built v1 DB; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color; the app bar shows the current list name and changes when switching lists).
 
 ### [ ] T19 (Agent): Prepared conversations
 - In a `conversation` list, speaking a row (tap or Következő) sets its `said = true`.
@@ -98,6 +99,17 @@ Each list has a color; its chip, its tile in the ▾ grid and all its sentence r
 - The next unsaid sentence gets a subtle highlight (border/marker, no size change, no auto-scroll jumping; if it's off-screen, scroll it into view only after a Következő tap, never during the user's own scrolling).
 - `said` survives app restarts (it's in the DB).
 - **Checks:** `flutter analyze`, `flutter test` (Következő order, skipping sentences already said by direct tap, all-said state, reset).
+
+### [ ] T19a (Agent): Load sentences into the free-text field (one-shot builder mode)
+Goal: say a variation of a saved sentence ("Kérek egy pohár vizet!" → "Kérek egy pohár teát!") or build a sentence from pieces, without breaking "a tap on a row speaks".
+- **Button:** a large (≥ 48 dp) button in the bottom bar, left of the free-text field (e.g. `Icons.playlist_add` or a ↓ icon; TalkBack label "Mondat betöltése a szövegmezőbe"). Pressing it **arms** builder mode; pressing it again cancels.
+- **One-shot:** while armed, the next tap on a sentence row (any list, including history) **appends** its text to the free-text field and builder mode **turns off automatically**. To add several pieces, press the button again before each one. Builder mode never stays on: it is cancelled by pressing the button again, the banner's ✕, switching lists (chip or ▾ grid), pressing Mondom, or the app going to the background.
+- **Append rule:** empty field → the sentence text; otherwise `field.trimRight() + " " + text`. Cursor at the end. Don't focus the field or open the keyboard automatically (it would cover the list and block adding more pieces); the user taps the field to edit.
+- **Loading is not speaking:** it doesn't speak, doesn't call `addToHistory`, doesn't set `said`, doesn't reorder anything.
+- **Visual cues while armed (must be unmistakable):** the button shows an active state (filled/highlighted); a banner at the top of the sentence area: "Koppints a mondatra, amit a szövegmezőbe töltenél" with a ✕; sentence rows get a clearly different look (e.g. dashed border plus a small ↓ icon at the end, or a distinct tint) so a row never looks like it will speak when it won't. The banner appearing is a layout change triggered by a dedicated button, which the interaction rules allow; make sure nothing else shifts. In conversation lists, hide or disable Következő while armed.
+- Update architecture.md "Interaction rules": "One tap = one fixed meaning" gets the exception: the one-shot load button, which changes the meaning of exactly the next row tap, with a strong visual cue, and then turns itself off. Add one line on why it isn't a toggle (a mode left on by accident would make a tap silent in an urgent moment), and the rejected alternatives: long-press (slow ALS fingers exceed the long-press time, so a tap meant to speak would load instead; also undiscoverable), a per-row icon (second small target next to the big one, mis-taps), swipe (unreliable with shaky hands, conflicts with scrolling), suggestions above the keyboard (too crowded next to the keyboard's own suggestion row).
+- All strings via ARB (hu + en).
+- **Checks:** `flutter analyze`, `flutter test` (widget tests with the fake `Speaker`: armed + row tap → text in field, nothing spoken, history unchanged, mode off afterwards; second row tap after that speaks normally; appending to existing text adds one space; cancel via button / ✕ / chip switch / Mondom; a conversation row loaded while armed stays unsaid).
 
 ### [ ] T20 (You): A real prepared conversation
 1. The evening before talking to someone (a family member is fine), create a conversation list in the editor: paste 5–10 sentences as one paragraph and check they split correctly. Pin it.

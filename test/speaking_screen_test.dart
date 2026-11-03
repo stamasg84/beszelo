@@ -141,7 +141,7 @@ void main() {
     // Free text while history is shown goes in at the top.
     await tester.enterText(find.byType(TextField), 'Új');
     await tester.pump();
-    await tester.tap(find.text('Mondd'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Mondom'));
     await settle(tester);
     expect(await historyBodies(), ['Új', 'A', 'B', 'C']);
 
@@ -189,11 +189,11 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('free text: Mondd speaks, ✕ clears', (tester) async {
+  testWidgets('free text: Mondom speaks, ✕ clears', (tester) async {
     await pumpScreen(tester);
     await tester.enterText(find.byType(TextField), 'Szia!');
     await tester.pump();
-    await tester.tap(find.text('Mondd'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Mondom'));
     await settle(tester);
     expect(speaker.spoken, ['Szia!']);
     expect(find.text('Szia!'), findsOneWidget); // text stays for repeat

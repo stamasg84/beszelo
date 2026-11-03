@@ -64,8 +64,8 @@ Rules:
 Licenses/About screen. State management: plain `setState` + drift `watch` streams; add a package only if that gets painful.
 
 ## Speaking (decided 2026-11-02)
-- One **Mondd** button, no separate "Ismétlés". `Speaker.speak(text)` remembers the last `(voice id, normalized text)` → WAV path; the same key replays the WAV from the start without synthesizing, a new key synthesizes and deletes the previous WAV. Normalization: trim + collapse inner whitespace. This is "last utterance" only, not an audio cache (see `docs/TODO.md`).
-- The free-text field keeps its text after speaking (so Mondd again = repeat) and has a ✕ to clear it. Older phrases are reachable through history.
+- One **Mondom** button, no separate "Ismétlés". `Speaker.speak(text)` remembers the last `(voice id, normalized text)` → WAV path; the same key replays the WAV from the start without synthesizing, a new key synthesizes and deletes the previous WAV. Normalization: trim + collapse inner whitespace. This is "last utterance" only, not an audio cache (see `docs/TODO.md`).
+- The free-text field keeps its text after speaking (so Mondom again = repeat) and has a ✕ to clear it. Older phrases are reachable through history.
 - Sentence-row taps go through the same `Speaker.speak`, so tapping a row twice replays instantly.
 
 ## Storage (decided 2026-11-02)
@@ -118,7 +118,7 @@ Main screen (speaking mode):
 │ Mi újság a suliban?          │
 │           [ Következő ▶ ]    │  conversation lists only
 ├──────────────────────────────┤
-│ [free text…………  ✕] [Mondd]   │  always visible
+│ [free text…………  ✕] [Mondom]   │  always visible
 └──────────────────────────────┘
 ```
 

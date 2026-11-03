@@ -19,7 +19,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get loading => 'Betöltés…';
 
   @override
-  String get speak => 'Mondd';
+  String get speak => 'Mondom';
 
   @override
   String get clearText => 'Szöveg törlése';

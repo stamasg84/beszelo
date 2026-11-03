@@ -119,7 +119,7 @@ abstract class AppLocalizations {
   /// Button that speaks the typed text.
   ///
   /// In hu, this message translates to:
-  /// **'Mondd'**
+  /// **'Mondom'**
   String get speak;
 
   /// Tooltip of the ✕ button that clears the text field.
