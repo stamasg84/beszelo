@@ -283,6 +283,24 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Ez a lista üres. Szerkesztés: ✎'**
   String get emptyListHint;
+
+  /// Dialog asking whether to add the default sentence lists of another language. The language name is lowercase in Hungarian.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hozzáadjam a(z) {language} alapértelmezett listákat?'**
+  String addSeedListsQuestion(String language);
+
+  /// Confirm button of the add-default-lists dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hozzáadás'**
+  String get addAction;
+
+  /// Decline button of the add-default-lists dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Nem'**
+  String get noAction;
 }
 
 class _AppLocalizationsDelegate

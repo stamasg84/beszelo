@@ -74,7 +74,17 @@ class $SentenceListsTable extends SentenceLists
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _seedLanguageMeta = const VerificationMeta(
+    'seedLanguage',
+  );
+  @override
+  late final GeneratedColumn<String> seedLanguage = GeneratedColumn<String>(
+    'seed_language',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -96,6 +106,7 @@ class $SentenceListsTable extends SentenceLists
     pinned,
     position,
     seedKey,
+    seedLanguage,
     createdAt,
   ];
   @override
@@ -141,6 +152,15 @@ class $SentenceListsTable extends SentenceLists
         seedKey.isAcceptableOrUnknown(data['seed_key']!, _seedKeyMeta),
       );
     }
+    if (data.containsKey('seed_language')) {
+      context.handle(
+        _seedLanguageMeta,
+        seedLanguage.isAcceptableOrUnknown(
+          data['seed_language']!,
+          _seedLanguageMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -152,6 +172,10 @@ class $SentenceListsTable extends SentenceLists
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {seedLanguage, seedKey},
+  ];
   @override
   SentenceList map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -182,6 +206,10 @@ class $SentenceListsTable extends SentenceLists
         DriftSqlType.string,
         data['${effectivePrefix}seed_key'],
       ),
+      seedLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seed_language'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -205,6 +233,10 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
   final bool pinned;
   final int position;
   final String? seedKey;
+
+  /// Seed file the list came from (`hu`, `en`, ...); null for user lists and
+  /// history. The same seed list can exist once per language.
+  final String? seedLanguage;
   final DateTime createdAt;
   const SentenceList({
     required this.id,
@@ -213,6 +245,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     required this.pinned,
     required this.position,
     this.seedKey,
+    this.seedLanguage,
     required this.createdAt,
   });
   @override
@@ -230,6 +263,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     if (!nullToAbsent || seedKey != null) {
       map['seed_key'] = Variable<String>(seedKey);
     }
+    if (!nullToAbsent || seedLanguage != null) {
+      map['seed_language'] = Variable<String>(seedLanguage);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -244,6 +280,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       seedKey: seedKey == null && nullToAbsent
           ? const Value.absent()
           : Value(seedKey),
+      seedLanguage: seedLanguage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seedLanguage),
       createdAt: Value(createdAt),
     );
   }
@@ -262,6 +301,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       pinned: serializer.fromJson<bool>(json['pinned']),
       position: serializer.fromJson<int>(json['position']),
       seedKey: serializer.fromJson<String?>(json['seedKey']),
+      seedLanguage: serializer.fromJson<String?>(json['seedLanguage']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -277,6 +317,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       'pinned': serializer.toJson<bool>(pinned),
       'position': serializer.toJson<int>(position),
       'seedKey': serializer.toJson<String?>(seedKey),
+      'seedLanguage': serializer.toJson<String?>(seedLanguage),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -288,6 +329,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     bool? pinned,
     int? position,
     Value<String?> seedKey = const Value.absent(),
+    Value<String?> seedLanguage = const Value.absent(),
     DateTime? createdAt,
   }) => SentenceList(
     id: id ?? this.id,
@@ -296,6 +338,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     pinned: pinned ?? this.pinned,
     position: position ?? this.position,
     seedKey: seedKey.present ? seedKey.value : this.seedKey,
+    seedLanguage: seedLanguage.present ? seedLanguage.value : this.seedLanguage,
     createdAt: createdAt ?? this.createdAt,
   );
   SentenceList copyWithCompanion(SentenceListsCompanion data) {
@@ -306,6 +349,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       pinned: data.pinned.present ? data.pinned.value : this.pinned,
       position: data.position.present ? data.position.value : this.position,
       seedKey: data.seedKey.present ? data.seedKey.value : this.seedKey,
+      seedLanguage: data.seedLanguage.present
+          ? data.seedLanguage.value
+          : this.seedLanguage,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -319,14 +365,23 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
           ..write('pinned: $pinned, ')
           ..write('position: $position, ')
           ..write('seedKey: $seedKey, ')
+          ..write('seedLanguage: $seedLanguage, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, kind, pinned, position, seedKey, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    kind,
+    pinned,
+    position,
+    seedKey,
+    seedLanguage,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -337,6 +392,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
           other.pinned == this.pinned &&
           other.position == this.position &&
           other.seedKey == this.seedKey &&
+          other.seedLanguage == this.seedLanguage &&
           other.createdAt == this.createdAt);
 }
 
@@ -347,6 +403,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
   final Value<bool> pinned;
   final Value<int> position;
   final Value<String?> seedKey;
+  final Value<String?> seedLanguage;
   final Value<DateTime> createdAt;
   const SentenceListsCompanion({
     this.id = const Value.absent(),
@@ -355,6 +412,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     this.pinned = const Value.absent(),
     this.position = const Value.absent(),
     this.seedKey = const Value.absent(),
+    this.seedLanguage = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   SentenceListsCompanion.insert({
@@ -364,6 +422,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     this.pinned = const Value.absent(),
     required int position,
     this.seedKey = const Value.absent(),
+    this.seedLanguage = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : title = Value(title),
        kind = Value(kind),
@@ -375,6 +434,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     Expression<bool>? pinned,
     Expression<int>? position,
     Expression<String>? seedKey,
+    Expression<String>? seedLanguage,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -384,6 +444,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
       if (pinned != null) 'pinned': pinned,
       if (position != null) 'position': position,
       if (seedKey != null) 'seed_key': seedKey,
+      if (seedLanguage != null) 'seed_language': seedLanguage,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -395,6 +456,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     Value<bool>? pinned,
     Value<int>? position,
     Value<String?>? seedKey,
+    Value<String?>? seedLanguage,
     Value<DateTime>? createdAt,
   }) {
     return SentenceListsCompanion(
@@ -404,6 +466,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
       pinned: pinned ?? this.pinned,
       position: position ?? this.position,
       seedKey: seedKey ?? this.seedKey,
+      seedLanguage: seedLanguage ?? this.seedLanguage,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -431,6 +494,9 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     if (seedKey.present) {
       map['seed_key'] = Variable<String>(seedKey.value);
     }
+    if (seedLanguage.present) {
+      map['seed_language'] = Variable<String>(seedLanguage.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -446,6 +512,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
           ..write('pinned: $pinned, ')
           ..write('position: $position, ')
           ..write('seedKey: $seedKey, ')
+          ..write('seedLanguage: $seedLanguage, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1254,6 +1321,7 @@ typedef $$SentenceListsTableCreateCompanionBuilder =
       Value<bool> pinned,
       required int position,
       Value<String?> seedKey,
+      Value<String?> seedLanguage,
       Value<DateTime> createdAt,
     });
 typedef $$SentenceListsTableUpdateCompanionBuilder =
@@ -1264,6 +1332,7 @@ typedef $$SentenceListsTableUpdateCompanionBuilder =
       Value<bool> pinned,
       Value<int> position,
       Value<String?> seedKey,
+      Value<String?> seedLanguage,
       Value<DateTime> createdAt,
     });
 
@@ -1331,6 +1400,11 @@ class $$SentenceListsTableFilterComposer
 
   ColumnFilters<String> get seedKey => $composableBuilder(
     column: $table.seedKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seedLanguage => $composableBuilder(
+    column: $table.seedLanguage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1404,6 +1478,11 @@ class $$SentenceListsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get seedLanguage => $composableBuilder(
+    column: $table.seedLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1436,6 +1515,11 @@ class $$SentenceListsTableAnnotationComposer
 
   GeneratedColumn<String> get seedKey =>
       $composableBuilder(column: $table.seedKey, builder: (column) => column);
+
+  GeneratedColumn<String> get seedLanguage => $composableBuilder(
+    column: $table.seedLanguage,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1500,6 +1584,7 @@ class $$SentenceListsTableTableManager
                 Value<bool> pinned = const Value.absent(),
                 Value<int> position = const Value.absent(),
                 Value<String?> seedKey = const Value.absent(),
+                Value<String?> seedLanguage = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => SentenceListsCompanion(
                 id: id,
@@ -1508,6 +1593,7 @@ class $$SentenceListsTableTableManager
                 pinned: pinned,
                 position: position,
                 seedKey: seedKey,
+                seedLanguage: seedLanguage,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -1518,6 +1604,7 @@ class $$SentenceListsTableTableManager
                 Value<bool> pinned = const Value.absent(),
                 required int position,
                 Value<String?> seedKey = const Value.absent(),
+                Value<String?> seedLanguage = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => SentenceListsCompanion.insert(
                 id: id,
@@ -1526,6 +1613,7 @@ class $$SentenceListsTableTableManager
                 pinned: pinned,
                 position: position,
                 seedKey: seedKey,
+                seedLanguage: seedLanguage,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

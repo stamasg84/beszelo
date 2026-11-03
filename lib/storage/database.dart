@@ -7,13 +7,15 @@ part 'database.g.dart';
 
 enum ListKind { everyday, conversation, history }
 
-/// Language used when there is no seed for the UI language.
+/// Language used when there is no seed for the requested language.
 const fallbackSeedLanguage = 'en';
 
 /// `seedKey` of the single history list.
 const historySeedKey = 'history';
 
-const _seedLanguageMetaKey = 'seedLanguage';
+// Schema v1 kept the one seed language here; v2 moves it onto the lists.
+const _legacySeedLanguageMetaKey = 'seedLanguage';
+const _seededMetaKey = 'seeded';
 
 class SentenceLists extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -21,8 +23,17 @@ class SentenceLists extends Table {
   TextColumn get kind => textEnum<ListKind>()();
   BoolColumn get pinned => boolean().withDefault(const Constant(false))();
   IntColumn get position => integer()();
-  TextColumn get seedKey => text().nullable().unique()();
+  TextColumn get seedKey => text().nullable()();
+
+  /// Seed file the list came from (`hu`, `en`, ...); null for user lists and
+  /// history. The same seed list can exist once per language.
+  TextColumn get seedLanguage => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {seedLanguage, seedKey},
+  ];
 }
 
 class Sentences extends Table {
@@ -54,43 +65,53 @@ class AppMeta extends Table {
 
 @DriftDatabase(tables: [SentenceLists, Sentences, AppMeta])
 class AppDatabase extends _$AppDatabase {
-  /// [language]: UI language code used to pick the seed on creation.
-  AppDatabase(
-    super.executor, {
-    required this.language,
-    this.loadSeed = loadSeedAsset,
-  });
+  AppDatabase(super.executor, {this.loadSeed = loadSeedAsset});
 
   /// Production database in the app's documents directory.
-  factory AppDatabase.open({required String language}) =>
-      AppDatabase(driftDatabase(name: 'mondom'), language: language);
+  factory AppDatabase.open() => AppDatabase(driftDatabase(name: 'mondom'));
 
-  final String language;
   final SeedLoader loadSeed;
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
-      final (seedLanguage, seed) = await resolveSeed(language);
-      await into(appMeta).insert(
-        AppMetaCompanion.insert(key: _seedLanguageMetaKey, value: seedLanguage),
-      );
-      for (final (i, list) in seed.lists.indexed) {
-        await insertSeedList(list, i);
-      }
+      // Seed lists are added when the first voice is chosen (see
+      // ListsRepository.addSeedLists).
       await into(sentenceLists).insert(
         SentenceListsCompanion.insert(
           title: 'History',
           kind: ListKind.history,
           pinned: const Value(true),
-          position: seed.lists.length,
+          position: 0,
           seedKey: const Value(historySeedKey),
         ),
       );
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // v1 had a column-level UNIQUE on seedKey, so the table is rebuilt.
+        await m.alterTable(
+          TableMigration(
+            sentenceLists,
+            newColumns: [sentenceLists.seedLanguage],
+            columnTransformer: {
+              sentenceLists.seedLanguage: const CustomExpression<String>(
+                'CASE WHEN seed_key IS NOT NULL '
+                "AND seed_key <> '$historySeedKey' "
+                '''THEN (SELECT value FROM app_meta WHERE key = '$_legacySeedLanguageMetaKey') END''',
+              ),
+            },
+          ),
+        );
+        await (delete(
+          appMeta,
+        )..where((t) => t.key.equals(_legacySeedLanguageMetaKey))).go();
+        await markSeeded();
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -107,15 +128,33 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  /// Language the DB was seeded with (restore uses the same seed).
-  Future<String> seedLanguage() async {
-    final row = await (select(
-      appMeta,
-    )..where((t) => t.key.equals(_seedLanguageMetaKey))).getSingleOrNull();
-    return row?.value ?? fallbackSeedLanguage;
+  /// Whether a seed file exists for [lang] (no fallback).
+  Future<bool> hasSeed(String lang) async {
+    try {
+      await loadSeed(lang);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
-  Future<int> insertSeedList(SeedList list, int position) async {
+  /// Whether a seed was ever inserted (so deleting every seed list later does
+  /// not trigger seeding again).
+  Future<bool> isSeeded() async =>
+      await (select(
+        appMeta,
+      )..where((t) => t.key.equals(_seededMetaKey))).getSingleOrNull() !=
+      null;
+
+  Future<void> markSeeded() => into(appMeta).insertOnConflictUpdate(
+    AppMetaCompanion.insert(key: _seededMetaKey, value: '1'),
+  );
+
+  Future<int> insertSeedList(
+    SeedList list,
+    int position, {
+    required String language,
+  }) async {
     final id = await into(sentenceLists).insert(
       SentenceListsCompanion.insert(
         title: list.title,
@@ -123,6 +162,7 @@ class AppDatabase extends _$AppDatabase {
         pinned: Value(list.pinned),
         position: position,
         seedKey: Value(list.seedKey),
+        seedLanguage: Value(language),
       ),
     );
     for (final (i, s) in list.sentences.indexed) {

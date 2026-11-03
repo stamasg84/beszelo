@@ -39,6 +39,7 @@ lib/
     system_engine.dart    # flutter_tts synthesizeToFile → WAV, same playback path
     catalog.dart          # remote/bundled voice catalog, parsing + filtering
     voice_installer.dart  # download → sha256 → extract (isolate) → install/delete
+    language_names.dart   # languageName(code, uiLang) for dialogs/selector
   speech/speaker.dart     # Speaker: current VoiceEngine + player, speak(text), last-utterance reuse
   storage/database.dart   # drift tables (+ generated database.g.dart, committed)
   storage/lists_repository.dart  # the only storage API the UI uses; seeding, history, restore defaults

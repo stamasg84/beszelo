@@ -70,7 +70,7 @@ Problem: tapping a row in Előzmények calls `addToHistory`, which moves that ro
 5. Close and reopen: same list is open.
 Done → commit.
 
-### [ ] T17a (Agent): Seed in the speech language, seed language per list
+### [x] T17a (Agent): Seed in the speech language, seed language per list
 Problem: `onCreate` seeds from the UI language before any voice is picked, so a user who picks a voice in another language ("Más nyelvek") gets default sentences the voice can't pronounce, and restore keeps bringing them back. Read architecture.md "Storage", especially "Speech language", first.
 - **Schema v2:** `sentence_lists.seedLanguage` nullable text; the list's `seedKey` uniqueness becomes `(seedLanguage, seedKey)`. Migration v1→v2: `addColumn`, set `seedLanguage` = the old `app_meta.seedLanguage` value on every list with a `seedKey` except history, replace the meta row with `seeded = 1`. Rebuilding the table is needed if the old unique constraint on `seedKey` is a column constraint (drift's `TableMigration`). Regenerate `*.g.dart`.
 - **Deferred seeding:** `AppDatabase` no longer takes a `language`; `onCreate` creates only the history list. New repository methods: `isSeeded()`, `seedLanguages()` (distinct non-null `seedLanguage` of lists), `addSeedLists(String language)` (appends that seed's lists after the existing ones, with `seedLanguage` set, falling back to `en` via `resolveSeed`; sets `seeded = 1`). Seeding becomes a normal operation instead of being done in `onCreate`.

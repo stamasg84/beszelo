@@ -30,5 +30,8 @@
   "allLists": "All lists",
   "editTooltip": "Edit",
   "editComingSoon": "Editing is coming soon.",
-  "emptyListHint": "This list is empty. Edit: ✎"
+  "emptyListHint": "This list is empty. Edit: ✎",
+  "addSeedListsQuestion": "Add the default {language} lists?",
+  "addAction": "Add",
+  "noAction": "No"
 }

@@ -46,7 +46,6 @@ Future<void> _pump(WidgetTester tester, Locale locale) async {
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   final db = AppDatabase(
     NativeDatabase.memory(),
-    language: locale.languageCode,
     loadSeed: (_) async => const Seed([]),
   );
   addTearDown(db.close);

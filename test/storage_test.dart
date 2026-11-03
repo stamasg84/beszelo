@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
 import 'package:mondom/storage/seed.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Seed> _fileSeed(String lang) async {
   final f = File('assets/seed/$lang.json');
@@ -15,8 +16,8 @@ Future<Seed> _fileSeed(String lang) async {
   );
 }
 
-AppDatabase _open(String lang) =>
-    AppDatabase(NativeDatabase.memory(), language: lang, loadSeed: _fileSeed);
+AppDatabase _open() =>
+    AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
 
 void main() {
   late AppDatabase db;
@@ -28,9 +29,11 @@ void main() {
   Future<List<Sentence>> sentencesOf(int id) async =>
       (await repo.watchSentences(id).first);
 
-  setUp(() {
-    db = _open('hu');
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    db = _open();
     repo = ListsRepository(db);
+    await repo.addSeedLists('hu');
   });
   tearDown(() => db.close());
 
@@ -51,14 +54,94 @@ void main() {
     expect(s.map((x) => x.body), contains('Várj, gépelek.'));
   });
 
-  test('seeds en, and unknown language falls back to en', () async {
+  test('fresh DB has only history and is not seeded', () async {
     await db.close();
-    db = _open('en');
-    expect((await db.select(db.sentenceLists).get()).first.title, 'Basics');
-    await db.close();
-    db = _open('de');
-    expect((await db.select(db.sentenceLists).get()).first.title, 'Basics');
-    expect(await db.seedLanguage(), 'en');
+    db = _open();
+    repo = ListsRepository(db);
+    expect((await repo.watchLists().first).map((l) => l.kind), [
+      ListKind.history,
+    ]);
+    expect(await repo.isSeeded(), isFalse);
+    expect(await repo.seedLanguages(), isEmpty);
+  });
+
+  test('addSeedLists: hu then en, no key clash, history stays last', () async {
+    expect(await repo.isSeeded(), isTrue);
+    await repo.addSeedLists('en');
+    final lists = await repo.watchLists().first;
+    expect(lists.map((l) => (l.seedLanguage, l.seedKey)), [
+      ('hu', 'everyday'),
+      ('hu', 'example-conversation'),
+      ('en', 'everyday'),
+      ('en', 'example-conversation'),
+      (null, 'history'),
+    ]);
+    expect(lists.where((l) => l.title == 'Basics'), hasLength(1));
+    expect(await repo.seedLanguages(), {'hu', 'en'});
+    // Idempotent.
+    await repo.addSeedLists('en');
+    expect(await repo.watchLists().first, hasLength(5));
+  });
+
+  test('unknown language falls back to en', () async {
+    await repo.addSeedLists('de');
+    expect(await repo.seedLanguages(), {'hu', 'en'});
+    final lists = await repo.watchLists().first;
+    expect(lists.where((l) => l.seedLanguage == 'en').first.title, 'Basics');
+  });
+
+  test('every catalog language has a seed file', () {
+    final catalog = jsonDecode(
+      File('assets/catalog.json').readAsStringSync(),
+    ) as Map<String, dynamic>;
+    final languages = {
+      for (final v in catalog['voices'] as List) v['language'] as String,
+    };
+    expect(languages, isNotEmpty);
+    for (final l in languages) {
+      expect(File('assets/seed/$l.json').existsSync(), isTrue, reason: l);
+    }
+  });
+
+  group('offerSeedLists', () {
+    late int asked;
+    Future<bool> Function() answer(bool yes) => () async {
+      asked++;
+      return yes;
+    };
+    setUp(() => asked = 0);
+
+    test('not seeded: seeds without asking', () async {
+      await db.close();
+      db = _open();
+      repo = ListsRepository(db);
+      expect(await repo.offerSeedLists('sv', ask: answer(false)), isTrue);
+      expect(asked, 0);
+      expect(await repo.seedLanguages(), {'sv'});
+    });
+
+    test('seeded + new language: asks; yes adds the lists', () async {
+      expect(await repo.offerSeedLists('sv', ask: answer(true)), isTrue);
+      expect(asked, 1);
+      expect(await repo.seedLanguages(), {'hu', 'sv'});
+    });
+
+    test('declined: not asked again', () async {
+      expect(await repo.offerSeedLists('sv', ask: answer(false)), isFalse);
+      expect(await repo.offerSeedLists('sv', ask: answer(true)), isFalse);
+      expect(asked, 1);
+      expect(await repo.seedLanguages(), {'hu'});
+    });
+
+    test('same language: nothing', () async {
+      expect(await repo.offerSeedLists('hu', ask: answer(true)), isFalse);
+      expect(asked, 0);
+    });
+
+    test('language without a seed file: nothing', () async {
+      expect(await repo.offerSeedLists('de', ask: answer(true)), isFalse);
+      expect(asked, 0);
+    });
   });
 
   test('history dedupes by normalized text and moves to top', () async {
@@ -132,10 +215,40 @@ void main() {
     final c = await listByKey('example-conversation');
     await repo.deleteList(c.id);
     expect(await db.select(db.sentenceLists).get(), hasLength(2));
-    expect(await repo.restoreDefaultLists(), 1);
+    expect(await repo.restoreDefaultLists('hu'), 1);
     final again = await listByKey('example-conversation');
     expect(await sentencesOf(again.id), hasLength(3));
-    expect(await repo.restoreDefaultLists(), 0);
+    expect(await repo.restoreDefaultLists('hu'), 0);
+    expect((await repo.watchLists().first).last.kind, ListKind.history);
+  });
+
+  test('restore lists only touches the given language', () async {
+    await repo.addSeedLists('en');
+    for (final l in await repo.watchLists().first) {
+      if (l.kind != ListKind.history) await repo.deleteList(l.id);
+    }
+    expect(await repo.restoreDefaultLists('en'), 2);
+    expect(await repo.seedLanguages(), {'en'});
+  });
+
+  test('restore sentences uses the own language of the list', () async {
+    await repo.addSeedLists('en');
+    final en = (await repo.watchLists().first).firstWhere(
+      (l) => l.seedLanguage == 'en' && l.seedKey == 'everyday',
+    );
+    final s = await sentencesOf(en.id);
+    await repo.deleteSentence(s.first.id);
+    expect(await repo.restoreDefaultSentences(en.id), 1);
+    final after = await sentencesOf(en.id);
+    expect(after.first.seedKey, s.first.seedKey);
+    expect(after.first.body, s.first.body);
+    expect(after.every((x) => !x.body.contains('Kérek')), isTrue);
+  });
+
+  test('user lists and history have nothing to restore', () async {
+    final id = await repo.createList('Orvos');
+    expect(await repo.hasMissingDefaults(id), isFalse);
+    expect(await repo.restoreDefaultSentences(id), 0);
   });
 
   test('deleting a list cascades its sentences', () async {

@@ -109,4 +109,15 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get emptyListHint => 'Ez a lista üres. Szerkesztés: ✎';
+
+  @override
+  String addSeedListsQuestion(String language) {
+    return 'Hozzáadjam a(z) $language alapértelmezett listákat?';
+  }
+
+  @override
+  String get addAction => 'Hozzáadás';
+
+  @override
+  String get noAction => 'Nem';
 }

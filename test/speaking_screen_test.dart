@@ -61,11 +61,7 @@ void main() {
   setUp(() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     SharedPreferences.setMockInitialValues({});
-    db = AppDatabase(
-      NativeDatabase.memory(),
-      language: 'hu',
-      loadSeed: _fileSeed,
-    );
+    db = AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
     repo = ListsRepository(db);
     speaker = _FakeSpeaker();
   });
@@ -79,7 +75,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
   }
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, {bool seed = true}) async {
+    // Seeding normally happens when the first voice is chosen.
+    if (seed) await tester.runAsync(() => repo.addSeedLists('hu'));
     tester.platformDispatcher.localesTestValue = const [Locale('hu', 'HU')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(
@@ -119,6 +117,17 @@ void main() {
             .map((s) => s.body)
             .toList();
       }))!;
+
+  testWidgets('lists that appear after the screen is built get opened', (
+    tester,
+  ) async {
+    await pumpScreen(tester, seed: false);
+    expect(find.text('Kérek vizet!'), findsNothing);
+    await tester.runAsync(() => repo.addSeedLists('hu'));
+    await settle(tester);
+    expect(find.text('Kérek vizet!'), findsOneWidget);
+    await finish(tester);
+  });
 
   testWidgets('history: row tap leaves order; other lists and free text '
       'move to top', (tester) async {

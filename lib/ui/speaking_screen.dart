@@ -27,9 +27,16 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   final _controller = TextEditingController();
 
   late final Stream<List<SentenceList>> _lists;
+  StreamSubscription<List<SentenceList>>? _listsSub;
+  int? _lastUsedId;
   Stream<List<Sentence>>? _sentences;
   int? _currentId;
   bool _currentIsHistory = false;
+
+  /// The open list was chosen by the fallback rule, not by the user or the
+  /// remembered last list, so it may be replaced when lists appear later
+  /// (e.g. the first seed is inserted after this screen is built).
+  bool _autoPicked = false;
   int? _tappedId;
   bool _expanded = false;
 
@@ -37,22 +44,35 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   void initState() {
     super.initState();
     _lists = widget.repo.watchLists().asBroadcastStream();
-    _pickInitialList();
+    _start();
   }
 
-  Future<void> _pickInitialList() async {
-    final lists = await _lists.first;
-    final lastId = await widget.repo.lastUsedListId();
+  Future<void> _start() async {
+    _lastUsedId = await widget.repo.lastUsedListId();
+    if (!mounted) return;
+    _listsSub = _lists.listen(_onLists);
+  }
+
+  /// Opens the last used list, else the first `everyday` list, else any
+  /// non-history list, else history. Re-evaluated whenever the lists change
+  /// while no valid list is open (or only a fallback history is).
+  void _onLists(List<SentenceList> lists) {
+    final current = lists.where((l) => l.id == _currentId).firstOrNull;
+    if (current != null && !(_autoPicked && _currentIsHistory)) return;
+    final lastUsed = lists.where((l) => l.id == _lastUsedId).firstOrNull;
     final initial =
-        lists.where((l) => l.id == lastId).firstOrNull ??
+        lastUsed ??
         lists.where((l) => l.seedKey == 'everyday').firstOrNull ??
+        lists.where((l) => l.kind != ListKind.history).firstOrNull ??
         lists.firstOrNull;
-    if (!mounted || initial == null) return;
+    if (initial == null || initial.id == _currentId) return;
+    _autoPicked = lastUsed == null;
     _showList(initial, remember: false);
   }
 
   void _showList(SentenceList list, {bool remember = true}) {
     final id = list.id;
+    if (remember) _autoPicked = false;
     setState(() {
       _currentId = id;
       _currentIsHistory = list.kind == ListKind.history;
@@ -76,6 +96,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
 
   @override
   void dispose() {
+    _listsSub?.cancel();
     _controller.dispose();
     super.dispose();
   }

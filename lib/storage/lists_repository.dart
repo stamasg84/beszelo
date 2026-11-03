@@ -11,6 +11,7 @@ export 'database.dart' show ListKind, Sentence, SentenceList;
 const historyCap = 30;
 
 const _lastListKey = 'lastListId';
+const _declinedSeedKey = 'declinedSeedLanguages';
 
 /// The only storage API the UI uses.
 class ListsRepository {
@@ -205,8 +206,9 @@ class ListsRepository {
   Future<bool> hasMissingDefaults(int listId) async =>
       (await _missingSeedSentences(listId)).isNotEmpty;
 
-  /// Re-adds missing seed sentences at their seed position. Never deletes or
-  /// changes anything. Returns how many were added.
+  /// Re-adds missing seed sentences at their seed position, from the list's
+  /// own seed language. Never deletes or changes anything. Returns how many
+  /// were added.
   Future<int> restoreDefaultSentences(int listId) => _db.transaction(() async {
     final missing = await _missingSeedSentences(listId);
     for (final (index, s) in missing) {
@@ -218,21 +220,52 @@ class ListsRepository {
     return missing.length;
   });
 
-  /// Re-creates seed lists whose `seedKey` is missing. Returns how many.
-  Future<int> restoreDefaultLists() => _db.transaction(() async {
-    final (_, seed) = await _db.resolveSeed(await _db.seedLanguage());
-    final existing = {
-      for (final l in await _db.select(_lists).get())
-        if (l.seedKey != null) l.seedKey,
-    };
-    var added = 0;
-    for (final l in seed.lists) {
-      if (existing.contains(l.seedKey)) continue;
-      await _db.insertSeedList(l, await _lastListPosition() + 1);
-      added++;
-    }
-    return added;
+  /// Re-creates the seed lists of [language] (the current speech language)
+  /// that are missing. Lists of other languages are left alone. Returns how
+  /// many were added.
+  Future<int> restoreDefaultLists(String language) =>
+      _db.transaction(() => _addMissingSeedLists(language));
+
+  /// Whether any seed was ever inserted.
+  Future<bool> isSeeded() => _db.isSeeded();
+
+  /// Languages of the seed lists currently present.
+  Future<Set<String>> seedLanguages() async => {
+    for (final l in await _db.select(_lists).get())
+      if (l.seedLanguage != null) l.seedLanguage!,
+  };
+
+  /// Appends the default lists of [language] (falling back to `en` when there
+  /// is no seed file) after the existing ones. Lists already present are not
+  /// duplicated.
+  Future<void> addSeedLists(String language) => _db.transaction(() async {
+    await _addMissingSeedLists(language);
+    await _db.markSeeded();
   });
+
+  /// Called when a voice of [language] becomes the speech language. Seeds on
+  /// first use; later, asks (via [ask]) once whether to add that language's
+  /// default lists. Returns whether lists were added.
+  Future<bool> offerSeedLists(
+    String language, {
+    required Future<bool> Function() ask,
+  }) async {
+    if (!await isSeeded()) {
+      await addSeedLists(language);
+      return true;
+    }
+    if ((await seedLanguages()).contains(language)) return false;
+    if (!await _db.hasSeed(language)) return false;
+    final prefs = await SharedPreferences.getInstance();
+    final declined = prefs.getStringList(_declinedSeedKey) ?? const [];
+    if (declined.contains(language)) return false;
+    if (await ask()) {
+      await addSeedLists(language);
+      return true;
+    }
+    await prefs.setStringList(_declinedSeedKey, [...declined, language]);
+    return false;
+  }
 
   // ---- Last used list ----
 
@@ -321,16 +354,48 @@ class ListsRepository {
     return [...head, ...all.where((id) => !head.contains(id))];
   }
 
-  /// Seed sentences (with their seed index) missing from the list. Empty for
-  /// lists without a seed (user lists, history).
+  /// Inserts the seed lists of [language] that are missing, after the existing
+  /// ones; the history list stays last if it was last. Returns how many.
+  Future<int> _addMissingSeedLists(String language) async {
+    final (used, seed) = await _db.resolveSeed(language);
+    final all = await (_db.select(
+      _lists,
+    )..orderBy([(t) => OrderingTerm.asc(t.position)])).get();
+    final history = all.where((l) => l.kind == ListKind.history).firstOrNull;
+    final historyLast = history != null && all.last.id == history.id;
+    final existing = {
+      for (final l in all)
+        if (l.seedLanguage == used && l.seedKey != null) l.seedKey,
+    };
+    var added = 0;
+    for (final l in seed.lists) {
+      if (existing.contains(l.seedKey)) continue;
+      await _db.insertSeedList(
+        l,
+        await _lastListPosition() + 1,
+        language: used,
+      );
+      added++;
+    }
+    if (added > 0 && historyLast) {
+      await (_db.update(_lists)..where((x) => x.id.equals(history.id))).write(
+        SentenceListsCompanion(position: Value(await _lastListPosition() + 1)),
+      );
+    }
+    return added;
+  }
+
+  /// Seed sentences (with their seed index) missing from the list, from the
+  /// list's own seed language. Empty for lists without a seed (user lists,
+  /// history).
   Future<List<(int, SeedSentence)>> _missingSeedSentences(int listId) async {
     final list = await (_db.select(
       _lists,
     )..where((l) => l.id.equals(listId))).getSingleOrNull();
-    if (list?.seedKey == null) return const [];
-    final (_, seed) = await _db.resolveSeed(await _db.seedLanguage());
+    if (list?.seedKey == null || list?.seedLanguage == null) return const [];
+    final (_, seed) = await _db.resolveSeed(list!.seedLanguage!);
     final seedList = seed.lists
-        .where((l) => l.seedKey == list!.seedKey)
+        .where((l) => l.seedKey == list.seedKey)
         .firstOrNull;
     if (seedList == null) return const [];
     final have = {

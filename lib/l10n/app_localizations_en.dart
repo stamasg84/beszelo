@@ -109,4 +109,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyListHint => 'This list is empty. Edit: ✎';
+
+  @override
+  String addSeedListsQuestion(String language) {
+    return 'Add the default $language lists?';
+  }
+
+  @override
+  String get addAction => 'Add';
+
+  @override
+  String get noAction => 'No';
 }

@@ -144,5 +144,22 @@
   "emptyListHint": "Ez a lista üres. Szerkesztés: ✎",
   "@emptyListHint": {
     "description": "Hint shown in an empty sentence list."
+  },
+  "addSeedListsQuestion": "Hozzáadjam a(z) {language} alapértelmezett listákat?",
+  "@addSeedListsQuestion": {
+    "description": "Dialog asking whether to add the default sentence lists of another language. The language name is lowercase in Hungarian.",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "addAction": "Hozzáadás",
+  "@addAction": {
+    "description": "Confirm button of the add-default-lists dialog."
+  },
+  "noAction": "Nem",
+  "@noAction": {
+    "description": "Decline button of the add-default-lists dialog."
   }
 }

@@ -9,6 +9,7 @@ import 'storage/lists_repository.dart';
 import 'ui/speaking_screen.dart';
 import 'ui/voice_picker.dart';
 import 'voices/catalog.dart';
+import 'voices/language_names.dart';
 import 'voices/piper_engine.dart';
 import 'voices/system_engine.dart';
 import 'voices/voice.dart';
@@ -70,12 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
-    final db = AppDatabase.open(
-      language: Localizations.localeOf(context).languageCode,
-    );
+    final db = AppDatabase.open();
+    final repo = ListsRepository(db);
     setState(() {
       _db = db;
-      _repo = ListsRepository(db);
+      _repo = repo;
     });
     await _installer.cleanupStaging();
     final info = await PackageInfo.fromPlatform();
@@ -92,12 +92,20 @@ class _HomeScreenState extends State<HomeScreen> {
       _voice = Voice.system(uiLang);
     }
     await _speaker.setVoice(_voice);
-    // First launch: no voice chosen yet.
-    if (savedId == null && mounted) _openPicker(firstRun: true);
+    if (savedId == null) {
+      // First launch: no voice chosen yet.
+      if (mounted) await _openPicker(firstRun: true);
+      // Left the picker without choosing: the system voice is in use, so the
+      // app still gets its lists, in the UI language.
+      if (!await repo.isSeeded()) await repo.addSeedLists(uiLang);
+    } else if (!await repo.isSeeded()) {
+      // Safety net for a seed that never happened (e.g. killed mid-start).
+      await repo.addSeedLists(_voice.languageCode);
+    }
   }
 
-  void _openPicker({bool firstRun = false}) {
-    Navigator.of(context).push(
+  Future<void> _openPicker({bool firstRun = false}) {
+    return Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => VoicePickerScreen(
           catalog: _catalog,
@@ -126,7 +134,37 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKey, v.id);
     await _speaker.setVoice(v);
+    // After the switch, so a question doesn't delay the new voice.
+    await _repo?.offerSeedLists(v.languageCode, ask: _askAddSeedLists(v));
   }
+
+  Future<bool> Function() _askAddSeedLists(Voice v) => () async {
+    if (!mounted) return false;
+    final l10n = AppLocalizations.of(context);
+    final ui = Localizations.localeOf(context).languageCode;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(
+          l10n.addSeedListsQuestion(
+            languageName(v.languageCode, ui, midSentence: true),
+          ),
+          style: const TextStyle(fontSize: 20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.noAction),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.addAction),
+          ),
+        ],
+      ),
+    );
+    return yes ?? false;
+  };
 
   @override
   void dispose() {
