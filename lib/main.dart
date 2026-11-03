@@ -92,6 +92,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _voice = Voice.system(uiLang);
     }
     await _speaker.setVoice(_voice);
+    // History title follows the speech language (also fixes older installs).
+    if (savedId != null && await repo.isSeeded()) {
+      await repo.syncHistoryTitle(_voice.languageCode);
+    }
     if (savedId == null) {
       // First launch: no voice chosen yet.
       if (mounted) await _openPicker(firstRun: true);

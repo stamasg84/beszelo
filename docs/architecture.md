@@ -82,7 +82,7 @@ Tables (schema v1; v2 adds `seedLanguage`, v3 adds `color`):
 - Moving a sentence to another list drops its `seedKey` (it left its seed list); copies never have one.
 - Generated code (`database.g.dart`) is committed. Regenerate after changing tables: `dart run build_runner build --delete-conflicting-outputs`.
 
-Seed data: `assets/seed/<lang>.json`; once inserted, they're ordinary rows the user can edit or delete. Changing the phone language later doesn't touch the DB.
+Seed data: `assets/seed/<lang>.json` (also has a top-level `historyTitle`, copied onto the history list when that language becomes the speech language; empty title = UI-language fallback); once inserted, they're ordinary rows the user can edit or delete. Changing the phone language later doesn't touch the DB.
 
 **Speech language (decided 2026-11-03)** = the selected voice's language (`Voice.language`). For "Android alapértelmezett" it is the language of the picker row it was chosen from (id `system-<lang>`; the default row is the UI language). The UI follows the phone, but **sentence content follows the speech language**, because default sentences in a language the voice can't pronounce are useless (e.g. a Hungarian user with a German phone who picks Imre under "Más nyelvek").
 - `onCreate` only creates the history list. The seed is inserted **when the first voice is chosen** in the first-run picker, in that voice's speech language (fallback `en` if there's no seed file). If the user leaves the first-run picker without choosing (system back), the system voice is in use, so seed with the UI language then too: the app is never left without lists.

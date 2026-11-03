@@ -61,18 +61,16 @@ void main() {
     expect(lists.map((l) => l.pinned), [true, false, true]);
 
     // Cascade must not have wiped the sentences while the table was rebuilt.
-    expect(
-      (await repo.watchSentences(lists[0].id).first).map((s) => s.body),
-      ['Kérek vizet!', 'Saját mondat.'],
-    );
-    expect(
-      (await repo.watchSentences(lists[1].id).first).map((s) => s.body),
-      ['Fáj a fejem.'],
-    );
-    expect(
-      (await repo.watchSentences(lists[2].id).first).map((s) => s.body),
-      ['Szia!'],
-    );
+    expect((await repo.watchSentences(lists[0].id).first).map((s) => s.body), [
+      'Kérek vizet!',
+      'Saját mondat.',
+    ]);
+    expect((await repo.watchSentences(lists[1].id).first).map((s) => s.body), [
+      'Fáj a fejem.',
+    ]);
+    expect((await repo.watchSentences(lists[2].id).first).map((s) => s.body), [
+      'Szia!',
+    ]);
 
     // app_meta: seedLanguage replaced by seeded = 1.
     expect(await repo.isSeeded(), isTrue);

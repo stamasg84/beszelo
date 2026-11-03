@@ -83,7 +83,7 @@ class AppDatabase extends _$AppDatabase {
       // ListsRepository.addSeedLists).
       await into(sentenceLists).insert(
         SentenceListsCompanion.insert(
-          title: 'History',
+          title: '', // set from the seed's historyTitle; UI-language fallback while empty
           kind: ListKind.history,
           pinned: const Value(true),
           position: 0,

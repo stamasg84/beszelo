@@ -240,8 +240,23 @@ class ListsRepository {
   /// duplicated.
   Future<void> addSeedLists(String language) => _db.transaction(() async {
     await _addMissingSeedLists(language);
+    await syncHistoryTitle(language);
     await _db.markSeeded();
   });
+
+  /// Gives the history list the title of [language]'s seed, so it matches the
+  /// seeded lists (the speech language, not the UI language). No-op without a
+  /// seed file for [language] or if the title is already right.
+  Future<void> syncHistoryTitle(String language) async {
+    if (!await _db.hasSeed(language)) return;
+    final title = (await _db.resolveSeed(language)).$2.historyTitle;
+    if (title == null) return;
+    final history = await _historyList();
+    if (history.title == title) return;
+    await (_db.update(_lists)..where((l) => l.id.equals(history.id))).write(
+      SentenceListsCompanion(title: Value(title)),
+    );
+  }
 
   /// Called when a voice of [language] becomes the speech language. Seeds on
   /// first use; later, asks (via [ask]) once whether to add that language's
@@ -250,6 +265,7 @@ class ListsRepository {
     String language, {
     required Future<bool> Function() ask,
   }) async {
+    await syncHistoryTitle(language);
     if (!await isSeeded()) {
       await addSeedLists(language);
       return true;

@@ -81,7 +81,7 @@ Problem: `onCreate` seeds from the UI language before any voice is picked, so a 
 - Unit test: every language in `assets/catalog.json` has `assets/seed/<lang>.json`.
 - **Checks:** `flutter analyze`, `flutter test` (fresh DB has only history; `addSeedLists('hu')` then `('en')` gives both sets with no key clash; unknown language falls back to `en`; migration v1→v2 keeps all rows and sets `seedLanguage`; restore sentences uses the list's language; restore lists only touches the given language; widget/unit test for the decision in `_selectVoice`: not seeded → seed; seeded + new language → asks; declined → doesn't ask again; same language → nothing). `flutter build apk --debug 2>&1 | tail -40`.
 
-### [ ] T17b (You): Seeding by voice language
+### [x] T17b (You): Seeding by voice language
 1. Migration first: **don't uninstall** the build from T17. Note a few edits (a deleted and an added sentence), then `flutter run --profile` the new build over it: lists and sentences are unchanged, and "restore" still works on Alap.
 2. Uninstall, set the phone language to English, `flutter run --profile`. In the first-run picker choose Imre (under other languages): the lists are Hungarian (Alap…), the UI is English.
 3. Settings → voice → pick the English system voice: you're asked once whether to add the English default lists. Say no, switch to Imre and back to English: not asked again.
@@ -100,9 +100,10 @@ Do after T17a (uses its `languageName` helper and the speech-language rules). Re
   - If the check itself throws: treat as `installed` (today's behavior), so a quirky engine never hides the always-available voice.
 - An already selected system voice keeps working whatever the check says (it's only a hint for choosing).
 - ARB (hu + en) for new strings.
+- **Follow-up (2026-11-03):** the history list's title now follows the speech language like the seeded lists do (`historyTitle` in each `assets/seed/<lang>.json`, stored on the history row by `ListsRepository.syncHistoryTitle`, called when a voice is chosen and at app start). Before, it came from the UI-language ARB, so it showed "Előzmények" next to Swedish lists. An empty title falls back to the ARB string. New seed files must include `historyTitle`.
 - **Checks:** `flutter analyze`, `flutter test` (widget tests with a fake catalog of hu + sv and a fake availability service: selector hidden with one language; defaults to the UI language on first run and to the selected voice's language from settings; switching to Svéd shows the sv system row + NST + Alma and no Hungarian voices; `missingData` shows the hint and no select button; `unsupported` hides the row for sv but shows the hint for the UI language; the installed marker appears on a language with a downloaded voice; picking `system-sv` calls `onSelect` with language `sv`).
 
-### [ ] T17d (You): Voice picker by language
+### [x] T17d (You): Voice picker by language
 1. Settings → voice: the selector shows "Magyar". Switch to Svéd: system row, NST, Alma. Play the samples.
 2. If the Swedish system row says the voice isn't downloaded: tap the button, install Swedish in Google's voice data, come back: the row is selectable now. Select it and type "Hej, hur mår du?": it speaks Swedish. Check it with airplane mode on (a network-only voice would fail here, which means `isLanguageInstalled` isn't telling the truth on this phone; note it).
 3. Download NST, switch the selector back to Magyar: Svéd shows the installed marker in the language list.

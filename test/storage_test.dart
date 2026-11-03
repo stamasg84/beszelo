@@ -54,6 +54,17 @@ void main() {
     expect(s.map((x) => x.body), contains('Várj, gépelek.'));
   });
 
+  test(
+    'history title follows the speech language, not the UI language',
+    () async {
+      expect((await repo.watchLists().first).last.title, 'Előzmények');
+      await repo.syncHistoryTitle('sv');
+      expect((await repo.watchLists().first).last.title, 'Historik');
+      await repo.syncHistoryTitle('fi'); // no seed: unchanged
+      expect((await repo.watchLists().first).last.title, 'Historik');
+    },
+  );
+
   test('fresh DB has only history and is not seeded', () async {
     await db.close();
     db = _open();

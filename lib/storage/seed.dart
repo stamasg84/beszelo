@@ -26,23 +26,27 @@ class SeedList {
 }
 
 class Seed {
-  const Seed(this.lists);
+  const Seed(this.lists, {this.historyTitle});
   final List<SeedList> lists;
 
+  /// Title of the history list in this language (null: keep the current one).
+  final String? historyTitle;
+
   /// Format: see docs/architecture.md "Storage".
-  factory Seed.fromJson(Map<String, dynamic> json) => Seed([
-    for (final l in json['lists'] as List)
-      SeedList(
-        seedKey: l['seedKey'] as String,
-        title: l['title'] as String,
-        kind: ListKind.values.byName(l['kind'] as String),
-        pinned: l['pinned'] as bool? ?? false,
-        sentences: [
-          for (final s in l['sentences'] as List)
-            SeedSentence(s['seedKey'] as String, s['text'] as String),
-        ],
-      ),
-  ]);
+  factory Seed.fromJson(Map<String, dynamic> json) =>
+      Seed(historyTitle: json['historyTitle'] as String?, [
+        for (final l in json['lists'] as List)
+          SeedList(
+            seedKey: l['seedKey'] as String,
+            title: l['title'] as String,
+            kind: ListKind.values.byName(l['kind'] as String),
+            pinned: l['pinned'] as bool? ?? false,
+            sentences: [
+              for (final s in l['sentences'] as List)
+                SeedSentence(s['seedKey'] as String, s['text'] as String),
+            ],
+          ),
+      ]);
 }
 
 /// Loads the seed for a language code; throws if there is none.

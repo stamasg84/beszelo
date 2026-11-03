@@ -102,7 +102,9 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   }
 
   String _title(AppLocalizations l10n, SentenceList l) =>
-      l.kind == ListKind.history ? l10n.historyTitle : l.title;
+      l.kind == ListKind.history && l.title.isEmpty
+      ? l10n.historyTitle
+      : l.title;
 
   @override
   Widget build(BuildContext context) {
