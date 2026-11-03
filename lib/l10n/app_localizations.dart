@@ -164,11 +164,35 @@ abstract class AppLocalizations {
   /// **'Hang kiválasztása'**
   String get voiceSettingsTooltip;
 
-  /// Expandable section with voices of other languages.
+  /// Button at the top of the voice picker showing the chosen language.
   ///
   /// In hu, this message translates to:
-  /// **'Más nyelvek'**
-  String get moreLanguages;
+  /// **'Nyelv: {name}'**
+  String languageSelectorLabel(String name);
+
+  /// Marker on a language in the language list: downloaded voices.
+  ///
+  /// In hu, this message translates to:
+  /// **'{count} letöltve'**
+  String installedVoicesCount(int count);
+
+  /// System voice row: the engine knows the language but has no voice data.
+  ///
+  /// In hu, this message translates to:
+  /// **'A hang nincs letöltve a telefonon.'**
+  String get systemVoiceMissing;
+
+  /// Button opening Android's voice data install screen.
+  ///
+  /// In hu, this message translates to:
+  /// **'Letöltés az Android beállításaiban'**
+  String get downloadInAndroidSettings;
+
+  /// System voice row: the engine can't speak this language.
+  ///
+  /// In hu, this message translates to:
+  /// **'A telefon nem tud ezen a nyelven beszélni.'**
+  String get systemVoiceUnsupported;
 
   /// Name of the Android system TTS voice.
   ///

@@ -60,9 +60,27 @@
   "@voiceSettingsTooltip": {
     "description": "Tooltip of the app bar icon that opens the voice picker."
   },
-  "moreLanguages": "Más nyelvek",
-  "@moreLanguages": {
-    "description": "Expandable section with voices of other languages."
+  "languageSelectorLabel": "Nyelv: {name}",
+  "@languageSelectorLabel": {
+    "description": "Button at the top of the voice picker showing the chosen language.",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "installedVoicesCount": "{count} letöltve",
+  "@installedVoicesCount": {
+    "description": "Marker on a language in the language list: downloaded voices.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "systemVoiceMissing": "A hang nincs letöltve a telefonon.",
+  "@systemVoiceMissing": {
+    "description": "System voice row: the engine knows the language but has no voice data."
+  },
+  "downloadInAndroidSettings": "Letöltés az Android beállításaiban",
+  "@downloadInAndroidSettings": {
+    "description": "Button opening Android's voice data install screen."
+  },
+  "systemVoiceUnsupported": "A telefon nem tud ezen a nyelven beszélni.",
+  "@systemVoiceUnsupported": {
+    "description": "System voice row: the engine can't speak this language."
   },
   "systemVoice": "Android alapértelmezett",
   "@systemVoice": {

@@ -15,6 +15,26 @@ const _names = <String, Map<String, String>>{
   'uk': {'hu': 'Ukrán', 'en': 'Ukrainian'},
 };
 
+/// Each language's own name, so a user who can't read the UI language can
+/// still find theirs.
+const _nativeNames = <String, String>{
+  'hu': 'Magyar',
+  'en': 'English',
+  'sv': 'Svenska',
+  'de': 'Deutsch',
+  'fr': 'Français',
+  'es': 'Español',
+  'it': 'Italiano',
+  'ro': 'Română',
+  'sk': 'Slovenčina',
+  'sr': 'Српски',
+  'fi': 'Suomi',
+  'uk': 'Українська',
+};
+
+/// Name of language [code] in that language itself; unknown → the code.
+String nativeLanguageName(String code) => _nativeNames[code] ?? code;
+
 /// Name of language [code] in [uiLang] (`hu` or `en`; anything else is
 /// treated as `en`), capitalized. With [midSentence], Hungarian names are
 /// lowercased ("a svéd listák"); English names stay capitalized.

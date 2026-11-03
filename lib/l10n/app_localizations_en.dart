@@ -47,7 +47,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voiceSettingsTooltip => 'Choose a voice';
 
   @override
-  String get moreLanguages => 'Other languages';
+  String languageSelectorLabel(String name) {
+    return 'Language: $name';
+  }
+
+  @override
+  String installedVoicesCount(int count) {
+    return '$count downloaded';
+  }
+
+  @override
+  String get systemVoiceMissing => 'The voice isn\'t downloaded on this phone.';
+
+  @override
+  String get downloadInAndroidSettings => 'Download in Android settings';
+
+  @override
+  String get systemVoiceUnsupported => 'This phone can\'t speak this language.';
 
   @override
   String get systemVoice => 'Android default';

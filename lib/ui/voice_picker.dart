@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 
 import '../l10n/app_localizations.dart';
 import '../voices/catalog.dart';
+import '../voices/language_names.dart';
+import '../voices/system_tts_info.dart';
 import '../voices/voice.dart';
 import '../voices/voice_installer.dart';
 
@@ -60,7 +62,8 @@ class DefaultVoicePreviewer implements VoicePreviewer {
   }
 }
 
-/// Voice list: system voice + catalog voices (downloadable / installed).
+/// Voice list for one language (chosen with a selector): system voice +
+/// catalog voices (downloadable / installed).
 class VoicePickerScreen extends StatefulWidget {
   const VoicePickerScreen({
     super.key,
@@ -70,6 +73,7 @@ class VoicePickerScreen extends StatefulWidget {
     required this.onSelect,
     this.firstRun = false,
     this.previewer,
+    this.systemInfo,
   });
 
   final Catalog catalog;
@@ -83,16 +87,22 @@ class VoicePickerScreen extends StatefulWidget {
   final bool firstRun;
   final VoicePreviewer? previewer;
 
+  /// Android TTS availability per language. Replaceable in tests.
+  final SystemTtsInfo? systemInfo;
+
   @override
   State<VoicePickerScreen> createState() => _VoicePickerScreenState();
 }
 
-class _VoicePickerScreenState extends State<VoicePickerScreen> {
+class _VoicePickerScreenState extends State<VoicePickerScreen>
+    with WidgetsBindingObserver {
   late final VoicePreviewer _previewer;
+  late final SystemTtsInfo _systemInfo;
   late String _selectedId = widget.selectedId;
+  final _availability = <String, SystemVoiceAvailability>{};
   final _installed = <String>{};
+  String? _language;
   bool _checkedInstalled = false;
-  bool _showOthers = false;
   String? _downloadingId;
   double _progress = 0;
   InstallStage _stage = InstallStage.downloading;
@@ -104,14 +114,57 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
   void initState() {
     super.initState();
     _previewer = widget.previewer ?? DefaultVoicePreviewer();
+    _systemInfo = widget.systemInfo ?? DefaultSystemTtsInfo();
+    WidgetsBinding.instance.addObserver(this);
     _refreshInstalled();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_language == null) {
+      _language = _initialLanguage();
+      _refreshAvailability();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _token?.cancel();
     _previewer.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The user may have installed voice data in Android's settings.
+    if (state == AppLifecycleState.resumed) _refreshAvailability();
+  }
+
+  String get _uiLanguage => Localizations.localeOf(context).languageCode;
+
+  /// Opened from settings: the selected voice's language; first run (nothing
+  /// selected): the UI language.
+  String _initialLanguage() {
+    final id = widget.selectedId;
+    final fromVoice =
+        widget.catalog.byId(id)?.language ??
+        (id.startsWith('system-') ? id.substring('system-'.length) : null);
+    return fromVoice != null && _languages.contains(fromVoice)
+        ? fromVoice
+        : _uiLanguage;
+  }
+
+  /// Catalog languages: the UI language first, then the rest by their
+  /// UI-language name. Without a catalog (offline) just the UI language.
+  List<String> get _languages {
+    final ui = _uiLanguage;
+    final codes = {for (final v in widget.catalog.voices) v.language};
+    if (codes.isEmpty) return [ui];
+    final others = codes.where((c) => c != ui).toList()
+      ..sort((a, b) => languageName(a, ui).compareTo(languageName(b, ui)));
+    return [if (codes.contains(ui)) ui, ...others];
   }
 
   Future<void> _refreshInstalled() async {
@@ -121,9 +174,12 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
     if (mounted) setState(() => _checkedInstalled = true);
   }
 
-  String get _uiLanguage => Localizations.localeOf(context).languageCode;
-
-  Voice get _systemVoice => Voice.system(_uiLanguage);
+  Future<void> _refreshAvailability() async {
+    final lang = _language;
+    if (lang == null) return;
+    final result = await _systemInfo.availability(lang);
+    if (mounted) setState(() => _availability[lang] = result);
+  }
 
   Future<void> _select(Voice v) async {
     setState(() => _selectedId = v.id);
@@ -169,7 +225,7 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
   }
 
   Future<void> _delete(CatalogVoice v) async {
-    if (_selectedId == v.id) await _select(_systemVoice);
+    if (_selectedId == v.id) await _select(Voice.system(v.language));
     await widget.installer.delete(v.id);
     if (mounted) setState(() => _installed.remove(v.id));
   }
@@ -184,16 +240,62 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
     }
   }
 
+  Future<void> _chooseLanguage() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: _languageSheet,
+    );
+    if (picked != null && picked != _language && mounted) {
+      setState(() => _language = picked);
+      _refreshAvailability();
+    }
+  }
+
+  Widget _languageSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final ui = _uiLanguage;
+    return SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          for (final code in _languages) _languageTile(context, code, ui, l10n),
+        ],
+      ),
+    );
+  }
+
+  Widget _languageTile(
+    BuildContext context,
+    String code,
+    String ui,
+    AppLocalizations l10n,
+  ) {
+    final name = languageName(code, ui);
+    final native = nativeLanguageName(code);
+    final count = widget.catalog.voices
+        .where((v) => v.language == code && _installed.contains(v.id))
+        .length;
+    return ListTile(
+      key: Key('language-$code'),
+      minTileHeight: 56,
+      title: Text(
+        native == name ? name : '$name ($native)',
+        style: const TextStyle(fontSize: 20),
+      ),
+      subtitle: count > 0 ? Text(l10n.installedVoicesCount(count)) : null,
+      trailing: count > 0 ? const Icon(Icons.check) : null,
+      selected: code == _language,
+      onTap: () => Navigator.of(context).pop(code),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final lang = _uiLanguage;
-    final mine = widget.catalog.forLanguage(lang);
-    final others = widget.catalog.voices
-        .where((v) => v.language != lang)
-        .toList();
-    final sample = widget.catalog.sampleText[lang];
-    final system = _systemVoice;
+    final ui = _uiLanguage;
+    final lang = _language ?? ui;
+    final voices = widget.catalog.forLanguage(lang);
 
     return Scaffold(
       appBar: AppBar(
@@ -204,6 +306,11 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: [
+            if (_languages.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _languageSelector(l10n, ui, lang),
+              ),
             if (widget.catalog.isBundled || widget.catalog.voices.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -225,32 +332,101 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
-            _row(
-              key: const Key('voice-system'),
-              title: l10n.systemVoice,
-              subtitle: l10n.systemVoiceInfo,
-              onPlay: sample == null
-                  ? null
-                  : () => _previewer.speakSystem(sample, lang),
-              trailing: _selectedId == system.id
-                  ? _selectedLabel(l10n)
-                  : OutlinedButton(
-                      onPressed: () => _select(system),
-                      child: Text(l10n.select),
-                    ),
-            ),
-            for (final v in mine) _catalogRow(v, l10n),
-            if (others.isNotEmpty)
-              ExpansionTile(
-                key: const Key('more-languages'),
-                title: Text(l10n.moreLanguages),
-                initiallyExpanded: _showOthers,
-                onExpansionChanged: (e) => _showOthers = e,
-                children: [for (final v in others) _catalogRow(v, l10n)],
-              ),
+            ?_systemRow(lang, l10n),
+            for (final v in voices) _catalogRow(v, l10n),
           ],
         ),
       ),
+    );
+  }
+
+  /// The main control of the screen (it decides which voices are listed), so
+  /// it is the most prominent element: tall, tinted, with a globe and arrow.
+  Widget _languageSelector(AppLocalizations l10n, String ui, String lang) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: double.infinity,
+      height: 64,
+      child: FilledButton(
+        key: const Key('language-selector'),
+        style: FilledButton.styleFrom(
+          backgroundColor: scheme.primaryContainer,
+          foregroundColor: scheme.onPrimaryContainer,
+          side: BorderSide(color: scheme.primary, width: 2),
+        ),
+        onPressed: _chooseLanguage,
+        child: Row(
+          children: [
+            const Icon(Icons.language, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.languageSelectorLabel(languageName(lang, ui)),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down, size: 36),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget? _systemRow(String lang, AppLocalizations l10n) {
+    final system = Voice.system(lang);
+    final isSelected = _selectedId == system.id;
+    // Unknown yet (check running or failed) counts as installed.
+    final status = _availability[lang] ?? SystemVoiceAvailability.installed;
+    final sample = widget.catalog.sampleText[lang];
+
+    // A selected system voice keeps working whatever the check says.
+    if (isSelected || status == SystemVoiceAvailability.installed) {
+      return _row(
+        key: const Key('voice-system'),
+        title: l10n.systemVoice,
+        subtitle: l10n.systemVoiceInfo,
+        onPlay: sample == null
+            ? null
+            : () => _previewer.speakSystem(sample, lang),
+        trailing: isSelected
+            ? _selectedLabel(l10n)
+            : OutlinedButton(
+                onPressed: () => _select(system),
+                child: Text(l10n.select),
+              ),
+      );
+    }
+    if (status == SystemVoiceAvailability.missingData) {
+      return _row(
+        key: const Key('voice-system'),
+        title: l10n.systemVoice,
+        subtitle: l10n.systemVoiceMissing,
+        trailing: const SizedBox.shrink(),
+        // Too long for the trailing slot: it would squeeze the title.
+        footer: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton(
+              onPressed: _systemInfo.openInstallVoiceData,
+              child: Text(l10n.downloadInAndroidSettings),
+            ),
+          ),
+        ),
+      );
+    }
+    // Unsupported: hidden, except for the UI language, so the picker never
+    // looks voiceless.
+    if (lang != _uiLanguage) return null;
+    return _row(
+      key: const Key('voice-system'),
+      title: l10n.systemVoice,
+      subtitle: l10n.systemVoiceUnsupported,
+      trailing: const SizedBox.shrink(),
     );
   }
 
@@ -321,6 +497,7 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
     VoidCallback? onDelete,
     String? deleteTooltip,
     String? playTooltip,
+    Widget? footer,
   }) {
     return Card(
       key: key,
@@ -355,6 +532,7 @@ class _VoicePickerScreenState extends State<VoicePickerScreen> {
                   ),
               ],
             ),
+            ?footer,
             if (showProgress)
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),

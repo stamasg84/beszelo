@@ -47,7 +47,24 @@ class AppLocalizationsHu extends AppLocalizations {
   String get voiceSettingsTooltip => 'Hang kiválasztása';
 
   @override
-  String get moreLanguages => 'Más nyelvek';
+  String languageSelectorLabel(String name) {
+    return 'Nyelv: $name';
+  }
+
+  @override
+  String installedVoicesCount(int count) {
+    return '$count letöltve';
+  }
+
+  @override
+  String get systemVoiceMissing => 'A hang nincs letöltve a telefonon.';
+
+  @override
+  String get downloadInAndroidSettings => 'Letöltés az Android beállításaiban';
+
+  @override
+  String get systemVoiceUnsupported =>
+      'A telefon nem tud ezen a nyelven beszélni.';
 
   @override
   String get systemVoice => 'Android alapértelmezett';

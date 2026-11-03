@@ -88,7 +88,7 @@ Problem: `onCreate` seeds from the UI language before any voice is picked, so a 
 4. Uninstall again, Hungarian phone, leave the first-run picker with the back gesture: Hungarian lists exist, and the picker shows again next launch.
 Done → commit.
 
-### [ ] T17c (Agent): Voice picker: language selector, system voice per language
+### [x] T17c (Agent): Voice picker: language selector, system voice per language
 Do after T17a (uses its `languageName` helper and the speech-language rules). Read architecture.md "Voices" (voice picker) first. Replaces the "Más nyelvek" `ExpansionTile` in `lib/ui/voice_picker.dart`.
 - **Language selector** at the top, only if the catalog has more than one language: a full-width button ≥ 56 dp, "Nyelv: Magyar ▾". It opens a bottom sheet (or dialog) of large rows (≥ 56 dp), one per catalog language: "Svéd (Svenska)" (UI-language name + native name; add the native name to the helper), with a marker (✓ + "1 letöltve") on languages that have installed voices, so downloaded voices in other languages can still be found and deleted. UI language first, then the others alphabetically by their UI-language name.
 - **Default:** opened from settings → the selected voice's language; first run → the UI language. Changing the selector only filters the list; nothing is saved and no seed question is asked until a voice is picked.
