@@ -287,14 +287,14 @@ abstract class AppLocalizations {
   /// Hint shown in an empty sentence list.
   ///
   /// In hu, this message translates to:
-  /// **'Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák'**
+  /// **'Ez a lista üres. Szerkesztés: ☰ Menü → Listák'**
   String get emptyListHint;
 
-  /// Tooltip of the cog in the speaking screen's app bar, and title of the settings screen.
+  /// Tooltip of the hamburger button in the speaking screen's app bar.
   ///
   /// In hu, this message translates to:
-  /// **'Beállítások'**
-  String get settingsTooltip;
+  /// **'Menü'**
+  String get menuTooltip;
 
   /// Settings row opening the voice picker.
   ///

@@ -7,7 +7,7 @@ import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
 import '../voices/voice.dart';
 import 'list_colors.dart';
-import 'settings_screen.dart';
+import 'main_drawer.dart';
 
 /// Main screen: list chips, big sentence rows, always-visible free text.
 class SpeakingScreen extends StatefulWidget {
@@ -167,19 +167,6 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     super.dispose();
   }
 
-  void _openSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => SettingsScreen(
-          repo: widget.repo,
-          voice: widget.voice ?? () => Voice.system('hu'),
-          onOpenVoicePicker: widget.onOpenVoicePicker ?? () async {},
-          currentListId: () => _currentId,
-        ),
-      ),
-    );
-  }
-
   String _title(AppLocalizations l10n, SentenceList l) =>
       l.kind == ListKind.history && l.title.isEmpty
       ? l10n.historyTitle
@@ -194,7 +181,28 @@ class _SpeakingScreenState extends State<SpeakingScreen>
         final lists = snap.data ?? const <SentenceList>[];
         final current = lists.where((l) => l.id == _currentId).firstOrNull;
         return Scaffold(
+          // Opened only by the hamburger: an edge swipe clashes with Android's
+          // back gesture and opens by accident while scrolling.
+          drawerEnableOpenDragGesture: false,
+          drawer: MainDrawer(
+            repo: widget.repo,
+            voice: widget.voice ?? () => Voice.system('hu'),
+            onOpenVoicePicker: widget.onOpenVoicePicker ?? () async {},
+            currentListId: () => _currentId,
+          ),
           appBar: AppBar(
+            leading: Builder(
+              builder: (ctx) => IconButton(
+                tooltip: l10n.menuTooltip,
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  // Otherwise the route/drawer restores focus to the text
+                  // field on return and the keyboard pops up.
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  Scaffold.of(ctx).openDrawer();
+                },
+              ),
+            ),
             // The open list's name, so the screen says which list it is in
             // words as well as color.
             title: Text(
@@ -202,16 +210,7 @@ class _SpeakingScreenState extends State<SpeakingScreen>
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            actions: [
-              _loadButton(l10n),
-              // Wide gap: a slightly-off tap must not hit the neighbour.
-              const SizedBox(width: 16),
-              IconButton(
-                tooltip: l10n.settingsTooltip,
-                icon: const Icon(Icons.settings),
-                onPressed: _openSettings,
-              ),
-            ],
+            actions: [_loadButton(l10n), const SizedBox(width: 4)],
           ),
           body: SafeArea(
             child: Column(

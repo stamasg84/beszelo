@@ -6,10 +6,11 @@ import '../voices/language_names.dart';
 import '../voices/voice.dart';
 import 'lists_screen.dart';
 
-/// Settings: a plain list of large rows. Editing lives behind it, never on the
-/// speaking screen.
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({
+/// The speaking screen's menu: a plain list of large rows. Editing lives
+/// behind it, never on the speaking screen itself. Opened only by the app bar
+/// button (no edge swipe).
+class MainDrawer extends StatelessWidget {
+  const MainDrawer({
     super.key,
     required this.repo,
     required this.voice,
@@ -19,7 +20,7 @@ class SettingsScreen extends StatefulWidget {
 
   final ListsRepository repo;
 
-  /// The active voice (read again after the voice picker closes).
+  /// The active voice, read each time the drawer is built (i.e. opened).
   final Voice Function() voice;
   final Future<void> Function() onOpenVoicePicker;
 
@@ -27,48 +28,54 @@ class SettingsScreen extends StatefulWidget {
   final int? Function() currentListId;
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final ui = Localizations.localeOf(context).languageCode;
-    final voice = widget.voice();
-    final voiceName = voice.kind == VoiceKind.system
-        ? l10n.systemVoice
-        : voice.label;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsTooltip)),
-      body: SafeArea(
+    final v = voice();
+    final voiceName = v.kind == VoiceKind.system ? l10n.systemVoice : v.label;
+    // Close the drawer first, then push, so back returns to the speaking
+    // screen and not to an open drawer.
+    final navigator = Navigator.of(context);
+    return Drawer(
+      child: SafeArea(
         child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            _SettingsRow(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              child: Text(
+                l10n.appTitle,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+            _DrawerRow(
               icon: Icons.record_voice_over,
               title: l10n.settingsVoiceTitle,
               subtitle: l10n.settingsVoiceSubtitle(
                 voiceName,
-                languageName(voice.languageCode, ui),
+                languageName(v.languageCode, ui),
               ),
-              onTap: () async {
-                await widget.onOpenVoicePicker();
-                if (mounted) setState(() {});
+              onTap: () {
+                navigator.pop();
+                onOpenVoicePicker();
               },
             ),
-            _SettingsRow(
+            _DrawerRow(
               icon: Icons.list_alt,
               title: l10n.settingsListsTitle,
               subtitle: l10n.settingsListsSubtitle,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ListsScreen(
-                    repo: widget.repo,
-                    currentListId: widget.currentListId(),
-                    speechLanguage: () => widget.voice().languageCode,
+              onTap: () {
+                navigator.pop();
+                navigator.push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => ListsScreen(
+                      repo: repo,
+                      currentListId: currentListId(),
+                      speechLanguage: () => voice().languageCode,
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -77,8 +84,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({
+class _DrawerRow extends StatelessWidget {
+  const _DrawerRow({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -112,7 +119,6 @@ class _SettingsRow extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
             ],
           ),
         ),

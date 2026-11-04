@@ -89,7 +89,7 @@ void main() {
   }
 
   Future<void> openLists(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('Beállítások'));
+    await tester.tap(find.byTooltip('Menü'));
     await settle(tester);
     await tester.tap(find.text('Listák'));
     await settle(tester);

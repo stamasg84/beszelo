@@ -116,11 +116,10 @@ class AppLocalizationsHu extends AppLocalizations {
   String get allLists => 'Összes lista';
 
   @override
-  String get emptyListHint =>
-      'Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák';
+  String get emptyListHint => 'Ez a lista üres. Szerkesztés: ☰ Menü → Listák';
 
   @override
-  String get settingsTooltip => 'Beállítások';
+  String get menuTooltip => 'Menü';
 
   @override
   String get settingsVoiceTitle => 'Hang és nyelv';

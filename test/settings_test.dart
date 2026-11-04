@@ -92,7 +92,7 @@ void main() {
   }
 
   Future<void> openLists(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('Beállítások'));
+    await tester.tap(find.byTooltip('Menü'));
     await settle(tester);
     await tester.tap(find.text('Listák'));
     await settle(tester);
@@ -101,17 +101,40 @@ void main() {
   Future<List<SentenceList>> lists(WidgetTester tester) async =>
       (await tester.runAsync(() => repo.watchLists().first))!;
 
-  testWidgets('cog → settings → Hang és nyelv opens the picker', (
+  testWidgets('hamburger → drawer → Hang és nyelv opens the picker', (
     tester,
   ) async {
     await pumpScreen(tester);
     expect(find.byTooltip('Szerkesztés'), findsNothing);
-    await tester.tap(find.byTooltip('Beállítások'));
+    expect(find.byTooltip('Beállítások'), findsNothing); // no cog
+    await tester.tap(find.byTooltip('Menü'));
     await settle(tester);
+    expect(find.text('Listák'), findsOneWidget);
     expect(find.text('Android alapértelmezett · Magyar'), findsOneWidget);
     await tester.tap(find.text('Hang és nyelv'));
     await settle(tester);
     expect(pickerOpened, 1);
+    expect(find.text('Listák'), findsNothing); // drawer closed
+    await finish(tester);
+  });
+
+  testWidgets('edge swipe does not open the drawer', (tester) async {
+    await pumpScreen(tester);
+    await tester.dragFrom(const Offset(2, 300), const Offset(300, 0));
+    await settle(tester);
+    expect(find.text('Hang és nyelv'), findsNothing);
+    await finish(tester);
+  });
+
+  testWidgets('back from the overview lands on the speaking screen', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.text('Hang és nyelv'), findsNothing); // drawer not open
+    expect(find.byTooltip('Menü'), findsOneWidget);
     await finish(tester);
   });
 

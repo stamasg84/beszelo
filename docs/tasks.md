@@ -180,6 +180,15 @@ Goal: say a variation of a saved sentence ("Kérek egy pohár vizet!" → "Kére
 - All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (widget tests with the fake `Speaker`: armed + row tap → text in field, nothing spoken, history unchanged, mode off afterwards; second row tap after that speaks normally; appending to existing text adds one space; cancel via button / ✕ / chip switch / Mondom; a conversation row loaded while armed stays unsaid).
 
+### [x] T19b (Agent): Settings into a drawer (hamburger menu)
+Goal (own use, 2026-11-04): the settings screen holds only two rows, so it's an extra screen for nothing; and with the builder button (T19a) next to the cog, the right side of the app bar has two targets side by side (mis-tap risk). A drawer saves a tap and leaves the builder button alone on the right.
+- **Speaking screen app bar:** a hamburger button (`Icons.menu`, ≥ 48 dp, tooltip/TalkBack "Menü") as `leading`, left of the list name. The cog is removed; `actions` holds only the builder button (T19a). Remove the 16 dp spacer that separated it from the cog (keep the normal end padding).
+- **Drawer (`Scaffold.drawer`)**, opened **only by the button**: `drawerEnableOpenDragGesture: false` (an edge swipe conflicts with Android's back gesture and opens it by accident while scrolling). Contents = today's settings rows, same large rows (≥ 72 dp, icon + title + subtitle): "Hang és nyelv" (current voice · language) → voice picker; "Listák" → lists overview. A small header with the app name "Mondom" is fine (it no longer appears anywhere else on the speaking screen). Tapping a row closes the drawer, then pushes the screen (so back returns to the speaking screen, not to an open drawer). The voice subtitle must be current each time the drawer opens (it was refreshed after the picker returned before).
+- **Remove `settings_screen.dart`**: move `_SettingsRow` into the drawer widget (e.g. `lib/ui/main_drawer.dart`). Rows planned for later (speech speed, About, bell/emergency setup) go into the drawer; update the "Later" notes below that say "a row in the settings screen".
+- **Texts:** empty-list hint "Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák" → "Ez a lista üres. Szerkesztés: ☰ Menü → Listák" (hu + en). Drop `settingsTooltip` if unused; screen titles of the voice picker / lists overview are unchanged.
+- Update architecture.md "Settings and editing" (settings screen → drawer; editing still never happens on the speaking screen itself, it stays in separate screens reached from the drawer).
+- **Checks:** `flutter analyze`, `flutter test` (update tests that tap the cog; widget tests: hamburger → drawer shows both rows with the current voice; "Hang és nyelv" opens the picker; "Listák" shows the lists overview with the open list marked; back from the overview lands on the speaking screen with the drawer closed; the app bar has no cog; a horizontal drag from the left edge does not open the drawer).
+
 ### [ ] T20 (You): A real prepared conversation
 1. The evening before talking to someone (a family member is fine), create a conversation list in the editor: add 5–10 rows (typed, or pasted from notes one per line), at least one with two sentences in it. Pin it.
 2. Next day, open the app: the list is already open. Hold the conversation using only Következő, list taps and the occasional typed sentence; jump to Alap and back at least once.
@@ -193,5 +202,5 @@ Done → commit.
 - Offer new default lists/sentences added in later app versions to existing users (seed version).
 - Message banking (record your own audio for a sentence).
 - Bell; emergency SMS with GPS (platform channel).
-- Speech speed setting (lengthScale): a row in the settings screen (T18).
+- Speech speed setting (lengthScale): a row in the drawer (T19b).
 - About screen (a row in the settings screen, T18) with licenses; needed before the Play Store release (Alma is CC BY 4.0 and needs credit) (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).

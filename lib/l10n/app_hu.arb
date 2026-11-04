@@ -155,13 +155,13 @@
   "@allLists": {
     "description": "Tooltip of the ▾ button that shows all lists."
   },
-  "emptyListHint": "Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák",
+  "emptyListHint": "Ez a lista üres. Szerkesztés: ☰ Menü → Listák",
   "@emptyListHint": {
     "description": "Hint shown in an empty sentence list."
   },
-  "settingsTooltip": "Beállítások",
-  "@settingsTooltip": {
-    "description": "Tooltip of the cog in the speaking screen's app bar, and title of the settings screen."
+  "menuTooltip": "Menü",
+  "@menuTooltip": {
+    "description": "Tooltip of the hamburger button in the speaking screen's app bar."
   },
   "settingsVoiceTitle": "Hang és nyelv",
   "@settingsVoiceTitle": {

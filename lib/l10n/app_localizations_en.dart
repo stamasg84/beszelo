@@ -115,10 +115,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allLists => 'All lists';
 
   @override
-  String get emptyListHint => 'This list is empty. To edit: ⚙ Settings → Lists';
+  String get emptyListHint => 'This list is empty. To edit: ☰ Menu → Lists';
 
   @override
-  String get settingsTooltip => 'Settings';
+  String get menuTooltip => 'Menu';
 
   @override
   String get settingsVoiceTitle => 'Voice and language';
