@@ -93,5 +93,7 @@
   "@colorName_blue": {
     "description": "Color names are only semantics labels for screen readers."
   },
-  "colorSelected": "selected"
+  "colorSelected": "selected",
+  "nextSentence": "Next",
+  "allSaid": "All said"
 }

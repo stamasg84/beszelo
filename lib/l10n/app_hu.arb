@@ -379,5 +379,13 @@
   "@colorName_blue": {
     "description": "Color names are only semantics labels for screen readers."
   },
-  "colorSelected": "kiválasztva"
+  "colorSelected": "kiválasztva",
+  "nextSentence": "Következő",
+  "@nextSentence": {
+    "description": "Button in a conversation list that speaks the first unsaid sentence."
+  },
+  "allSaid": "Minden elhangzott",
+  "@allSaid": {
+    "description": "Shown in place of the next button when every sentence of a conversation is said."
+  }
 }

@@ -162,7 +162,7 @@ Problem (own use, 2026-11-04): the "Alapértelmezett mondatok visszaállítása"
 - Repository: only the `createList` `color` parameter above. Strings via ARB (hu + en; plural-aware count).
 - **Checks:** `flutter analyze`, `flutter test` (update the T18 "restore row" test to the app-bar menu; widget tests: delete a seed sentence → the editor has no restore row; the list's ⋮ sheet shows the restore entry, tapping it brings the sentence back and shows the snackbar; with nothing missing the entry is absent; history's sheet never has it; Újrakezdés appears only for conversation lists; create dialog: untouched swatches → same color as the automatic pick, picking green → new list is `green`, "Nincs" → `null`).
 
-### [ ] T19 (Agent): Prepared conversations
+### [x] T19 (Agent): Prepared conversations
 - In a `conversation` list, speaking a row (tap or Következő) sets its `said = true`.
 - **"Következő ▶"** button below the rows (conversation lists only, fixed position, large): speaks the first unsaid sentence in order. When all are said, it's disabled and shows "Minden elhangzott" with an "Újrakezdés" action next to it (confirm first; this is the one place the speaking screen changes data besides `said`).
 - The next unsaid sentence gets a subtle highlight (border/marker, no size change, no auto-scroll jumping; if it's off-screen, scroll it into view only after a Következő tap, never during the user's own scrolling).

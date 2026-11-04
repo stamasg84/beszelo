@@ -301,4 +301,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorSelected => 'selected';
+
+  @override
+  String get nextSentence => 'Next';
+
+  @override
+  String get allSaid => 'All said';
 }

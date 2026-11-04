@@ -39,6 +39,13 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   Stream<List<Sentence>>? _sentences;
   int? _currentId;
   bool _currentIsHistory = false;
+  bool _currentIsConversation = false;
+
+  /// After "Következő": the id of the sentence just said; once its `said`
+  /// flag arrives, the new next row is scrolled into view (never otherwise).
+  int? _scrollAfterId;
+  final _scrollController = ScrollController();
+  final _nextKey = GlobalKey();
 
   /// The open list was chosen by the fallback rule, not by the user or the
   /// remembered last list, so it may be replaced when lists appear later
@@ -83,6 +90,8 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
     setState(() {
       _currentId = id;
       _currentIsHistory = list.kind == ListKind.history;
+      _currentIsConversation = list.kind == ListKind.conversation;
+      _scrollAfterId = null;
       _sentences = widget.repo.watchSentences(id);
       _expanded = false;
     });
@@ -93,6 +102,9 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
     final speaker = widget.speaker;
     if (!speaker.ready || text.trim().isEmpty) return;
     setState(() => _tappedId = rowId);
+    if (rowId != null && _currentIsConversation) {
+      unawaited(widget.repo.setSaid(rowId, true));
+    }
     // Tapping a row in the history list must not reorder it under the finger.
     if (rowId == null || !_currentIsHistory) {
       unawaited(widget.repo.addToHistory(text));
@@ -105,6 +117,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   void dispose() {
     _listsSub?.cancel();
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -274,26 +287,152 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
             ),
           );
         }
-        return ListenableBuilder(
-          listenable: widget.speaker,
-          builder: (context, _) => ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: sentences.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, i) => _row(sentences[i], list?.color),
-          ),
+        final conversation = list?.kind == ListKind.conversation;
+        final next = conversation
+            ? sentences.where((s) => !s.said).firstOrNull
+            : null;
+        final pending = _scrollAfterId;
+        if (pending != null &&
+            sentences.any((s) => s.id == pending && s.said)) {
+          _scrollAfterId = null;
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _scrollToNext(sentences),
+          );
+        }
+        return Column(
+          children: [
+            Expanded(
+              child: ListenableBuilder(
+                listenable: widget.speaker,
+                builder: (context, _) => ListView.separated(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: sentences.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, i) => _row(
+                    sentences[i],
+                    list?.color,
+                    isNext: next != null && sentences[i].id == next.id,
+                  ),
+                ),
+              ),
+            ),
+            if (conversation) _nextBar(l10n, next),
+          ],
         );
       },
     );
   }
 
-  Widget _row(Sentence s, String? colorKey) {
+  /// Brings the next unsaid row into view: exact if it is built, otherwise
+  /// jump near it by an estimated row height first.
+  void _scrollToNext(List<Sentence> sentences) {
+    if (!mounted || !_scrollController.hasClients) return;
+    final i = sentences.indexWhere((s) => !s.said);
+    if (i < 0) return;
+    final ctx = _nextKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 250),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      return;
+    }
+    final pos = _scrollController.position;
+    _scrollController.jumpTo((i * 80.0).clamp(0, pos.maxScrollExtent));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final c = _nextKey.currentContext;
+      if (mounted && c != null) Scrollable.ensureVisible(c);
+    });
+  }
+
+  Future<void> _speakNext(Sentence next) async {
+    if (!widget.speaker.ready) return;
+    _scrollAfterId = next.id;
+    await _speak(next.body, rowId: next.id);
+  }
+
+  Future<void> _confirmReset(int listId) async {
+    final l10n = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(
+          l10n.resetSaidQuestion,
+          style: const TextStyle(fontSize: 20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.resetSaid),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await widget.repo.resetSaid(listId);
+  }
+
+  Widget _nextBar(AppLocalizations l10n, Sentence? next) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: next != null
+          ? SizedBox(
+              width: double.infinity,
+              height: 64,
+              child: FilledButton.icon(
+                onPressed: widget.speaker.ready ? () => _speakNext(next) : null,
+                icon: const Icon(Icons.play_arrow, size: 32),
+                label: Text(
+                  l10n.nextSentence,
+                  style: const TextStyle(fontSize: 26),
+                ),
+              ),
+            )
+          : SizedBox(
+              height: 64,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.allSaid,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(64, 56),
+                    ),
+                    onPressed: () => _confirmReset(_currentId!),
+                    child: Text(
+                      l10n.resetSaid,
+                      style: const TextStyle(fontSize: 22),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _row(Sentence s, String? colorKey, {bool isNext = false}) {
     final scheme = Theme.of(context).colorScheme;
     final tones = listColor(context, colorKey);
     final active = _tappedId == s.id;
     return Material(
+      key: isNext ? _nextKey : null,
       color: active ? tones.rowActive : tones.row,
-      borderRadius: BorderRadius.circular(12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isNext
+            ? BorderSide(width: 3, color: scheme.onSurface)
+            : BorderSide.none,
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () => _speak(s.body, rowId: s.id),

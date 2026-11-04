@@ -607,6 +607,18 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'kiválasztva'**
   String get colorSelected;
+
+  /// Button in a conversation list that speaks the first unsaid sentence.
+  ///
+  /// In hu, this message translates to:
+  /// **'Következő'**
+  String get nextSentence;
+
+  /// Shown in place of the next button when every sentence of a conversation is said.
+  ///
+  /// In hu, this message translates to:
+  /// **'Minden elhangzott'**
+  String get allSaid;
 }
 
 class _AppLocalizationsDelegate

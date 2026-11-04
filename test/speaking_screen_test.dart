@@ -211,4 +211,100 @@ void main() {
     expect(find.text('Szia!'), findsNothing);
     await finish(tester);
   });
+
+  group('prepared conversation', () {
+    Future<void> openConversation(WidgetTester tester) async {
+      await pumpScreen(tester);
+      await tester.tap(find.byTooltip('Összes lista'));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'Példa beszélgetés'));
+      await settle(tester);
+    }
+
+    Future<List<bool>> saidFlags() async => (await tester0!.runAsync(() async {
+      final conv = (await repo.watchLists().first).firstWhere(
+        (l) => l.kind == ListKind.conversation,
+      );
+      return (await repo.watchSentences(conv.id).first)
+          .map((s) => s.said)
+          .toList();
+    }))!;
+
+    const a = 'Ki kéne cserélni a villanykörtét.';
+    const b = 'Légyszi vegyetek a boltban trappistát!';
+    const c = 'Mi újság a suliban?';
+
+    testWidgets('Következő speaks in order, skips said, then resets', (
+      tester,
+    ) async {
+      tester0 = tester;
+      await openConversation(tester);
+      final next = find.widgetWithText(FilledButton, 'Következő');
+
+      // Direct tap on the 2nd row marks it said.
+      await tester.tap(find.text(b));
+      await settle(tester);
+      expect(await saidFlags(), [false, true, false]);
+
+      await tester.tap(next);
+      await settle(tester);
+      await tester.tap(next);
+      await settle(tester);
+      expect(speaker.spoken, [b, a, c]);
+      expect(await saidFlags(), [true, true, true]);
+
+      // All-said state.
+      expect(next, findsNothing);
+      expect(find.text('Minden elhangzott'), findsOneWidget);
+
+      // Cancel keeps; confirm resets.
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Újrakezdés'));
+      await settle(tester);
+      await tester.tap(find.text('Mégse'));
+      await settle(tester);
+      expect(await saidFlags(), [true, true, true]);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Újrakezdés'));
+      await settle(tester);
+      await tester.tap(find.widgetWithText(TextButton, 'Újrakezdés'));
+      await settle(tester);
+      expect(await saidFlags(), [false, false, false]);
+      expect(next, findsOneWidget);
+      tester0 = null;
+      await finish(tester);
+    });
+
+    testWidgets('everyday lists have no Következő and no said marks', (
+      tester,
+    ) async {
+      tester0 = tester;
+      await pumpScreen(tester);
+      expect(find.text('Következő'), findsNothing);
+      await tester.tap(find.text('Kérek vizet!'));
+      await settle(tester);
+      final everyday = await tester.runAsync(() async {
+        final l = (await repo.watchLists().first).firstWhere(
+          (l) => l.seedKey == 'everyday',
+        );
+        return repo.watchSentences(l.id).first;
+      });
+      expect(everyday!.any((s) => s.said), isFalse);
+      tester0 = null;
+      await finish(tester);
+    });
+
+    testWidgets('free text in a conversation list marks nothing said', (
+      tester,
+    ) async {
+      tester0 = tester;
+      await openConversation(tester);
+      await tester.enterText(find.byType(TextField), 'Szia!');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'Mondom'));
+      await settle(tester);
+      expect(await saidFlags(), [false, false, false]);
+      expect(find.text(c), findsOneWidget);
+      tester0 = null;
+      await finish(tester);
+    });
+  });
 }

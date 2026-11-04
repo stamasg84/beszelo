@@ -303,4 +303,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get colorSelected => 'kiválasztva';
+
+  @override
+  String get nextSentence => 'Következő';
+
+  @override
+  String get allSaid => 'Minden elhangzott';
 }
