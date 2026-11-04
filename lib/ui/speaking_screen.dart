@@ -497,7 +497,14 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     final active = _tappedId == s.id;
     return Material(
       key: isNext ? _nextKey : null,
-      color: active ? tones.rowActive : tones.row,
+      color: active
+          ? tones.rowActive
+          : s.said
+          ? Color.alphaBlend(
+              scheme.surface.withValues(alpha: 0.7),
+              tones.row,
+            )
+          : tones.row,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: _loadArmed
@@ -530,6 +537,15 @@ class _SpeakingScreenState extends State<SpeakingScreen>
                     ),
                   ),
                 ),
+                if (s.said && !_loadArmed)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 28,
+                      color: scheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
                 if (_loadArmed)
                   Padding(
                     padding: const EdgeInsets.only(left: 12),

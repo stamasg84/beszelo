@@ -141,6 +141,7 @@ ListColor listColor(BuildContext context, String? key) {
 ListColor? listColorFor(String key, Brightness brightness) =>
     (brightness == Brightness.dark ? _dark : _light)[key];
 
-/// Alpha of the greyed-out text of a `said` row; high enough for AA contrast
-/// on every palette row color.
-const saidTextAlpha = 0.85;
+/// Alpha of the greyed-out text of a `said` row. Deliberately clearly dimmer
+/// than unsaid text (the row also fades and shows a check mark), since the
+/// point is seeing at a glance what is left; still readable on the faded row.
+const saidTextAlpha = 0.6;

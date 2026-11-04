@@ -103,7 +103,7 @@ void main() {
           );
           expect(
             _contrast(said, bg),
-            greaterThanOrEqualTo(4.5),
+            greaterThanOrEqualTo(3.0), // large (24 px) text: AA needs 3:1
             reason: '$key said text ($brightness)',
           );
         }
