@@ -109,16 +109,35 @@ Do after T17a (uses its `languageName` helper and the speech-language rules). Re
 3. Download NST, switch the selector back to Magyar: Svéd shows the installed marker in the language list.
 Done → commit.
 
-### [ ] T18 (Agent): Editing screen
-- Opened from the speaking screen's edit icon, for the current list. Lists overview: create, rename, delete (confirm dialog), pin/unpin, reorder; "Alapértelmezett listák visszaállítása" if any seed list of the current speech language is missing (`restoreDefaultLists(voice.language)`, see T17a).
-- Per-list editor: one row per sentence (keeps sentence ids, so recordings and `said` survive edits). Tap a row = edit its text (dialog with a large multi-line field). Drag handle to reorder, delete icon (with undo snackbar). A large "Új mondat(ok)" field at the bottom: what's typed or pasted is split into sentences and appended.
-- **Splitting** (`lib/lists/split_sentences.dart`, pure function): split after `.`, `!`, `?`, `…` (and runs like `?!`, `...`) **only when followed by whitespace and an uppercase letter or a newline / end of text**, and on every newline. Keep the punctuation, trim, drop empties. This keeps Hungarian ordinals and dates together ("a 3. emeleten", "2026. 11. 02.") and abbreviations followed by lowercase ("pl. holnap").
+### [ ] T18 (Agent): Settings screen + lists overview
+Read architecture.md "Settings and editing" first. Editing is never a mode on the speaking screen: it lives in separate screens reached through settings, so a stray tap can't leave the speaking screen silently editing.
+- **Speaking screen app bar:** remove the edit icon (and the `editComingSoon` placeholder + ARB key). Replace the voice icon (`Icons.record_voice_over`) with a cog (`Icons.settings`, tooltip "Beállítások"), the only action in the app bar. Empty-list hint becomes "Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák".
+- **New `lib/ui/settings_screen.dart`:** a plain list of large rows (≥ 72 dp, icon + title + subtitle), back arrow to leave:
+  - "Hang és nyelv" (subtitle: current voice label + language, e.g. "Imre · Magyar") → the existing voice picker (`firstRun: false`, as the old voice icon did).
+  - "Listák" (subtitle: "Listák és mondatok szerkesztése") → lists overview.
+  - Nothing else yet (About, speech speed etc. come later as more rows; don't add placeholders).
+- **Lists overview (`lib/ui/lists_screen.dart`):** one large row per list in `position` order: title, a pin marker (📌 icon + "Kitűzve" text, not color only), sentence count. The list that is open on the speaking screen is marked "Most megnyitva" so the user finds it at once.
+  - Tap a row → per-list editor (T18b; until then, a placeholder screen with the list's title).
+  - Drag handle on the right → reorder (`reorderLists`). History can be reordered too (it's just a chip position).
+  - A ⋮ button per row (≥ 48 dp) opens a bottom sheet with large rows: "Átnevezés" (dialog), "Kitűzés" / "Kitűzés megszüntetése" (`setPinned`), "Törlés" (confirm dialog naming the list and its sentence count: "Törlöd a(z) „Orvos” listát és a 12 mondatát?"). History: no rename, no delete (its title follows the speech language), pin/unpin allowed. T18a adds "Szín" here.
+  - **"Új lista"** button at the bottom (full width, ≥ 56 dp) → dialog: name field + kind choice with two large radio rows: "Mondatlista" (`everyday`) / "Beszélgetés" ("Előre megírt mondatok, Következő gombbal", `conversation`). New lists are pinned by default (otherwise a freshly prepared conversation is hidden behind ▾); after creating, open its editor directly.
+  - "Alapértelmezett listák visszaállítása" row at the bottom, only if a seed list of the current speech language is missing (`restoreDefaultLists(voice.language)`, see T17a).
+  - Deleting the list that's open on the speaking screen: the speaking screen falls back as in T17a (first `everyday` list).
+- All strings via ARB (hu + en).
+- **Checks:** `flutter analyze`, `flutter test` (update existing tests that used the voice icon; widget tests: cog → settings → "Hang és nyelv" opens the picker; "Listák" shows all lists with the open one marked; create a conversation list → it exists, is pinned, has kind `conversation`; delete asks first and cancel keeps the list; history has no rename/delete; restore row appears only when a seed list is missing).
+
+### [ ] T18b (Agent): Per-list sentence editor
+Do after T18. Opened from a row in the lists overview.
+- App bar: the list's title. One row per sentence (keeps sentence ids, so recordings and `said` survive edits). Tap a row = edit its text (dialog with a large multi-line field). Drag handle to reorder, delete icon (with undo snackbar). A large multi-line "Új sor(ok)" field at the bottom with a "Hozzáadás" button: **each non-empty line becomes one row** (trimmed), appended in order. No splitting inside a line, so a row can hold several sentences that are spoken in one go ("Vegyetek sütit! Tegnap csináltuk."). Pasting a list from phone notes (one item per line) gives one row per line.
+- **No sentence splitting** (decided 2026-11-04): splitting on punctuation was error-prone (ordinals, dates, abbreviations) and would break up multi-sentence rows the user wants to say in one tap. Line breaks are the only separator, because the user sees and controls them.
 - "Alapértelmezett mondatok visszaállítása" on seeded lists, only shown when `hasMissingDefaults` is true.
-- History list: not reorderable; each row has "Mentés listába" (copy to a chosen list) and delete. No add field.
-- Any list: per-row "Áthelyezés…" / "Másolás…" to another list.
+- **Per-row actions:** each row has one ⋮ button (≥ 48 dp) opening a bottom sheet with large rows: "Másolás listába…", "Áthelyezés listába…", "Törlés" (undo snackbar). The two list actions open a picker of the other lists (large rows, history excluded as a target). Delete stays as its own icon too only if it fits without crowding; otherwise it's just in the sheet.
+- **History list:** same per-row sheet (copy = "keep it and also save it", move = take it out of history), so saving a phrase works the same as moving between any two lists. No tap-to-edit, no drag reorder (newest first is the order), no add field. Rows can be deleted (privacy: something said to the doctor shouldn't stay on screen for visitors). The history list itself can't be renamed or deleted (T18).
+- **No "save free text" button** on the speaking screen (decided 2026-11-04): everything spoken lands in history anyway, so "speak it, then save it from history" covers it without another target on the speaking screen. Sentences written ahead of time go in through this editor's "Új sor(ok)" field.
 - Conversation lists: "Újrakezdés" button (`resetSaid`).
 - All strings via ARB (hu + en).
-- **Checks:** `flutter analyze`, `flutter test` (unit-test the splitter thoroughly with Hungarian cases: ordinals, dates, `pl.`, `?!`, `...`, `…`, multiple newlines, no final punctuation; widget test: paste a paragraph → N sentences appear in the list).
+- List-level actions (rename, pin, delete, color) stay in the overview's ⋮ menu only; this screen is just for sentences.
+- **Checks:** `flutter analyze`, `flutter test` (widget tests: three lines with blank lines between → 3 rows in order; "Vegyetek sütit! Tegnap csináltuk." → 1 row; editing a row keeps its id).
 
 ### [ ] T18a (Agent): List colors
 Each list has a color; its chip, its tile in the ▾ grid and all its sentence rows use it, so the user sees which list they're in without reading the chip row. See architecture.md "List colors".
@@ -128,9 +147,10 @@ Each list has a color; its chip, its tile in the ▾ grid and all its sentence r
 - `createList` picks the first palette color not used by any list (round robin when all are used).
 - Speaking screen: chips filled with their list color, the selected chip additionally gets a thick dark border (color must not be the only cue); grid tiles likewise; rows use `row`, the tapped/speaking row uses `rowActive` + the existing spinner (not `primaryContainer` anymore).
 - App bar title on the speaking screen: the **current list's name** instead of the app name (history: its localized title), so the screen says which list is open in words as well as color. Long names: one line, ellipsized (the chip row and the rows themselves stay unchanged). The app name "Mondom" no longer appears on the speaking screen (it was the same word as the speak button).
-- Editor (T18): per list a "Szín" row with large swatches (≥ 48 dp, selected one with a check mark) plus "Nincs" (neutral). Repository: `setColor(listId, key?)`.
+- **Where it's edited:** lists overview (T18). Each list's ⋮ sheet gets a "Szín" row (with the current color shown as a swatch next to the label); tapping it opens a dialog with a grid of large swatches (≥ 48 dp, selected one with a check mark) plus "Nincs" (neutral). Tapping a swatch saves at once (`setColor(listId, key?)`) and closes the dialog; no separate OK button. History has no "Szín" row (always neutral grey).
+- Lists overview rows themselves also show the list's color (tinted row or a wide color stripe at the start), so the overview matches the chips.
 - ARB (hu + en) for new strings; color names only as semantics labels for TalkBack.
-- **Checks:** `flutter analyze`, `flutter test` (migration v2→v3 test with drift's schema tools or a hand-built v2 DB, plus v1→v3; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color; the app bar shows the current list name and changes when switching lists).
+- **Checks:** `flutter analyze`, `flutter test` (migration v2→v3 test with drift's schema tools or a hand-built v2 DB, plus v1→v3; seeding sets colors; `createList` picks unused colors; contrast unit test over every palette entry for both `said` and normal text; widget test: rows of a colored list have its row color; the app bar shows the current list name and changes when switching lists; overview ⋮ → Szín → pick green → the list's color is `green` and its rows on the speaking screen use it; "Nincs" sets `null`; history's sheet has no Szín row).
 
 ### [ ] T19 (Agent): Prepared conversations
 - In a `conversation` list, speaking a row (tap or Következő) sets its `said = true`.
@@ -151,7 +171,7 @@ Goal: say a variation of a saved sentence ("Kérek egy pohár vizet!" → "Kére
 - **Checks:** `flutter analyze`, `flutter test` (widget tests with the fake `Speaker`: armed + row tap → text in field, nothing spoken, history unchanged, mode off afterwards; second row tap after that speaks normally; appending to existing text adds one space; cancel via button / ✕ / chip switch / Mondom; a conversation row loaded while armed stays unsaid).
 
 ### [ ] T20 (You): A real prepared conversation
-1. The evening before talking to someone (a family member is fine), create a conversation list in the editor: paste 5–10 sentences as one paragraph and check they split correctly. Pin it.
+1. The evening before talking to someone (a family member is fine), create a conversation list in the editor: add 5–10 rows (typed, or pasted from notes one per line), at least one with two sentences in it. Pin it.
 2. Next day, open the app: the list is already open. Hold the conversation using only Következő, list taps and the occasional typed sentence; jump to Alap and back at least once.
 3. Note what felt slow, confusing or missing (and what the other person noticed). These notes feed Phase 4 and the ALS group / logopédus questions.
 Done → commit.
@@ -163,5 +183,5 @@ Done → commit.
 - Offer new default lists/sentences added in later app versions to existing users (seed version).
 - Message banking (record your own audio for a sentence).
 - Bell; emergency SMS with GPS (platform channel).
-- Speech speed setting (lengthScale) in settings.
-- About screen with licenses (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).
+- Speech speed setting (lengthScale): a row in the settings screen (T18).
+- About screen (a row in the settings screen, T18) with licenses; needed before the Play Store release (Alma is CC BY 4.0 and needs credit) (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).

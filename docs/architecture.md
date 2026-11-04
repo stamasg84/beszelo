@@ -44,7 +44,6 @@ lib/
   speech/speaker.dart     # Speaker: current VoiceEngine + player, speak(text), last-utterance reuse
   storage/database.dart   # drift tables (+ generated database.g.dart, committed)
   storage/lists_repository.dart  # the only storage API the UI uses; seeding, history, restore defaults
-  lists/split_sentences.dart     # paste → sentences
   ui/                     # screens/widgets: speaking screen, editing screen, voice picker
   # later: recordings/, emergency/ (platform channel)
 assets/seed/<lang>.json     # default sentence lists per speech language (inserted on first voice choice, re-read by restore)
@@ -137,11 +136,13 @@ Interaction rules (the user may have weak, slow or shaky hands):
 - The app opens on the last used list, so a conversation prepared in the evening is already open the next day.
 - The free-text field is always visible. Focusing it brings up the keyboard (which takes the space); closing the keyboard gives the space back to the list. No extra code needed.
 
-List colors (decided 2026-11-03): each list has a color from a small fixed palette, stored as a palette key (not ARGB, so tones can be tuned for contrast and a dark theme without touching data). The chip, the ▾ grid tile and every sentence row of that list are tinted with it, so the user always sees which list they're in. Color is never the only cue: the selected chip also has a thick border, and history is always neutral grey. All tones must keep row text at WCAG AA contrast. New lists get the next unused color; the user can change it in the editor.
+List colors (decided 2026-11-03): each list has a color from a small fixed palette, stored as a palette key (not ARGB, so tones can be tuned for contrast and a dark theme without touching data). The chip, the ▾ grid tile and every sentence row of that list are tinted with it, so the user always sees which list they're in. Color is never the only cue: the selected chip also has a thick border, and history is always neutral grey. All tones must keep row text at WCAG AA contrast. New lists get the next unused color; the user can change it in the lists overview (⋮ → Szín).
 
-Editing mode (separate screen, used with no time pressure, e.g. the evening before a visit):
-- One row per sentence (not one big text box: rows keep sentence ids, so recordings and `said` survive edits). Tap to edit, drag to reorder, delete, later record message-banking audio. An "add" field at the bottom: typed or pasted text is split into sentences (after `.`, `!`, `?`, `…` only when followed by whitespace + uppercase or a newline/end, plus every newline; keep the punctuation, Piper uses it). The uppercase rule keeps Hungarian ordinals and dates together ("a 3. emeleten", "2026. 11. 02.").
-- From any list or history: "add to list" / move a sentence to another list.
+Settings and editing (decided 2026-11-04): the speaking screen's app bar has a single ⚙ button opening a **settings screen** (rows: "Hang és nyelv" → voice picker, "Listák" → lists overview; later About, speech speed). Editing is never a mode on the speaking screen and has no one-tap entry from it: editing is rare and done without time pressure, while a stray tap during a conversation must never leave the user on a screen where taps don't speak (same reasoning as the one-shot builder button, T19a). Two taps away (⚙ → Listák) is fine for something done the evening before. List-level actions (create with kind, rename, pin, reorder, delete, color, restore defaults) live in the lists overview; the per-list editor is only for sentences.
+
+Editing screens (used with no time pressure, e.g. the evening before a visit):
+- One row per sentence (not one big text box: rows keep sentence ids, so recordings and `said` survive edits). Tap to edit, drag to reorder, delete, later record message-banking audio. An "add" field at the bottom: each non-empty line becomes one row. No splitting on punctuation (decided 2026-11-04): it was error-prone with Hungarian ordinals, dates and abbreviations, and a row may deliberately hold several sentences spoken in one tap ("Vegyetek sütit! Tegnap csináltuk."). A "row" is whatever the user wants said at once, not a grammatical sentence.
+- From any list or history: copy or move a sentence to another list (one per-row ⋮ sheet, same everywhere). There is no "save free text" button on the speaking screen: spoken free text is in history, and is saved from there.
 - Conversation lists: "reset" (clear `said`) for reuse; carry unsaid sentences over to the next conversation.
 
 Open questions (ask logopédusok / the ALS group, ideally with a paper or screenshot mockup): rows vs grid for everyday phrases; should a conversation list reset or disappear after the visit; do patients already prepare like this (paper, phone notes), and how.
