@@ -139,7 +139,7 @@ Do after T18. Opened from a row in the lists overview.
 - List-level actions (rename, pin, delete, color) stay in the overview's ⋮ menu only; this screen is just for sentences.
 - **Checks:** `flutter analyze`, `flutter test` (widget tests: three lines with blank lines between → 3 rows in order; "Vegyetek sütit! Tegnap csináltuk." → 1 row; editing a row keeps its id).
 
-### [ ] T18a (Agent): List colors
+### [x] T18a (Agent): List colors
 Each list has a color; its chip, its tile in the ▾ grid and all its sentence rows use it, so the user sees which list they're in without reading the chip row. See architecture.md "List colors".
 - Schema v3 (v2 is T17a): `sentence_lists.color` nullable text = a **palette key** (e.g. `"blue"`), not an ARGB value. `null` = neutral. Migration: `addColumn`, then give existing lists their seed color (by `seedLanguage` + `seedKey`) or the next palette color. Regenerate `*.g.dart`.
 - `lib/ui/list_colors.dart`: a fixed palette of ~8 keys (blue, green, orange, purple, teal, pink, yellow, brown) → `ListColor { chip, row, rowActive }` for light theme (dark theme: return darker tones from the same function, even if the app has no dark mode yet). All tones keep body text at WCAG AA contrast (≥ 4.5:1) with the normal text color, including the greyed-out `said` text (raise its alpha if needed). Unknown key → neutral (forward compatible).

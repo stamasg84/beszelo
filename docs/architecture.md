@@ -89,7 +89,7 @@ Seed data: `assets/seed/<lang>.json` (also has a top-level `historyTitle`, copie
 - **Switching later to a voice in another language never touches existing lists.** If no list with that `seedLanguage` exists yet and a seed file exists for it, ask once: "Hozzáadjam a(z) <nyelv> alapértelmezett listákat?" ("Add the default <language> lists?"). Yes = append that seed's lists after the existing ones. No = remember the language (`shared_preferences`, `declinedSeedLanguages`) and don't ask again. Old-language lists stay; the user can delete them.
 - Sentences the user typed in another language are their content: no detection, no warnings.
 ```json
-{ "lists": [ { "seedKey": "everyday", "title": "Alap", "kind": "everyday", "pinned": true,
+{ "lists": [ { "seedKey": "everyday", "title": "Alap", "kind": "everyday", "pinned": true, "color": "blue",
                "sentences": [ { "seedKey": "water", "text": "Kérek vizet!" } ] } ] }
 ```
 

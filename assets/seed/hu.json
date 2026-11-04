@@ -6,6 +6,7 @@
       "title": "Alap",
       "kind": "everyday",
       "pinned": true,
+      "color": "blue",
       "sentences": [
         {
           "seedKey": "water",
@@ -130,6 +131,7 @@
       "title": "Példa beszélgetés",
       "kind": "conversation",
       "pinned": false,
+      "color": "orange",
       "sentences": [
         {
           "seedKey": "bulb",

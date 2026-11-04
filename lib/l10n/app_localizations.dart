@@ -517,6 +517,78 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Még nincs mondat. Írj alább, soronként egyet.'**
   String get emptyEditorList;
+
+  /// Row in the list actions sheet that opens the color dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Szín'**
+  String get listColorLabel;
+
+  /// Neutral (no color) choice.
+  ///
+  /// In hu, this message translates to:
+  /// **'Nincs'**
+  String get listColorNone;
+
+  /// No description provided for @listColorDialogTitle.
+  ///
+  /// In hu, this message translates to:
+  /// **'Lista színe'**
+  String get listColorDialogTitle;
+
+  /// Color names are only semantics labels for screen readers.
+  ///
+  /// In hu, this message translates to:
+  /// **'kék'**
+  String get colorName_blue;
+
+  /// No description provided for @colorName_green.
+  ///
+  /// In hu, this message translates to:
+  /// **'zöld'**
+  String get colorName_green;
+
+  /// No description provided for @colorName_orange.
+  ///
+  /// In hu, this message translates to:
+  /// **'narancs'**
+  String get colorName_orange;
+
+  /// No description provided for @colorName_purple.
+  ///
+  /// In hu, this message translates to:
+  /// **'lila'**
+  String get colorName_purple;
+
+  /// No description provided for @colorName_teal.
+  ///
+  /// In hu, this message translates to:
+  /// **'türkiz'**
+  String get colorName_teal;
+
+  /// No description provided for @colorName_pink.
+  ///
+  /// In hu, this message translates to:
+  /// **'rózsaszín'**
+  String get colorName_pink;
+
+  /// No description provided for @colorName_yellow.
+  ///
+  /// In hu, this message translates to:
+  /// **'sárga'**
+  String get colorName_yellow;
+
+  /// No description provided for @colorName_brown.
+  ///
+  /// In hu, this message translates to:
+  /// **'barna'**
+  String get colorName_brown;
+
+  /// No description provided for @colorSelected.
+  ///
+  /// In hu, this message translates to:
+  /// **'kiválasztva'**
+  String get colorSelected;
 }
 
 class _AppLocalizationsDelegate

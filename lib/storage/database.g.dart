@@ -86,6 +86,15 @@ class $SentenceListsTable extends SentenceLists
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -107,6 +116,7 @@ class $SentenceListsTable extends SentenceLists
     position,
     seedKey,
     seedLanguage,
+    color,
     createdAt,
   ];
   @override
@@ -161,6 +171,12 @@ class $SentenceListsTable extends SentenceLists
         ),
       );
     }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -210,6 +226,10 @@ class $SentenceListsTable extends SentenceLists
         DriftSqlType.string,
         data['${effectivePrefix}seed_language'],
       ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -237,6 +257,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
   /// Seed file the list came from (`hu`, `en`, ...); null for user lists and
   /// history. The same seed list can exist once per language.
   final String? seedLanguage;
+
+  /// Palette key (see [listColorKeys]); null = neutral (always for history).
+  final String? color;
   final DateTime createdAt;
   const SentenceList({
     required this.id,
@@ -246,6 +269,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     required this.position,
     this.seedKey,
     this.seedLanguage,
+    this.color,
     required this.createdAt,
   });
   @override
@@ -266,6 +290,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     if (!nullToAbsent || seedLanguage != null) {
       map['seed_language'] = Variable<String>(seedLanguage);
     }
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -283,6 +310,9 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       seedLanguage: seedLanguage == null && nullToAbsent
           ? const Value.absent()
           : Value(seedLanguage),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
       createdAt: Value(createdAt),
     );
   }
@@ -302,6 +332,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       position: serializer.fromJson<int>(json['position']),
       seedKey: serializer.fromJson<String?>(json['seedKey']),
       seedLanguage: serializer.fromJson<String?>(json['seedLanguage']),
+      color: serializer.fromJson<String?>(json['color']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -318,6 +349,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       'position': serializer.toJson<int>(position),
       'seedKey': serializer.toJson<String?>(seedKey),
       'seedLanguage': serializer.toJson<String?>(seedLanguage),
+      'color': serializer.toJson<String?>(color),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -330,6 +362,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     int? position,
     Value<String?> seedKey = const Value.absent(),
     Value<String?> seedLanguage = const Value.absent(),
+    Value<String?> color = const Value.absent(),
     DateTime? createdAt,
   }) => SentenceList(
     id: id ?? this.id,
@@ -339,6 +372,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     position: position ?? this.position,
     seedKey: seedKey.present ? seedKey.value : this.seedKey,
     seedLanguage: seedLanguage.present ? seedLanguage.value : this.seedLanguage,
+    color: color.present ? color.value : this.color,
     createdAt: createdAt ?? this.createdAt,
   );
   SentenceList copyWithCompanion(SentenceListsCompanion data) {
@@ -352,6 +386,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
       seedLanguage: data.seedLanguage.present
           ? data.seedLanguage.value
           : this.seedLanguage,
+      color: data.color.present ? data.color.value : this.color,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -366,6 +401,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
           ..write('position: $position, ')
           ..write('seedKey: $seedKey, ')
           ..write('seedLanguage: $seedLanguage, ')
+          ..write('color: $color, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -380,6 +416,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
     position,
     seedKey,
     seedLanguage,
+    color,
     createdAt,
   );
   @override
@@ -393,6 +430,7 @@ class SentenceList extends DataClass implements Insertable<SentenceList> {
           other.position == this.position &&
           other.seedKey == this.seedKey &&
           other.seedLanguage == this.seedLanguage &&
+          other.color == this.color &&
           other.createdAt == this.createdAt);
 }
 
@@ -404,6 +442,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
   final Value<int> position;
   final Value<String?> seedKey;
   final Value<String?> seedLanguage;
+  final Value<String?> color;
   final Value<DateTime> createdAt;
   const SentenceListsCompanion({
     this.id = const Value.absent(),
@@ -413,6 +452,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     this.position = const Value.absent(),
     this.seedKey = const Value.absent(),
     this.seedLanguage = const Value.absent(),
+    this.color = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   SentenceListsCompanion.insert({
@@ -423,6 +463,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     required int position,
     this.seedKey = const Value.absent(),
     this.seedLanguage = const Value.absent(),
+    this.color = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : title = Value(title),
        kind = Value(kind),
@@ -435,6 +476,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     Expression<int>? position,
     Expression<String>? seedKey,
     Expression<String>? seedLanguage,
+    Expression<String>? color,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -445,6 +487,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
       if (position != null) 'position': position,
       if (seedKey != null) 'seed_key': seedKey,
       if (seedLanguage != null) 'seed_language': seedLanguage,
+      if (color != null) 'color': color,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -457,6 +500,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     Value<int>? position,
     Value<String?>? seedKey,
     Value<String?>? seedLanguage,
+    Value<String?>? color,
     Value<DateTime>? createdAt,
   }) {
     return SentenceListsCompanion(
@@ -467,6 +511,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
       position: position ?? this.position,
       seedKey: seedKey ?? this.seedKey,
       seedLanguage: seedLanguage ?? this.seedLanguage,
+      color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -497,6 +542,9 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
     if (seedLanguage.present) {
       map['seed_language'] = Variable<String>(seedLanguage.value);
     }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -513,6 +561,7 @@ class SentenceListsCompanion extends UpdateCompanion<SentenceList> {
           ..write('position: $position, ')
           ..write('seedKey: $seedKey, ')
           ..write('seedLanguage: $seedLanguage, ')
+          ..write('color: $color, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1322,6 +1371,7 @@ typedef $$SentenceListsTableCreateCompanionBuilder =
       required int position,
       Value<String?> seedKey,
       Value<String?> seedLanguage,
+      Value<String?> color,
       Value<DateTime> createdAt,
     });
 typedef $$SentenceListsTableUpdateCompanionBuilder =
@@ -1333,6 +1383,7 @@ typedef $$SentenceListsTableUpdateCompanionBuilder =
       Value<int> position,
       Value<String?> seedKey,
       Value<String?> seedLanguage,
+      Value<String?> color,
       Value<DateTime> createdAt,
     });
 
@@ -1405,6 +1456,11 @@ class $$SentenceListsTableFilterComposer
 
   ColumnFilters<String> get seedLanguage => $composableBuilder(
     column: $table.seedLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1483,6 +1539,11 @@ class $$SentenceListsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1520,6 +1581,9 @@ class $$SentenceListsTableAnnotationComposer
     column: $table.seedLanguage,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1585,6 +1649,7 @@ class $$SentenceListsTableTableManager
                 Value<int> position = const Value.absent(),
                 Value<String?> seedKey = const Value.absent(),
                 Value<String?> seedLanguage = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => SentenceListsCompanion(
                 id: id,
@@ -1594,6 +1659,7 @@ class $$SentenceListsTableTableManager
                 position: position,
                 seedKey: seedKey,
                 seedLanguage: seedLanguage,
+                color: color,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -1605,6 +1671,7 @@ class $$SentenceListsTableTableManager
                 required int position,
                 Value<String?> seedKey = const Value.absent(),
                 Value<String?> seedLanguage = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => SentenceListsCompanion.insert(
                 id: id,
@@ -1614,6 +1681,7 @@ class $$SentenceListsTableTableManager
                 position: position,
                 seedKey: seedKey,
                 seedLanguage: seedLanguage,
+                color: color,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

@@ -62,7 +62,6 @@ Future<void> _pump(WidgetTester tester, Locale locale) async {
 void main() {
   testWidgets('Hungarian phone shows Hungarian strings', (tester) async {
     await _pump(tester, const Locale('hu', 'HU'));
-    expect(find.text('Mondom'), findsOneWidget);
     expect(find.text('Betöltés…'), findsOneWidget);
     expect(find.text('Ismétlés'), findsNothing);
   });

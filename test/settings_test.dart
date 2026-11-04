@@ -10,6 +10,7 @@ import 'package:mondom/speech/speaker.dart';
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
 import 'package:mondom/storage/seed.dart';
+import 'package:mondom/ui/list_colors.dart';
 import 'package:mondom/ui/speaking_screen.dart';
 import 'package:mondom/voices/voice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -195,6 +196,83 @@ void main() {
     await settle(tester);
     expect(find.text(restore), findsNothing);
     expect(find.text('Példa beszélgetés'), findsOneWidget);
+    await finish(tester);
+  });
+
+  Future<void> openSheet(WidgetTester tester, int index) async {
+    await tester.tap(find.byTooltip('További műveletek').at(index));
+    await settle(tester);
+  }
+
+  testWidgets('overview ⋮ → Szín → green saves it; Nincs sets null', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    String? colorOf(List<SentenceList> ls) =>
+        ls.firstWhere((l) => l.title == 'Alap').color;
+    expect(colorOf(await lists(tester)), 'blue');
+
+    await openSheet(tester, 0);
+    await tester.tap(find.text('Szín'));
+    await settle(tester);
+    await tester.tap(find.byKey(const ValueKey('swatch-green')));
+    await settle(tester);
+    expect(find.text('Lista színe'), findsNothing); // closed at once
+    expect(colorOf(await lists(tester)), 'green');
+
+    await openSheet(tester, 0);
+    await tester.tap(find.text('Szín'));
+    await settle(tester);
+    await tester.tap(find.byKey(const ValueKey('swatch-none')));
+    await settle(tester);
+    expect(colorOf(await lists(tester)), isNull);
+    await finish(tester);
+  });
+
+  testWidgets('history sheet has no Szín row', (tester) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    await openSheet(tester, 2);
+    expect(find.text('Szín'), findsNothing);
+    await finish(tester);
+  });
+
+  testWidgets('app bar shows the open list; rows use its color', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    Finder inAppBar(String text) =>
+        find.descendant(of: find.byType(AppBar), matching: find.text(text));
+    expect(inAppBar('Alap'), findsOneWidget);
+    expect(inAppBar('Mondom'), findsNothing);
+
+    Color? rowColor() => tester
+        .widget<Material>(
+          find
+              .ancestor(
+                of: find.text('Kérek vizet!'),
+                matching: find.byType(Material),
+              )
+              .first,
+        )
+        .color;
+    expect(rowColor(), listColorFor('blue', Brightness.light)!.row);
+
+    final alap = (await lists(tester)).firstWhere((l) => l.title == 'Alap');
+    await tester.runAsync(() => repo.setColor(alap.id, 'green'));
+    await settle(tester);
+    expect(rowColor(), listColorFor('green', Brightness.light)!.row);
+
+    // Switching lists changes the title.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ChoiceChip),
+        matching: find.text('Előzmények'),
+      ),
+    );
+    await settle(tester);
+    expect(inAppBar('Előzmények'), findsOneWidget);
     await finish(tester);
   });
 }

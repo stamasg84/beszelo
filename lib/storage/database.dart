@@ -10,6 +10,34 @@ enum ListKind { everyday, conversation, history }
 /// Language used when there is no seed for the requested language.
 const fallbackSeedLanguage = 'en';
 
+/// Palette keys for list colors, in the order new lists pick them. The tones
+/// live in `ui/list_colors.dart`; the DB only stores the key.
+const listColorKeys = [
+  'blue',
+  'green',
+  'orange',
+  'purple',
+  'teal',
+  'pink',
+  'yellow',
+  'brown',
+];
+
+/// Colors of the shipped seed lists (by `seedKey`); other lists get the next
+/// unused palette color.
+const seedListColors = {'everyday': 'blue', 'example-conversation': 'orange'};
+
+/// First palette key not in [used]; when all are used, round robin over how
+/// often each is used (least used first, palette order breaks ties).
+String nextListColor(Iterable<String?> used) {
+  final counts = {for (final k in listColorKeys) k: 0};
+  for (final u in used) {
+    if (counts.containsKey(u)) counts[u!] = counts[u]! + 1;
+  }
+  final min = counts.values.reduce((a, b) => a < b ? a : b);
+  return listColorKeys.firstWhere((k) => counts[k] == min);
+}
+
 /// `seedKey` of the single history list.
 const historySeedKey = 'history';
 
@@ -28,6 +56,9 @@ class SentenceLists extends Table {
   /// Seed file the list came from (`hu`, `en`, ...); null for user lists and
   /// history. The same seed list can exist once per language.
   TextColumn get seedLanguage => text().nullable()();
+
+  /// Palette key (see [listColorKeys]); null = neutral (always for history).
+  TextColumn get color => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -73,7 +104,7 @@ class AppDatabase extends _$AppDatabase {
   final SeedLoader loadSeed;
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -97,7 +128,9 @@ class AppDatabase extends _$AppDatabase {
         await m.alterTable(
           TableMigration(
             sentenceLists,
-            newColumns: [sentenceLists.seedLanguage],
+            // The rebuild creates the table as it is now, so `color` (v3) is
+            // already part of it.
+            newColumns: [sentenceLists.seedLanguage, sentenceLists.color],
             columnTransformer: {
               sentenceLists.seedLanguage: const CustomExpression<String>(
                 'CASE WHEN seed_key IS NOT NULL '
@@ -111,6 +144,32 @@ class AppDatabase extends _$AppDatabase {
           appMeta,
         )..where((t) => t.key.equals(_legacySeedLanguageMetaKey))).go();
         await markSeeded();
+      }
+      if (from < 3) {
+        if (from >= 2) await m.addColumn(sentenceLists, sentenceLists.color);
+        final rows = await (select(
+          sentenceLists,
+        )..orderBy([(t) => OrderingTerm.asc(t.position)])).get();
+        final used = <String?>[];
+        final pending = <SentenceList>[];
+        for (final l in rows) {
+          if (l.kind == ListKind.history) continue;
+          final seeded = seedListColors[l.seedKey];
+          if (seeded != null) {
+            used.add(seeded);
+            await (update(sentenceLists)..where((t) => t.id.equals(l.id)))
+                .write(SentenceListsCompanion(color: Value(seeded)));
+          } else {
+            pending.add(l);
+          }
+        }
+        for (final l in pending) {
+          final key = nextListColor(used);
+          used.add(key);
+          await (update(sentenceLists)..where((t) => t.id.equals(l.id))).write(
+            SentenceListsCompanion(color: Value(key)),
+          );
+        }
       }
     },
     beforeOpen: (details) async {
@@ -161,6 +220,7 @@ class AppDatabase extends _$AppDatabase {
         kind: list.kind,
         pinned: Value(list.pinned),
         position: position,
+        color: Value(list.color),
         seedKey: Value(list.seedKey),
         seedLanguage: Value(language),
       ),

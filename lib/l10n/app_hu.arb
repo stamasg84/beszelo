@@ -59,12 +59,20 @@
   "languageSelectorLabel": "Nyelv: {name}",
   "@languageSelectorLabel": {
     "description": "Button at the top of the voice picker showing the chosen language.",
-    "placeholders": {"name": {"type": "String"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "installedVoicesCount": "{count} letöltve",
   "@installedVoicesCount": {
     "description": "Marker on a language in the language list: downloaded voices.",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "systemVoiceMissing": "A hang nincs letöltve a telefonon.",
   "@systemVoiceMissing": {
@@ -162,7 +170,14 @@
   "settingsVoiceSubtitle": "{voice} · {language}",
   "@settingsVoiceSubtitle": {
     "description": "Subtitle of the voice row: current voice and its language.",
-    "placeholders": {"voice": {"type": "String"}, "language": {"type": "String"}}
+    "placeholders": {
+      "voice": {
+        "type": "String"
+      },
+      "language": {
+        "type": "String"
+      }
+    }
   },
   "settingsListsTitle": "Listák",
   "@settingsListsTitle": {
@@ -179,7 +194,11 @@
   "sentenceCount": "{count} mondat",
   "@sentenceCount": {
     "description": "Number of sentences in a list.",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "currentlyOpen": "Most megnyitva",
   "@currentlyOpen": {
@@ -212,7 +231,14 @@
   "deleteListQuestion": "Törlöd a(z) „{title}” listát és a {count} mondatát?",
   "@deleteListQuestion": {
     "description": "Confirmation before deleting a list.",
-    "placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "deleteAction": "Törlés",
   "@deleteAction": {
@@ -310,5 +336,26 @@
   "emptyEditorList": "Még nincs mondat. Írj alább, soronként egyet.",
   "@emptyEditorList": {
     "description": "Hint in an empty list editor."
-  }
+  },
+  "listColorLabel": "Szín",
+  "@listColorLabel": {
+    "description": "Row in the list actions sheet that opens the color dialog."
+  },
+  "listColorNone": "Nincs",
+  "@listColorNone": {
+    "description": "Neutral (no color) choice."
+  },
+  "listColorDialogTitle": "Lista színe",
+  "colorName_blue": "kék",
+  "colorName_green": "zöld",
+  "colorName_orange": "narancs",
+  "colorName_purple": "lila",
+  "colorName_teal": "türkiz",
+  "colorName_pink": "rózsaszín",
+  "colorName_yellow": "sárga",
+  "colorName_brown": "barna",
+  "@colorName_blue": {
+    "description": "Color names are only semantics labels for screen readers."
+  },
+  "colorSelected": "kiválasztva"
 }

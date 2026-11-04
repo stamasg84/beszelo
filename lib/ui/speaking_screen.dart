@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
 import '../voices/voice.dart';
+import 'list_colors.dart';
 import 'settings_screen.dart';
 
 /// Main screen: list chips, big sentence rows, always-visible free text.
@@ -128,36 +129,43 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.settingsTooltip,
-            icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
+    return StreamBuilder<List<SentenceList>>(
+      stream: _lists,
+      builder: (context, snap) {
+        final lists = snap.data ?? const <SentenceList>[];
+        final current = lists.where((l) => l.id == _currentId).firstOrNull;
+        return Scaffold(
+          appBar: AppBar(
+            // The open list's name, so the screen says which list it is in
+            // words as well as color.
+            title: Text(
+              current == null ? '' : _title(l10n, current),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: [
+              IconButton(
+                tooltip: l10n.settingsTooltip,
+                icon: const Icon(Icons.settings),
+                onPressed: _openSettings,
+              ),
+            ],
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: StreamBuilder<List<SentenceList>>(
-          stream: _lists,
-          builder: (context, snap) {
-            final lists = snap.data ?? const <SentenceList>[];
-            return Column(
+          body: SafeArea(
+            child: Column(
               children: [
                 _chipRow(l10n, lists),
                 Expanded(
                   child: _expanded
                       ? _listGrid(l10n, lists)
-                      : _sentenceArea(l10n),
+                      : _sentenceArea(l10n, current),
                 ),
                 _bottomBar(l10n),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -188,6 +196,15 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                           vertical: 12,
                         ),
                         selected: l.id == _currentId,
+                        showCheckmark: false,
+                        backgroundColor: listColor(context, l.color).chip,
+                        selectedColor: listColor(context, l.color).chip,
+                        side: l.id == _currentId
+                            ? BorderSide(
+                                width: 4,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              )
+                            : BorderSide.none,
                         onSelected: (_) => _showList(l),
                       ),
                     ),
@@ -216,13 +233,16 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
       children: [
         for (final l in lists)
           FilledButton.tonal(
-            style: l.id == _currentId
-                ? FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer,
-                  )
-                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: listColor(context, l.color).chip,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              side: l.id == _currentId
+                  ? BorderSide(
+                      width: 4,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    )
+                  : null,
+            ),
             onPressed: () => _showList(l),
             child: Text(
               _title(l10n, l),
@@ -234,7 +254,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
     );
   }
 
-  Widget _sentenceArea(AppLocalizations l10n) {
+  Widget _sentenceArea(AppLocalizations l10n, SentenceList? list) {
     final stream = _sentences;
     if (stream == null) return const SizedBox.shrink();
     return StreamBuilder<List<Sentence>>(
@@ -260,18 +280,19 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
             padding: const EdgeInsets.all(12),
             itemCount: sentences.length,
             separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, i) => _row(sentences[i]),
+            itemBuilder: (context, i) => _row(sentences[i], list?.color),
           ),
         );
       },
     );
   }
 
-  Widget _row(Sentence s) {
+  Widget _row(Sentence s, String? colorKey) {
     final scheme = Theme.of(context).colorScheme;
+    final tones = listColor(context, colorKey);
     final active = _tappedId == s.id;
     return Material(
-      color: active ? scheme.primaryContainer : scheme.surfaceContainerHighest,
+      color: active ? tones.rowActive : tones.row,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -291,7 +312,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       color: s.said
-                          ? scheme.onSurface.withValues(alpha: 0.4)
+                          ? scheme.onSurface.withValues(alpha: saidTextAlpha)
                           : null,
                     ),
                   ),

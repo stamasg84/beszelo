@@ -239,4 +239,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyEditorList => 'No sentences yet. Write below, one per line.';
+
+  @override
+  String get listColorLabel => 'Color';
+
+  @override
+  String get listColorNone => 'None';
+
+  @override
+  String get listColorDialogTitle => 'List color';
+
+  @override
+  String get colorName_blue => 'blue';
+
+  @override
+  String get colorName_green => 'green';
+
+  @override
+  String get colorName_orange => 'orange';
+
+  @override
+  String get colorName_purple => 'purple';
+
+  @override
+  String get colorName_teal => 'teal';
+
+  @override
+  String get colorName_pink => 'pink';
+
+  @override
+  String get colorName_yellow => 'yellow';
+
+  @override
+  String get colorName_brown => 'brown';
+
+  @override
+  String get colorSelected => 'selected';
 }

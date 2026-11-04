@@ -16,12 +16,16 @@ class SeedList {
     required this.title,
     required this.kind,
     required this.pinned,
+    this.color,
     required this.sentences,
   });
   final String seedKey;
   final String title;
   final ListKind kind;
   final bool pinned;
+
+  /// Palette key, or null for neutral.
+  final String? color;
   final List<SeedSentence> sentences;
 }
 
@@ -41,6 +45,7 @@ class Seed {
             title: l['title'] as String,
             kind: ListKind.values.byName(l['kind'] as String),
             pinned: l['pinned'] as bool? ?? false,
+            color: l['color'] as String?,
             sentences: [
               for (final s in l['sentences'] as List)
                 SeedSentence(s['seedKey'] as String, s['text'] as String),

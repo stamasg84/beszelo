@@ -5,7 +5,8 @@ import '../speech/speaker.dart' show normalizeText;
 import 'database.dart';
 import 'seed.dart';
 
-export 'database.dart' show ListKind, Sentence, SentenceList;
+export 'database.dart'
+    show ListKind, Sentence, SentenceList, listColorKeys, nextListColor;
 
 /// Maximum number of rows in the history list.
 const historyCap = 30;
@@ -58,6 +59,9 @@ class ListsRepository {
     bool pinned = false,
   }) async {
     final last = await _lastListPosition();
+    final color = nextListColor([
+      for (final l in await _db.select(_lists).get()) l.color,
+    ]);
     return _db
         .into(_lists)
         .insert(
@@ -66,8 +70,17 @@ class ListsRepository {
             kind: kind,
             pinned: Value(pinned),
             position: last + 1,
+            color: Value(color),
           ),
         );
+  }
+
+  /// Sets the palette key ([listColorKeys]); null = neutral. Not for history.
+  Future<void> setColor(int id, String? key) async {
+    await _requireNotHistory(id, 'colored');
+    await (_db.update(_lists)..where((l) => l.id.equals(id))).write(
+      SentenceListsCompanion(color: Value(key)),
+    );
   }
 
   Future<void> renameList(int id, String title) async {

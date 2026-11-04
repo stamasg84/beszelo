@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../storage/lists_repository.dart';
+import 'list_colors.dart';
 import 'list_editor_screen.dart';
 
 /// Lists overview: reorder, pin, rename, delete, create, restore defaults.
@@ -141,19 +142,25 @@ class _ListsScreenState extends State<ListsScreen> {
   Widget _row(AppLocalizations l10n, SentenceList l, int index, int count) {
     final scheme = Theme.of(context).colorScheme;
     final isOpen = l.id == widget.currentListId;
+    final tones = listColor(context, l.color);
     return Padding(
       key: ValueKey(l.id),
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: scheme.surfaceContainerHighest,
+        color: tones.row,
         borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
           onTap: () => _openEditor(l.id),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 72),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(width: 12, color: tones.stripe),
+                ),
+              ),
+              padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
               child: Row(
                 children: [
                   Expanded(
@@ -251,6 +258,18 @@ class _ListsScreenState extends State<ListsScreen> {
               'pin',
             ),
             if (!isHistory)
+              _sheetRow(
+                context,
+                Icons.palette,
+                l10n.listColorLabel,
+                'color',
+                trailing: _Swatch(
+                  color: listColor(context, l.color).stripe,
+                  size: 28,
+                  neutral: l.color == null,
+                ),
+              ),
+            if (!isHistory)
               _sheetRow(context, Icons.delete, l10n.deleteList, 'delete'),
           ],
         ),
@@ -262,6 +281,8 @@ class _ListsScreenState extends State<ListsScreen> {
         await _rename(l);
       case 'pin':
         await widget.repo.setPinned(l.id, !l.pinned);
+      case 'color':
+        await _pickColor(l);
       case 'delete':
         await _delete(l, count);
     }
@@ -271,8 +292,9 @@ class _ListsScreenState extends State<ListsScreen> {
     BuildContext context,
     IconData icon,
     String label,
-    String value,
-  ) {
+    String value, {
+    Widget? trailing,
+  }) {
     return InkWell(
       onTap: () => Navigator.of(context).pop(value),
       child: ConstrainedBox(
@@ -287,11 +309,92 @@ class _ListsScreenState extends State<ListsScreen> {
               Icon(icon, size: 28),
               const SizedBox(width: 16),
               Text(label, style: const TextStyle(fontSize: 22)),
+              if (trailing != null) ...[const SizedBox(width: 12), trailing],
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Grid of swatches; tapping one saves at once and closes the dialog.
+  Future<void> _pickColor(SentenceList l) async {
+    final l10n = AppLocalizations.of(context);
+    final names = {
+      'blue': l10n.colorName_blue,
+      'green': l10n.colorName_green,
+      'orange': l10n.colorName_orange,
+      'purple': l10n.colorName_purple,
+      'teal': l10n.colorName_teal,
+      'pink': l10n.colorName_pink,
+      'yellow': l10n.colorName_yellow,
+      'brown': l10n.colorName_brown,
+    };
+    // A sentinel: dialog dismissed (no change) vs. "Nincs" (null).
+    const none = '';
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.listColorDialogTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final key in listColorKeys)
+                    Semantics(
+                      label: names[key],
+                      selected: l.color == key,
+                      button: true,
+                      child: InkWell(
+                        key: ValueKey('swatch-$key'),
+                        customBorder: const CircleBorder(),
+                        onTap: () => Navigator.of(context).pop(key),
+                        child: _Swatch(
+                          color: listColor(context, key).stripe,
+                          size: 56,
+                          checked: l.color == key,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                key: const ValueKey('swatch-none'),
+                onTap: () => Navigator.of(context).pop(none),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: 56,
+                    minWidth: double.infinity,
+                  ),
+                  child: Row(
+                    children: [
+                      _Swatch(
+                        color: Theme.of(context).colorScheme.outline,
+                        size: 40,
+                        neutral: true,
+                        checked: l.color == null,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n.listColorNone,
+                        style: const TextStyle(fontSize: 22),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null) return;
+    await widget.repo.setColor(l.id, picked == none ? null : picked);
   }
 
   Future<void> _rename(SentenceList l) async {
@@ -336,6 +439,45 @@ class _ListsScreenState extends State<ListsScreen> {
     final id = await widget.repo.createList(name, kind: kind, pinned: true);
     if (!mounted) return;
     _openEditor(id);
+  }
+}
+
+/// Round color swatch; [neutral] draws an outline only, [checked] a check mark.
+class _Swatch extends StatelessWidget {
+  const _Swatch({
+    required this.color,
+    required this.size,
+    this.neutral = false,
+    this.checked = false,
+  });
+  final Color color;
+  final double size;
+  final bool neutral;
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: neutral ? null : color,
+        border: Border.all(color: color, width: 3),
+      ),
+      child: checked
+          ? Icon(
+              Icons.check,
+              size: size * 0.6,
+              color: neutral
+                  ? color
+                  : ThemeData.estimateBrightnessForColor(color) ==
+                        Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+            )
+          : null,
+    );
   }
 }
 

@@ -69,5 +69,26 @@
   "undoAction": "Undo",
   "restoreDefaultSentences": "Restore default sentences",
   "resetSaid": "Start over",
-  "emptyEditorList": "No sentences yet. Write below, one per line."
+  "emptyEditorList": "No sentences yet. Write below, one per line.",
+  "listColorLabel": "Color",
+  "@listColorLabel": {
+    "description": "Row in the list actions sheet that opens the color dialog."
+  },
+  "listColorNone": "None",
+  "@listColorNone": {
+    "description": "Neutral (no color) choice."
+  },
+  "listColorDialogTitle": "List color",
+  "colorName_blue": "blue",
+  "colorName_green": "green",
+  "colorName_orange": "orange",
+  "colorName_purple": "purple",
+  "colorName_teal": "teal",
+  "colorName_pink": "pink",
+  "colorName_yellow": "yellow",
+  "colorName_brown": "brown",
+  "@colorName_blue": {
+    "description": "Color names are only semantics labels for screen readers."
+  },
+  "colorSelected": "selected"
 }

@@ -6,6 +6,7 @@
       "title": "Basics",
       "kind": "everyday",
       "pinned": true,
+      "color": "blue",
       "sentences": [
         {
           "seedKey": "water",
@@ -130,6 +131,7 @@
       "title": "Example conversation",
       "kind": "conversation",
       "pinned": false,
+      "color": "orange",
       "sentences": [
         {
           "seedKey": "bulb",

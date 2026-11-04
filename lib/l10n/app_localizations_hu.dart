@@ -241,4 +241,40 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get emptyEditorList => 'Még nincs mondat. Írj alább, soronként egyet.';
+
+  @override
+  String get listColorLabel => 'Szín';
+
+  @override
+  String get listColorNone => 'Nincs';
+
+  @override
+  String get listColorDialogTitle => 'Lista színe';
+
+  @override
+  String get colorName_blue => 'kék';
+
+  @override
+  String get colorName_green => 'zöld';
+
+  @override
+  String get colorName_orange => 'narancs';
+
+  @override
+  String get colorName_purple => 'lila';
+
+  @override
+  String get colorName_teal => 'türkiz';
+
+  @override
+  String get colorName_pink => 'rózsaszín';
+
+  @override
+  String get colorName_yellow => 'sárga';
+
+  @override
+  String get colorName_brown => 'barna';
+
+  @override
+  String get colorSelected => 'kiválasztva';
 }
