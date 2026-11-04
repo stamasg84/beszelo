@@ -212,6 +212,109 @@ void main() {
     await finish(tester);
   });
 
+  group('load into text field (T19a)', () {
+    final load = find.byTooltip('Mondat betöltése a szövegmezőbe');
+    String fieldText(WidgetTester t) =>
+        t.widget<TextField>(find.byType(TextField)).controller!.text;
+
+    testWidgets('armed row tap loads, does not speak, turns itself off', (
+      tester,
+    ) async {
+      tester0 = tester;
+      await pumpScreen(tester);
+      await tester.tap(load);
+      await tester.pump();
+      expect(find.textContaining('Koppints a mondatra'), findsOneWidget);
+
+      await tester.tap(find.text('Kérek vizet!'));
+      await settle(tester);
+      expect(fieldText(tester), 'Kérek vizet!');
+      expect(speaker.spoken, isEmpty);
+      expect(await historyBodies(), isEmpty);
+      expect(find.textContaining('Koppints a mondatra'), findsNothing);
+
+      // Mode is off: the next tap speaks.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InkWell),
+          matching: find.text('Kérek vizet!'),
+        ),
+      );
+      await settle(tester);
+      expect(speaker.spoken, ['Kérek vizet!']);
+      tester0 = null;
+      await finish(tester);
+    });
+
+    testWidgets('appends with one space', (tester) async {
+      await pumpScreen(tester);
+      await tester.enterText(find.byType(TextField), 'Szia!  ');
+      await tester.tap(load);
+      await tester.pump();
+      await tester.tap(find.text('Kérek vizet!'));
+      await settle(tester);
+      expect(fieldText(tester), 'Szia! Kérek vizet!');
+      await finish(tester);
+    });
+
+    testWidgets('cancel via button, banner ✕, chip, Mondom', (tester) async {
+      await pumpScreen(tester);
+      final banner = find.textContaining('Koppints a mondatra');
+
+      await tester.tap(load);
+      await tester.pump();
+      await tester.tap(load);
+      await tester.pump();
+      expect(banner, findsNothing);
+
+      await tester.tap(load);
+      await tester.pump();
+      await tester.tap(find.byTooltip('Mégse'));
+      await tester.pump();
+      expect(banner, findsNothing);
+
+      await tester.tap(load);
+      await tester.pump();
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Előzmények'));
+      await settle(tester);
+      expect(banner, findsNothing);
+
+      await tester.tap(load);
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), 'Szia!');
+      await tester.tap(find.widgetWithText(FilledButton, 'Mondom'));
+      await settle(tester);
+      expect(banner, findsNothing);
+      expect(speaker.spoken, ['Szia!']);
+      await finish(tester);
+    });
+
+    testWidgets('conversation row loaded while armed stays unsaid', (
+      tester,
+    ) async {
+      tester0 = tester;
+      await pumpScreen(tester);
+      await tester.tap(find.byTooltip('Összes lista'));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'Példa beszélgetés'));
+      await settle(tester);
+      await tester.tap(load);
+      await tester.pump();
+      await tester.tap(find.text('Ki kéne cserélni a villanykörtét.'));
+      await settle(tester);
+      expect(fieldText(tester), 'Ki kéne cserélni a villanykörtét.');
+      final said = await tester.runAsync(() async {
+        final conv = (await repo.watchLists().first).firstWhere(
+          (l) => l.kind == ListKind.conversation,
+        );
+        return (await repo.watchSentences(conv.id).first).map((s) => s.said);
+      });
+      expect(said!.any((x) => x), isFalse);
+      tester0 = null;
+      await finish(tester);
+    });
+  });
+
   group('prepared conversation', () {
     Future<void> openConversation(WidgetTester tester) async {
       await pumpScreen(tester);

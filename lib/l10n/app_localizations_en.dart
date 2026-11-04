@@ -307,4 +307,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allSaid => 'All said';
+
+  @override
+  String get loadSentence => 'Load a sentence into the text field';
+
+  @override
+  String get loadBanner =>
+      'Tap the sentence you want to load into the text field';
 }

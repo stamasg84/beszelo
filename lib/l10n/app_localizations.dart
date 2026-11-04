@@ -619,6 +619,18 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Minden elhangzott'**
   String get allSaid;
+
+  /// Tooltip/TalkBack label of the one-shot button that makes the next row tap load the sentence into the text field instead of speaking it.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mondat betöltése a szövegmezőbe'**
+  String get loadSentence;
+
+  /// Banner shown while the load-into-text-field mode is armed.
+  ///
+  /// In hu, this message translates to:
+  /// **'Koppints a mondatra, amit a szövegmezőbe töltenél'**
+  String get loadBanner;
 }
 
 class _AppLocalizationsDelegate

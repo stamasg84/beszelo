@@ -169,7 +169,7 @@ Problem (own use, 2026-11-04): the "Alapértelmezett mondatok visszaállítása"
 - `said` survives app restarts (it's in the DB).
 - **Checks:** `flutter analyze`, `flutter test` (Következő order, skipping sentences already said by direct tap, all-said state, reset).
 
-### [ ] T19a (Agent): Load sentences into the free-text field (one-shot builder mode)
+### [x] T19a (Agent): Load sentences into the free-text field (one-shot builder mode)
 Goal: say a variation of a saved sentence ("Kérek egy pohár vizet!" → "Kérek egy pohár teát!") or build a sentence from pieces, without breaking "a tap on a row speaks".
 - **Button:** a large (≥ 48 dp) button in the bottom bar, left of the free-text field (e.g. `Icons.playlist_add` or a ↓ icon; TalkBack label "Mondat betöltése a szövegmezőbe"). Pressing it **arms** builder mode; pressing it again cancels.
 - **One-shot:** while armed, the next tap on a sentence row (any list, including history) **appends** its text to the free-text field and builder mode **turns off automatically**. To add several pieces, press the button again before each one. Builder mode never stays on: it is cancelled by pressing the button again, the banner's ✕, switching lists (chip or ▾ grid), pressing Mondom, or the app going to the background.

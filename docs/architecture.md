@@ -131,6 +131,9 @@ Main screen (speaking mode):
 
 Interaction rules (the user may have weak, slow or shaky hands):
 - **One tap = one fixed meaning.** Tapping a sentence always speaks it; tapping a chip always switches lists. Nothing on the speaking screen is editable.
+  - **The one exception: the one-shot load button** (left of the free-text field). It changes the meaning of exactly the next row tap (append the sentence to the free-text field instead of speaking), with strong cues (active button, banner with ✕, rows with a primary-color border and a ↓ icon), then turns itself off. It is also cancelled by the button, the banner's ✕, switching lists, Mondom, or the app going to the background. Loading doesn't speak, add to history or set `said`.
+  - Why not a toggle: a mode left on by accident would make a tap silent in an urgent moment.
+  - Rejected alternatives: long-press (slow ALS fingers exceed the long-press time, so a tap meant to speak would load instead; also undiscoverable); a per-row icon (second small target next to the big one, mis-taps); swipe (unreliable with shaky hands, conflicts with scrolling); suggestions above the keyboard (too crowded next to the keyboard's own suggestion row).
 - **No layout shifts under the finger.** Sections don't expand on tap. Layout only changes through a dedicated button.
 - **Chips: pinned lists only** (e.g. Alap, the current conversation, Előzmények). Switching between them is one tap, which matters mid-conversation ("Kérek vizet!" from Alap, then back to the conversation). The **▾** button expands the chip row into a large grid of all lists over the sentence area; picking one collapses it and shows that list (as a temporary chip if it isn't pinned). Lists can be pinned/unpinned.
 - The app opens on the last used list, so a conversation prepared in the evening is already open the next day.

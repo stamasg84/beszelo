@@ -309,4 +309,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get allSaid => 'Minden elhangzott';
+
+  @override
+  String get loadSentence => 'Mondat betöltése a szövegmezőbe';
+
+  @override
+  String get loadBanner => 'Koppints a mondatra, amit a szövegmezőbe töltenél';
 }

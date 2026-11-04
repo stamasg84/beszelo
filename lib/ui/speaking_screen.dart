@@ -30,7 +30,8 @@ class SpeakingScreen extends StatefulWidget {
   State<SpeakingScreen> createState() => _SpeakingScreenState();
 }
 
-class _SpeakingScreenState extends State<SpeakingScreen> {
+class _SpeakingScreenState extends State<SpeakingScreen>
+    with WidgetsBindingObserver {
   final _controller = TextEditingController();
 
   late final Stream<List<SentenceList>> _lists;
@@ -54,11 +55,35 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   int? _tappedId;
   bool _expanded = false;
 
+  /// One-shot builder mode: the next row tap loads its text into the field
+  /// instead of speaking, then this turns itself off.
+  bool _loadArmed = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _lists = widget.repo.watchLists().asBroadcastStream();
     _start();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed && _loadArmed) {
+      setState(() => _loadArmed = false);
+    }
+  }
+
+  /// Appends [text] to the free-text field (cursor at the end) and turns the
+  /// builder mode off. Neither speaks, logs history nor sets `said`.
+  void _loadIntoField(String text) {
+    final old = _controller.text.trimRight();
+    final next = old.isEmpty ? text : '$old $text';
+    _controller.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: next.length),
+    );
+    setState(() => _loadArmed = false);
   }
 
   Future<void> _start() async {
@@ -94,6 +119,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
       _scrollAfterId = null;
       _sentences = widget.repo.watchSentences(id);
       _expanded = false;
+      _loadArmed = false;
     });
     if (remember) widget.repo.setLastUsedListId(id);
   }
@@ -101,7 +127,10 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
   Future<void> _speak(String text, {int? rowId}) async {
     final speaker = widget.speaker;
     if (!speaker.ready || text.trim().isEmpty) return;
-    setState(() => _tappedId = rowId);
+    setState(() {
+      _tappedId = rowId;
+      _loadArmed = false;
+    });
     if (rowId != null && _currentIsConversation) {
       unawaited(widget.repo.setSaid(rowId, true));
     }
@@ -115,6 +144,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _listsSub?.cancel();
     _controller.dispose();
     _scrollController.dispose();
@@ -168,6 +198,7 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
             child: Column(
               children: [
                 _chipRow(l10n, lists),
+                if (_loadArmed) _loadBanner(l10n),
                 Expanded(
                   child: _expanded
                       ? _listGrid(l10n, lists)
@@ -179,6 +210,42 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _loadBanner(AppLocalizations l10n) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Material(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(Icons.arrow_downward, color: scheme.onPrimaryContainer),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  l10n.loadBanner,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: scheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              iconSize: 32,
+              tooltip: l10n.cancel,
+              icon: const Icon(Icons.close),
+              onPressed: () => setState(() => _loadArmed = false),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -385,7 +452,9 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
               width: double.infinity,
               height: 64,
               child: FilledButton.icon(
-                onPressed: widget.speaker.ready ? () => _speakNext(next) : null,
+                onPressed: widget.speaker.ready && !_loadArmed
+                    ? () => _speakNext(next)
+                    : null,
                 icon: const Icon(Icons.play_arrow, size: 32),
                 label: Text(
                   l10n.nextSentence,
@@ -408,7 +477,9 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(64, 56),
                     ),
-                    onPressed: () => _confirmReset(_currentId!),
+                    onPressed: _loadArmed
+                        ? null
+                        : () => _confirmReset(_currentId!),
                     child: Text(
                       l10n.resetSaid,
                       style: const TextStyle(fontSize: 22),
@@ -429,13 +500,16 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
       color: active ? tones.rowActive : tones.row,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isNext
+        side: _loadArmed
+            ? BorderSide(width: 3, color: scheme.primary)
+            : isNext
             ? BorderSide(width: 3, color: scheme.onSurface)
             : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => _speak(s.body, rowId: s.id),
+        onTap: () =>
+            _loadArmed ? _loadIntoField(s.body) : _speak(s.body, rowId: s.id),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: 72,
@@ -456,6 +530,15 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                     ),
                   ),
                 ),
+                if (_loadArmed)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Icon(
+                      Icons.arrow_downward,
+                      size: 32,
+                      color: scheme.primary,
+                    ),
+                  ),
                 if (active && widget.speaker.busy)
                   const Padding(
                     padding: EdgeInsets.only(left: 12),
@@ -497,6 +580,37 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: IconButton(
+                          iconSize: 32,
+                          tooltip: l10n.loadSentence,
+                          isSelected: _loadArmed,
+                          style: _loadArmed
+                              ? IconButton.styleFrom(
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primary,
+                                  foregroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimary,
+                                )
+                              : IconButton.styleFrom(
+                                  side: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outline,
+                                  ),
+                                ),
+                          icon: const Icon(Icons.playlist_add),
+                          onPressed: () =>
+                              setState(() => _loadArmed = !_loadArmed),
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: TextField(
                         controller: _controller,

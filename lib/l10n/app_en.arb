@@ -95,5 +95,7 @@
   },
   "colorSelected": "selected",
   "nextSentence": "Next",
-  "allSaid": "All said"
+  "allSaid": "All said",
+  "loadSentence": "Load a sentence into the text field",
+  "loadBanner": "Tap the sentence you want to load into the text field"
 }
