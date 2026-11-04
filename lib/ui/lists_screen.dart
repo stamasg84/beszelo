@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../storage/lists_repository.dart';
+import 'list_editor_screen.dart';
 
 /// Lists overview: reorder, pin, rename, delete, create, restore defaults.
-/// Sentences are edited in the per-list editor (T18b).
+/// Sentences are edited in the per-list editor.
 class ListsScreen extends StatefulWidget {
   const ListsScreen({
     super.key,
@@ -41,10 +42,10 @@ class _ListsScreenState extends State<ListsScreen> {
       ? l10n.historyTitle
       : l.title;
 
-  void _openEditor(int id, String title) {
+  void _openEditor(int id) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => ListEditorPlaceholder(listId: id, title: title),
+        builder: (_) => ListEditorScreen(repo: widget.repo, listId: id),
       ),
     );
   }
@@ -75,12 +76,8 @@ class _ListsScreenState extends State<ListsScreen> {
                           ids.insert(to, ids.removeAt(from));
                           widget.repo.reorderLists(ids);
                         },
-                        itemBuilder: (context, i) => _row(
-                          l10n,
-                          lists[i],
-                          i,
-                          counts[lists[i].id] ?? 0,
-                        ),
+                        itemBuilder: (context, i) =>
+                            _row(l10n, lists[i], i, counts[lists[i].id] ?? 0),
                       );
                     },
                   );
@@ -152,7 +149,7 @@ class _ListsScreenState extends State<ListsScreen> {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => _openEditor(l.id, _title(l10n, l)),
+          onTap: () => _openEditor(l.id),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 72),
             child: Padding(
@@ -338,7 +335,7 @@ class _ListsScreenState extends State<ListsScreen> {
     final (name, kind) = result;
     final id = await widget.repo.createList(name, kind: kind, pinned: true);
     if (!mounted) return;
-    _openEditor(id, name.trim());
+    _openEditor(id);
   }
 }
 
@@ -448,22 +445,5 @@ class _NameDialogState extends State<_NameDialog> {
         ),
       ],
     );
-  }
-}
-
-/// Stand-in for the per-list sentence editor (T18b).
-class ListEditorPlaceholder extends StatelessWidget {
-  const ListEditorPlaceholder({
-    super.key,
-    required this.listId,
-    required this.title,
-  });
-
-  final int listId;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text(title)));
   }
 }

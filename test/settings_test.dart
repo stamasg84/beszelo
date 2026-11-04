@@ -185,9 +185,8 @@ void main() {
     const restore = 'Alapértelmezett listák visszaállítása';
     expect(find.text(restore), findsNothing);
 
-    final example = (await lists(
-      tester,
-    )).firstWhere((l) => l.seedKey == 'example-conversation');
+    final example = (await lists(tester))
+        .firstWhere((l) => l.seedKey == 'example-conversation');
     await tester.runAsync(() => repo.deleteList(example.id));
     await settle(tester);
     expect(find.text(restore), findsOneWidget);

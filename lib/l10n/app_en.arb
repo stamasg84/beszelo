@@ -58,5 +58,16 @@
   "restoreDefaultLists": "Restore default lists",
   "addSeedListsQuestion": "Add the default {language} lists?",
   "addAction": "Add",
-  "noAction": "No"
+  "noAction": "No",
+  "newLinesLabel": "New line(s)",
+  "newLinesHint": "One sentence per line",
+  "copyToList": "Copy to list…",
+  "moveToList": "Move to list…",
+  "chooseListTitle": "Which list?",
+  "editSentenceTitle": "Edit sentence",
+  "sentenceDeleted": "Sentence deleted",
+  "undoAction": "Undo",
+  "restoreDefaultSentences": "Restore default sentences",
+  "resetSaid": "Start over",
+  "emptyEditorList": "No sentences yet. Write below, one per line."
 }

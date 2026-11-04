@@ -206,4 +206,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAction => 'No';
+
+  @override
+  String get newLinesLabel => 'New line(s)';
+
+  @override
+  String get newLinesHint => 'One sentence per line';
+
+  @override
+  String get copyToList => 'Copy to list…';
+
+  @override
+  String get moveToList => 'Move to list…';
+
+  @override
+  String get chooseListTitle => 'Which list?';
+
+  @override
+  String get editSentenceTitle => 'Edit sentence';
+
+  @override
+  String get sentenceDeleted => 'Sentence deleted';
+
+  @override
+  String get undoAction => 'Undo';
+
+  @override
+  String get restoreDefaultSentences => 'Restore default sentences';
+
+  @override
+  String get resetSaid => 'Start over';
+
+  @override
+  String get emptyEditorList => 'No sentences yet. Write below, one per line.';
 }

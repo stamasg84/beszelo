@@ -126,7 +126,7 @@ Read architecture.md "Settings and editing" first. Editing is never a mode on th
 - All strings via ARB (hu + en).
 - **Checks:** `flutter analyze`, `flutter test` (update existing tests that used the voice icon; widget tests: cog → settings → "Hang és nyelv" opens the picker; "Listák" shows all lists with the open one marked; create a conversation list → it exists, is pinned, has kind `conversation`; delete asks first and cancel keeps the list; history has no rename/delete; restore row appears only when a seed list is missing).
 
-### [ ] T18b (Agent): Per-list sentence editor
+### [x] T18b (Agent): Per-list sentence editor
 Do after T18. Opened from a row in the lists overview.
 - App bar: the list's title. One row per sentence (keeps sentence ids, so recordings and `said` survive edits). Tap a row = edit its text (dialog with a large multi-line field). Drag handle to reorder, delete icon (with undo snackbar). A large multi-line "Új sor(ok)" field at the bottom with a "Hozzáadás" button: **each non-empty line becomes one row** (trimmed), appended in order. No splitting inside a line, so a row can hold several sentences that are spoken in one go ("Vegyetek sütit! Tegnap csináltuk."). Pasting a list from phone notes (one item per line) gives one row per line.
 - **No sentence splitting** (decided 2026-11-04): splitting on punctuation was error-prone (ordinals, dates, abbreviations) and would break up multi-sentence rows the user wants to say in one tap. Line breaks are the only separator, because the user sees and controls them.

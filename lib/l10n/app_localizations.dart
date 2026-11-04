@@ -451,6 +451,72 @@ abstract class AppLocalizations {
   /// In hu, this message translates to:
   /// **'Nem'**
   String get noAction;
+
+  /// Text field label for adding new sentences, one per line.
+  ///
+  /// In hu, this message translates to:
+  /// **'Új sor(ok)'**
+  String get newLinesLabel;
+
+  /// Hint of the add-sentences field.
+  ///
+  /// In hu, this message translates to:
+  /// **'Soronként egy mondat'**
+  String get newLinesHint;
+
+  /// Row action: copy a sentence to another list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Másolás listába…'**
+  String get copyToList;
+
+  /// Row action: move a sentence to another list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Áthelyezés listába…'**
+  String get moveToList;
+
+  /// Title of the target list picker.
+  ///
+  /// In hu, this message translates to:
+  /// **'Melyik listába?'**
+  String get chooseListTitle;
+
+  /// Title of the edit-sentence dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mondat szerkesztése'**
+  String get editSentenceTitle;
+
+  /// Snackbar after deleting a sentence.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mondat törölve'**
+  String get sentenceDeleted;
+
+  /// Undo button of a snackbar.
+  ///
+  /// In hu, this message translates to:
+  /// **'Visszavonás'**
+  String get undoAction;
+
+  /// Row that re-adds deleted default sentences.
+  ///
+  /// In hu, this message translates to:
+  /// **'Alapértelmezett mondatok visszaállítása'**
+  String get restoreDefaultSentences;
+
+  /// Button that clears the said marks of a conversation.
+  ///
+  /// In hu, this message translates to:
+  /// **'Újrakezdés'**
+  String get resetSaid;
+
+  /// Hint in an empty list editor.
+  ///
+  /// In hu, this message translates to:
+  /// **'Még nincs mondat. Írj alább, soronként egyet.'**
+  String get emptyEditorList;
 }
 
 class _AppLocalizationsDelegate

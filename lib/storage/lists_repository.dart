@@ -144,6 +144,16 @@ class ListsRepository {
     await _writeOrder(s.listId, await _sentenceIds(s.listId));
   });
 
+  /// Undo of [deleteSentence]: re-inserts [s] (same id, recording, seed
+  /// identity, `said`) at index [at] of its list.
+  Future<void> restoreSentence(Sentence s, int at) => _db.transaction(() async {
+    final ids = await _sentenceIds(s.listId);
+    await _db.into(_sentences).insert(s, mode: InsertMode.insertOrReplace);
+    ids.remove(s.id);
+    ids.insert(at.clamp(0, ids.length), s.id);
+    await _writeOrder(s.listId, ids);
+  });
+
   /// Moves to the end of [toListId]. The seed identity is dropped.
   Future<void> moveSentence(int id, int toListId) => _db.transaction(() async {
     final s = await _sentenceById(id);

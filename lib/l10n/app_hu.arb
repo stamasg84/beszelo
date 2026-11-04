@@ -266,5 +266,49 @@
   "noAction": "Nem",
   "@noAction": {
     "description": "Decline button of the add-default-lists dialog."
+  },
+  "newLinesLabel": "Új sor(ok)",
+  "@newLinesLabel": {
+    "description": "Text field label for adding new sentences, one per line."
+  },
+  "newLinesHint": "Soronként egy mondat",
+  "@newLinesHint": {
+    "description": "Hint of the add-sentences field."
+  },
+  "copyToList": "Másolás listába…",
+  "@copyToList": {
+    "description": "Row action: copy a sentence to another list."
+  },
+  "moveToList": "Áthelyezés listába…",
+  "@moveToList": {
+    "description": "Row action: move a sentence to another list."
+  },
+  "chooseListTitle": "Melyik listába?",
+  "@chooseListTitle": {
+    "description": "Title of the target list picker."
+  },
+  "editSentenceTitle": "Mondat szerkesztése",
+  "@editSentenceTitle": {
+    "description": "Title of the edit-sentence dialog."
+  },
+  "sentenceDeleted": "Mondat törölve",
+  "@sentenceDeleted": {
+    "description": "Snackbar after deleting a sentence."
+  },
+  "undoAction": "Visszavonás",
+  "@undoAction": {
+    "description": "Undo button of a snackbar."
+  },
+  "restoreDefaultSentences": "Alapértelmezett mondatok visszaállítása",
+  "@restoreDefaultSentences": {
+    "description": "Row that re-adds deleted default sentences."
+  },
+  "resetSaid": "Újrakezdés",
+  "@resetSaid": {
+    "description": "Button that clears the said marks of a conversation."
+  },
+  "emptyEditorList": "Még nincs mondat. Írj alább, soronként egyet.",
+  "@emptyEditorList": {
+    "description": "Hint in an empty list editor."
   }
 }

@@ -207,4 +207,38 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get noAction => 'Nem';
+
+  @override
+  String get newLinesLabel => 'Új sor(ok)';
+
+  @override
+  String get newLinesHint => 'Soronként egy mondat';
+
+  @override
+  String get copyToList => 'Másolás listába…';
+
+  @override
+  String get moveToList => 'Áthelyezés listába…';
+
+  @override
+  String get chooseListTitle => 'Melyik listába?';
+
+  @override
+  String get editSentenceTitle => 'Mondat szerkesztése';
+
+  @override
+  String get sentenceDeleted => 'Mondat törölve';
+
+  @override
+  String get undoAction => 'Visszavonás';
+
+  @override
+  String get restoreDefaultSentences =>
+      'Alapértelmezett mondatok visszaállítása';
+
+  @override
+  String get resetSaid => 'Újrakezdés';
+
+  @override
+  String get emptyEditorList => 'Még nincs mondat. Írj alább, soronként egyet.';
 }
