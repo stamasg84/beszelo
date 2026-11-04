@@ -240,6 +240,32 @@ class AppLocalizationsHu extends AppLocalizations {
   String get resetSaid => 'Újrakezdés';
 
   @override
+  String restoredSentences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mondat visszaállítva',
+      one: '$count mondat visszaállítva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String restoredLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lista visszaállítva',
+      one: '$count lista visszaállítva',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSaidQuestion =>
+      'Újrakezdés: az összes mondat újra elhangzatlan lesz. Folytatod?';
+
+  @override
   String get emptyEditorList => 'Még nincs mondat. Írj alább, soronként egyet.';
 
   @override

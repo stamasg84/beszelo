@@ -238,6 +238,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetSaid => 'Start over';
 
   @override
+  String restoredSentences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sentences restored',
+      one: '$count sentence restored',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String restoredLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lists restored',
+      one: '$count list restored',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSaidQuestion =>
+      'Start over: all sentences will be unsaid again. Continue?';
+
+  @override
   String get emptyEditorList => 'No sentences yet. Write below, one per line.';
 
   @override

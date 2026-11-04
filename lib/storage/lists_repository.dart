@@ -13,6 +13,7 @@ const historyCap = 30;
 
 const _lastListKey = 'lastListId';
 const _declinedSeedKey = 'declinedSeedLanguages';
+const _autoColor = Object();
 
 /// The only storage API the UI uses.
 class ListsRepository {
@@ -53,15 +54,17 @@ class ListsRepository {
     return seed.lists.any((l) => !existing.contains(l.seedKey));
   }
 
+  /// [color]: omitted = the next unused palette color; null = neutral.
   Future<int> createList(
     String title, {
     ListKind kind = ListKind.everyday,
     bool pinned = false,
+    Object? color = _autoColor,
   }) async {
     final last = await _lastListPosition();
-    final color = nextListColor([
-      for (final l in await _db.select(_lists).get()) l.color,
-    ]);
+    final String? chosen = identical(color, _autoColor)
+        ? await nextColorForNewList()
+        : color as String?;
     return _db
         .into(_lists)
         .insert(
@@ -70,10 +73,14 @@ class ListsRepository {
             kind: kind,
             pinned: Value(pinned),
             position: last + 1,
-            color: Value(color),
+            color: Value(chosen),
           ),
         );
   }
+
+  /// The color [createList] picks when none is given.
+  Future<String> nextColorForNewList() async =>
+      nextListColor([for (final l in await _db.select(_lists).get()) l.color]);
 
   /// Sets the palette key ([listColorKeys]); null = neutral. Not for history.
   Future<void> setColor(int id, String? key) async {

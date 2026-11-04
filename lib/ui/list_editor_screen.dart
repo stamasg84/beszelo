@@ -22,10 +22,6 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
   late final Stream<List<Sentence>> _sentences = widget.repo
       .watchSentences(widget.listId)
       .asBroadcastStream();
-  late final Stream<bool> _missing = widget.repo
-      .watchSentences(widget.listId)
-      .asyncMap((_) => widget.repo.hasMissingDefaults(widget.listId))
-      .asBroadcastStream();
   final _newLines = TextEditingController();
 
   @override
@@ -44,7 +40,6 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
             ?.where((l) => l.id == widget.listId)
             .firstOrNull;
         final isHistory = list?.kind == ListKind.history;
-        final isConversation = list?.kind == ListKind.conversation;
         final title = list == null
             ? ''
             : (isHistory && list.title.isEmpty
@@ -95,55 +90,12 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
                     },
                   ),
                 ),
-                if (!isHistory)
-                  StreamBuilder<bool>(
-                    stream: _missing,
-                    builder: (context, snap) => snap.data == true
-                        ? _bigRow(
-                            Icons.restore,
-                            l10n.restoreDefaultSentences,
-                            () => widget.repo.restoreDefaultSentences(
-                              widget.listId,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                if (isConversation)
-                  _bigRow(
-                    Icons.replay,
-                    l10n.resetSaid,
-                    () => widget.repo.resetSaid(widget.listId),
-                  ),
                 if (list != null && !isHistory) _addField(l10n),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _bigRow(IconData icon, String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: 64,
-          minWidth: double.infinity,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Icon(icon, size: 32),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(label, style: const TextStyle(fontSize: 20)),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

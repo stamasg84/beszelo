@@ -178,31 +178,150 @@ void main() {
     await finish(tester);
   });
 
-  testWidgets('restore row appears only when a seed list is missing', (
+  Future<void> openSheet(WidgetTester tester, int index) async {
+    await tester.tap(find.byTooltip('További műveletek').at(index));
+    await settle(tester);
+  }
+
+  testWidgets('restore lists lives in the app bar menu, with a snackbar', (
     tester,
   ) async {
     await pumpScreen(tester);
     await openLists(tester);
     const restore = 'Alapértelmezett listák visszaállítása';
+    final menu = find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byTooltip('További műveletek'),
+    );
+    expect(menu, findsNothing); // nothing missing: no menu at all
     expect(find.text(restore), findsNothing);
 
     final example = (await lists(tester))
         .firstWhere((l) => l.seedKey == 'example-conversation');
     await tester.runAsync(() => repo.deleteList(example.id));
     await settle(tester);
-    expect(find.text(restore), findsOneWidget);
+    expect(menu, findsOneWidget);
 
+    await tester.tap(menu);
+    await settle(tester);
     await tester.tap(find.text(restore));
     await settle(tester);
-    expect(find.text(restore), findsNothing);
+    expect(find.text('1 lista visszaállítva'), findsOneWidget);
+    expect(menu, findsNothing);
     expect(find.text('Példa beszélgetés'), findsOneWidget);
     await finish(tester);
   });
 
-  Future<void> openSheet(WidgetTester tester, int index) async {
-    await tester.tap(find.byTooltip('További műveletek').at(index));
+  testWidgets('sheet: restore sentences only when some are missing', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    const restore = 'Alapértelmezett mondatok visszaállítása';
+    await openSheet(tester, 0);
+    expect(find.text(restore), findsNothing);
+    await tester.tapAt(const Offset(5, 5)); // dismiss the sheet
     await settle(tester);
+
+    final alap = (await lists(tester)).firstWhere((l) => l.title == 'Alap');
+    final first = (await tester.runAsync(
+      () => repo.watchSentences(alap.id).first,
+    ))!.first;
+    await tester.runAsync(() => repo.deleteSentence(first.id));
+    await settle(tester);
+
+    await openSheet(tester, 0);
+    expect(find.text(restore), findsOneWidget);
+    await tester.tap(find.text(restore));
+    await settle(tester);
+    expect(find.text('1 mondat visszaállítva'), findsOneWidget);
+    final back = (await tester.runAsync(
+      () => repo.watchSentences(alap.id).first,
+    ))!;
+    expect(back.first.body, first.body);
+    await finish(tester);
+  });
+
+  testWidgets('sheet: history never has restore; Újrakezdés only for '
+      'conversations', (tester) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    await openSheet(tester, 2); // history
+    expect(find.text('Alapértelmezett mondatok visszaállítása'), findsNothing);
+    expect(find.text('Újrakezdés'), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await settle(tester);
+
+    await openSheet(tester, 0); // everyday
+    expect(find.text('Újrakezdés'), findsNothing);
+    await tester.tapAt(const Offset(5, 5));
+    await settle(tester);
+
+    final conv = (await lists(tester))
+        .firstWhere((l) => l.seedKey == 'example-conversation');
+    final sid = (await tester.runAsync(
+      () => repo.watchSentences(conv.id).first,
+    ))!.first.id;
+    await tester.runAsync(() => repo.setSaid(sid, true));
+    await openSheet(tester, 1);
+    await tester.tap(find.text('Újrakezdés'));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Újrakezdés'));
+    await settle(tester);
+    final after = (await tester.runAsync(
+      () => repo.watchSentences(conv.id).first,
+    ))!;
+    expect(after.any((x) => x.said), isFalse);
+    await finish(tester);
+  });
+
+  Future<void> openNewListDialog(WidgetTester tester) async {
+    await tester.tap(find.text('Új lista'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'Teszt');
   }
+
+  testWidgets('new list dialog: untouched color = automatic pick', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    final expected = (await tester.runAsync(repo.nextColorForNewList))!;
+    await openNewListDialog(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Létrehozás'));
+    await settle(tester);
+    final created = (await lists(tester)).firstWhere((l) => l.title == 'Teszt');
+    expect(created.color, expected);
+    await finish(tester);
+  });
+
+  testWidgets('new list dialog: pick green, or Nincs', (tester) async {
+    await pumpScreen(tester);
+    await openLists(tester);
+    await openNewListDialog(tester);
+    await tester.tap(find.byKey(const ValueKey('swatch-green')));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Létrehozás'));
+    await settle(tester);
+    expect(
+      (await lists(tester)).firstWhere((l) => l.title == 'Teszt').color,
+      'green',
+    );
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+
+    await openNewListDialog(tester);
+    await tester.enterText(find.byType(TextField), 'Semleges');
+    await tester.tap(find.byKey(const ValueKey('swatch-none')));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Létrehozás'));
+    await settle(tester);
+    expect(
+      (await lists(tester)).firstWhere((l) => l.title == 'Semleges').color,
+      isNull,
+    );
+    await finish(tester);
+  });
 
   testWidgets('overview ⋮ → Szín → green saves it; Nincs sets null', (
     tester,

@@ -333,6 +333,28 @@
   "@resetSaid": {
     "description": "Button that clears the said marks of a conversation."
   },
+  "restoredSentences": "{count, plural, one{{count} mondat visszaállítva} other{{count} mondat visszaállítva}}",
+  "@restoredSentences": {
+    "description": "Snackbar after restoring default sentences.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoredLists": "{count, plural, one{{count} lista visszaállítva} other{{count} lista visszaállítva}}",
+  "@restoredLists": {
+    "description": "Snackbar after restoring default lists.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resetSaidQuestion": "Újrakezdés: az összes mondat újra elhangzatlan lesz. Folytatod?",
+  "@resetSaidQuestion": {
+    "description": "Confirmation before clearing the said marks of a conversation."
+  },
   "emptyEditorList": "Még nincs mondat. Írj alább, soronként egyet.",
   "@emptyEditorList": {
     "description": "Hint in an empty list editor."

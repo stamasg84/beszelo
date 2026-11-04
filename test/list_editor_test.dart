@@ -174,6 +174,19 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('deleting a seed sentence adds no restore row to the editor', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    final alap = await idOf(tester, 'Alap');
+    final first = (await rows(tester, alap)).first;
+    await tester.runAsync(() => repo.deleteSentence(first.id));
+    await openEditor(tester, 'Alap');
+    expect(find.text('Alapértelmezett mondatok visszaállítása'), findsNothing);
+    expect(find.text('Újrakezdés'), findsNothing);
+    await finish(tester);
+  });
+
   testWidgets('move to another list', (tester) async {
     await pumpScreen(tester);
     final id = (await tester.runAsync(() => repo.createList('Orvos')))!;

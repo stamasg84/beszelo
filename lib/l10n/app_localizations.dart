@@ -512,6 +512,24 @@ abstract class AppLocalizations {
   /// **'Újrakezdés'**
   String get resetSaid;
 
+  /// Snackbar after restoring default sentences.
+  ///
+  /// In hu, this message translates to:
+  /// **'{count, plural, one{{count} mondat visszaállítva} other{{count} mondat visszaállítva}}'**
+  String restoredSentences(int count);
+
+  /// Snackbar after restoring default lists.
+  ///
+  /// In hu, this message translates to:
+  /// **'{count, plural, one{{count} lista visszaállítva} other{{count} lista visszaállítva}}'**
+  String restoredLists(int count);
+
+  /// Confirmation before clearing the said marks of a conversation.
+  ///
+  /// In hu, this message translates to:
+  /// **'Újrakezdés: az összes mondat újra elhangzatlan lesz. Folytatod?'**
+  String get resetSaidQuestion;
+
   /// Hint in an empty list editor.
   ///
   /// In hu, this message translates to:

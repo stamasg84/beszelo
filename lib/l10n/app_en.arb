@@ -69,6 +69,9 @@
   "undoAction": "Undo",
   "restoreDefaultSentences": "Restore default sentences",
   "resetSaid": "Start over",
+  "restoredSentences": "{count, plural, one{{count} sentence restored} other{{count} sentences restored}}",
+  "restoredLists": "{count, plural, one{{count} list restored} other{{count} lists restored}}",
+  "resetSaidQuestion": "Start over: all sentences will be unsaid again. Continue?",
   "emptyEditorList": "No sentences yet. Write below, one per line.",
   "listColorLabel": "Color",
   "@listColorLabel": {
