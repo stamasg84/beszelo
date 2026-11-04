@@ -171,7 +171,7 @@ Problem (own use, 2026-11-04): the "Alapértelmezett mondatok visszaállítása"
 
 ### [x] T19a (Agent): Load sentences into the free-text field (one-shot builder mode)
 Goal: say a variation of a saved sentence ("Kérek egy pohár vizet!" → "Kérek egy pohár teát!") or build a sentence from pieces, without breaking "a tap on a row speaks".
-- **Button:** a large (≥ 48 dp) button in the bottom bar, left of the free-text field (e.g. `Icons.playlist_add` or a ↓ icon; TalkBack label "Mondat betöltése a szövegmezőbe"). Pressing it **arms** builder mode; pressing it again cancels.
+- **Button:** a large (≥ 48 dp) button in the app bar, left of Settings (moved there from the bottom bar so the free-text field gets the full width) (e.g. `Icons.playlist_add` or a ↓ icon; TalkBack label "Mondat betöltése a szövegmezőbe"). Pressing it **arms** builder mode; pressing it again cancels.
 - **One-shot:** while armed, the next tap on a sentence row (any list, including history) **appends** its text to the free-text field and builder mode **turns off automatically**. To add several pieces, press the button again before each one. Builder mode never stays on: it is cancelled by pressing the button again, the banner's ✕, switching lists (chip or ▾ grid), pressing Mondom, or the app going to the background.
 - **Append rule:** empty field → the sentence text; otherwise `field.trimRight() + " " + text`. Cursor at the end. Don't focus the field or open the keyboard automatically (it would cover the list and block adding more pieces); the user taps the field to edit.
 - **Loading is not speaking:** it doesn't speak, doesn't call `addToHistory`, doesn't set `said`, doesn't reorder anything.

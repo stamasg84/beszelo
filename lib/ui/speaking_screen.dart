@@ -33,6 +33,7 @@ class SpeakingScreen extends StatefulWidget {
 class _SpeakingScreenState extends State<SpeakingScreen>
     with WidgetsBindingObserver {
   final _controller = TextEditingController();
+  final _focusNode = FocusNode();
 
   late final Stream<List<SentenceList>> _lists;
   StreamSubscription<List<SentenceList>>? _listsSub;
@@ -64,7 +65,21 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _lists = widget.repo.watchLists().asBroadcastStream();
+    _focusNode.addListener(_onFieldFocus);
     _start();
+  }
+
+  /// On gaining focus, put the caret at the end of the text. The field is
+  /// narrow and shows at most 3 lines, so the tap that focuses it often lands
+  /// mid-sentence of a long loaded text; continuing to type at the end is
+  /// what's almost always wanted. Focus listeners run after the tap has set
+  /// its selection, so this wins. Taps on an already focused field still
+  /// place the caret where tapped.
+  void _onFieldFocus() {
+    if (!_focusNode.hasFocus) return;
+    _controller.selection = TextSelection.collapsed(
+      offset: _controller.text.length,
+    );
   }
 
   @override
@@ -147,6 +162,7 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     WidgetsBinding.instance.removeObserver(this);
     _listsSub?.cancel();
     _controller.dispose();
+    _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -187,6 +203,9 @@ class _SpeakingScreenState extends State<SpeakingScreen>
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
+              _loadButton(l10n),
+              // Wide gap: a slightly-off tap must not hit the neighbour.
+              const SizedBox(width: 16),
               IconButton(
                 tooltip: l10n.settingsTooltip,
                 icon: const Icon(Icons.settings),
@@ -210,6 +229,25 @@ class _SpeakingScreenState extends State<SpeakingScreen>
           ),
         );
       },
+    );
+  }
+
+  /// Builder-mode toggle. Lives in the app bar so the free-text field gets
+  /// the full width of the bottom bar.
+  Widget _loadButton(AppLocalizations l10n) {
+    final scheme = Theme.of(context).colorScheme;
+    return IconButton(
+      iconSize: 32,
+      tooltip: l10n.loadSentence,
+      isSelected: _loadArmed,
+      style: _loadArmed
+          ? IconButton.styleFrom(
+              backgroundColor: scheme.primary,
+              foregroundColor: scheme.onPrimary,
+            )
+          : IconButton.styleFrom(side: BorderSide(color: scheme.outline)),
+      icon: const Icon(Icons.playlist_add),
+      onPressed: () => setState(() => _loadArmed = !_loadArmed),
     );
   }
 
@@ -596,40 +634,10 @@ class _SpeakingScreenState extends State<SpeakingScreen>
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: SizedBox(
-                        width: 56,
-                        height: 56,
-                        child: IconButton(
-                          iconSize: 32,
-                          tooltip: l10n.loadSentence,
-                          isSelected: _loadArmed,
-                          style: _loadArmed
-                              ? IconButton.styleFrom(
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .primary,
-                                  foregroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimary,
-                                )
-                              : IconButton.styleFrom(
-                                  side: BorderSide(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .outline,
-                                  ),
-                                ),
-                          icon: const Icon(Icons.playlist_add),
-                          onPressed: () =>
-                              setState(() => _loadArmed = !_loadArmed),
-                        ),
-                      ),
-                    ),
                     Expanded(
                       child: TextField(
                         controller: _controller,
+                        focusNode: _focusNode,
                         minLines: 1,
                         maxLines: 3,
                         style: const TextStyle(fontSize: 24),
