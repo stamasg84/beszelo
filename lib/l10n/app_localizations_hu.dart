@@ -44,9 +44,6 @@ class AppLocalizationsHu extends AppLocalizations {
   String get voicePickerTitle => 'Hang kiválasztása';
 
   @override
-  String get voiceSettingsTooltip => 'Hang kiválasztása';
-
-  @override
   String languageSelectorLabel(String name) {
     return 'Nyelv: $name';
   }
@@ -119,13 +116,86 @@ class AppLocalizationsHu extends AppLocalizations {
   String get allLists => 'Összes lista';
 
   @override
-  String get editTooltip => 'Szerkesztés';
+  String get emptyListHint =>
+      'Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák';
 
   @override
-  String get editComingSoon => 'A szerkesztés hamarosan elérhető.';
+  String get settingsTooltip => 'Beállítások';
 
   @override
-  String get emptyListHint => 'Ez a lista üres. Szerkesztés: ✎';
+  String get settingsVoiceTitle => 'Hang és nyelv';
+
+  @override
+  String settingsVoiceSubtitle(String voice, String language) {
+    return '$voice · $language';
+  }
+
+  @override
+  String get settingsListsTitle => 'Listák';
+
+  @override
+  String get settingsListsSubtitle => 'Listák és mondatok szerkesztése';
+
+  @override
+  String get pinnedLabel => 'Kitűzve';
+
+  @override
+  String sentenceCount(int count) {
+    return '$count mondat';
+  }
+
+  @override
+  String get currentlyOpen => 'Most megnyitva';
+
+  @override
+  String get reorderHandle => 'Mozgatás';
+
+  @override
+  String get moreActions => 'További műveletek';
+
+  @override
+  String get renameList => 'Átnevezés';
+
+  @override
+  String get pinList => 'Kitűzés';
+
+  @override
+  String get unpinList => 'Kitűzés megszüntetése';
+
+  @override
+  String get deleteList => 'Törlés';
+
+  @override
+  String deleteListQuestion(String title, int count) {
+    return 'Törlöd a(z) „$title” listát és a $count mondatát?';
+  }
+
+  @override
+  String get deleteAction => 'Törlés';
+
+  @override
+  String get saveAction => 'Mentés';
+
+  @override
+  String get newList => 'Új lista';
+
+  @override
+  String get listNameLabel => 'A lista neve';
+
+  @override
+  String get kindEveryday => 'Mondatlista';
+
+  @override
+  String get kindConversation => 'Beszélgetés';
+
+  @override
+  String get kindConversationInfo => 'Előre megírt mondatok, Következő gombbal';
+
+  @override
+  String get createAction => 'Létrehozás';
+
+  @override
+  String get restoreDefaultLists => 'Alapértelmezett listák visszaállítása';
 
   @override
   String addSeedListsQuestion(String language) {

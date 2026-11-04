@@ -186,6 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return SpeakingScreen(
       speaker: _speaker,
       repo: repo,
+      voice: () => _voice,
       onOpenVoicePicker: _openPicker,
     );
   }

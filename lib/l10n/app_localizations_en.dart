@@ -44,9 +44,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get voicePickerTitle => 'Choose a voice';
 
   @override
-  String get voiceSettingsTooltip => 'Choose a voice';
-
-  @override
   String languageSelectorLabel(String name) {
     return 'Language: $name';
   }
@@ -118,13 +115,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allLists => 'All lists';
 
   @override
-  String get editTooltip => 'Edit';
+  String get emptyListHint => 'This list is empty. To edit: ⚙ Settings → Lists';
 
   @override
-  String get editComingSoon => 'Editing is coming soon.';
+  String get settingsTooltip => 'Settings';
 
   @override
-  String get emptyListHint => 'This list is empty. Edit: ✎';
+  String get settingsVoiceTitle => 'Voice and language';
+
+  @override
+  String settingsVoiceSubtitle(String voice, String language) {
+    return '$voice · $language';
+  }
+
+  @override
+  String get settingsListsTitle => 'Lists';
+
+  @override
+  String get settingsListsSubtitle => 'Edit lists and sentences';
+
+  @override
+  String get pinnedLabel => 'Pinned';
+
+  @override
+  String sentenceCount(int count) {
+    return '$count sentences';
+  }
+
+  @override
+  String get currentlyOpen => 'Currently open';
+
+  @override
+  String get reorderHandle => 'Move';
+
+  @override
+  String get moreActions => 'More actions';
+
+  @override
+  String get renameList => 'Rename';
+
+  @override
+  String get pinList => 'Pin';
+
+  @override
+  String get unpinList => 'Unpin';
+
+  @override
+  String get deleteList => 'Delete';
+
+  @override
+  String deleteListQuestion(String title, int count) {
+    return 'Delete the list “$title” and its $count sentences?';
+  }
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get saveAction => 'Save';
+
+  @override
+  String get newList => 'New list';
+
+  @override
+  String get listNameLabel => 'List name';
+
+  @override
+  String get kindEveryday => 'Sentence list';
+
+  @override
+  String get kindConversation => 'Conversation';
+
+  @override
+  String get kindConversationInfo =>
+      'Sentences written ahead, with a Next button';
+
+  @override
+  String get createAction => 'Create';
+
+  @override
+  String get restoreDefaultLists => 'Restore default lists';
 
   @override
   String addSeedListsQuestion(String language) {

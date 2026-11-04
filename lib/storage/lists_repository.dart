@@ -27,6 +27,31 @@ class ListsRepository {
     _lists,
   )..orderBy([(t) => OrderingTerm.asc(t.position)])).watch();
 
+  /// Number of sentences per list id (lists without sentences are absent).
+  Stream<Map<int, int>> watchSentenceCounts() => _db
+      .select(_sentences)
+      .watch()
+      .map(
+        (rows) => {
+          for (final id in rows.map((s) => s.listId).toSet())
+            id: rows.where((s) => s.listId == id).length,
+        },
+      );
+
+  /// Whether some seed list of [language] is missing; re-evaluated whenever
+  /// the lists change.
+  Stream<bool> watchHasMissingDefaultLists(String language) =>
+      watchLists().asyncMap((_) => hasMissingDefaultLists(language));
+
+  Future<bool> hasMissingDefaultLists(String language) async {
+    final (used, seed) = await _db.resolveSeed(language);
+    final existing = {
+      for (final l in await _db.select(_lists).get())
+        if (l.seedLanguage == used && l.seedKey != null) l.seedKey,
+    };
+    return seed.lists.any((l) => !existing.contains(l.seedKey));
+  }
+
   Future<int> createList(
     String title, {
     ListKind kind = ListKind.everyday,

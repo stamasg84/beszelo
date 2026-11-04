@@ -158,12 +158,6 @@ abstract class AppLocalizations {
   /// **'Hang kiválasztása'**
   String get voicePickerTitle;
 
-  /// Tooltip of the app bar icon that opens the voice picker.
-  ///
-  /// In hu, this message translates to:
-  /// **'Hang kiválasztása'**
-  String get voiceSettingsTooltip;
-
   /// Button at the top of the voice picker showing the chosen language.
   ///
   /// In hu, this message translates to:
@@ -290,23 +284,155 @@ abstract class AppLocalizations {
   /// **'Összes lista'**
   String get allLists;
 
-  /// Tooltip of the app bar icon that opens the list editor.
-  ///
-  /// In hu, this message translates to:
-  /// **'Szerkesztés'**
-  String get editTooltip;
-
-  /// Temporary message until the editing screen exists.
-  ///
-  /// In hu, this message translates to:
-  /// **'A szerkesztés hamarosan elérhető.'**
-  String get editComingSoon;
-
   /// Hint shown in an empty sentence list.
   ///
   /// In hu, this message translates to:
-  /// **'Ez a lista üres. Szerkesztés: ✎'**
+  /// **'Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák'**
   String get emptyListHint;
+
+  /// Tooltip of the cog in the speaking screen's app bar, and title of the settings screen.
+  ///
+  /// In hu, this message translates to:
+  /// **'Beállítások'**
+  String get settingsTooltip;
+
+  /// Settings row opening the voice picker.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hang és nyelv'**
+  String get settingsVoiceTitle;
+
+  /// Subtitle of the voice row: current voice and its language.
+  ///
+  /// In hu, this message translates to:
+  /// **'{voice} · {language}'**
+  String settingsVoiceSubtitle(String voice, String language);
+
+  /// Settings row opening the lists overview; also its screen title.
+  ///
+  /// In hu, this message translates to:
+  /// **'Listák'**
+  String get settingsListsTitle;
+
+  /// Subtitle of the lists row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Listák és mondatok szerkesztése'**
+  String get settingsListsSubtitle;
+
+  /// Marker on a list that has a chip on the speaking screen.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kitűzve'**
+  String get pinnedLabel;
+
+  /// Number of sentences in a list.
+  ///
+  /// In hu, this message translates to:
+  /// **'{count} mondat'**
+  String sentenceCount(int count);
+
+  /// Marker on the list that is open on the speaking screen.
+  ///
+  /// In hu, this message translates to:
+  /// **'Most megnyitva'**
+  String get currentlyOpen;
+
+  /// Semantics label of the drag handle of a list row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mozgatás'**
+  String get reorderHandle;
+
+  /// Tooltip of the ⋮ button of a list row.
+  ///
+  /// In hu, this message translates to:
+  /// **'További műveletek'**
+  String get moreActions;
+
+  /// List action: rename.
+  ///
+  /// In hu, this message translates to:
+  /// **'Átnevezés'**
+  String get renameList;
+
+  /// List action: pin to the chip row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kitűzés'**
+  String get pinList;
+
+  /// List action: remove from the chip row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kitűzés megszüntetése'**
+  String get unpinList;
+
+  /// List action: delete.
+  ///
+  /// In hu, this message translates to:
+  /// **'Törlés'**
+  String get deleteList;
+
+  /// Confirmation before deleting a list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Törlöd a(z) „{title}” listát és a {count} mondatát?'**
+  String deleteListQuestion(String title, int count);
+
+  /// Confirm button of a delete dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Törlés'**
+  String get deleteAction;
+
+  /// Confirm button of the rename dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mentés'**
+  String get saveAction;
+
+  /// Button and dialog title for creating a list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Új lista'**
+  String get newList;
+
+  /// Name field of the new list / rename dialogs.
+  ///
+  /// In hu, this message translates to:
+  /// **'A lista neve'**
+  String get listNameLabel;
+
+  /// List kind: plain sentence list.
+  ///
+  /// In hu, this message translates to:
+  /// **'Mondatlista'**
+  String get kindEveryday;
+
+  /// List kind: prepared conversation.
+  ///
+  /// In hu, this message translates to:
+  /// **'Beszélgetés'**
+  String get kindConversation;
+
+  /// Explains the conversation list kind.
+  ///
+  /// In hu, this message translates to:
+  /// **'Előre megírt mondatok, Következő gombbal'**
+  String get kindConversationInfo;
+
+  /// Confirm button of the new list dialog.
+  ///
+  /// In hu, this message translates to:
+  /// **'Létrehozás'**
+  String get createAction;
+
+  /// Row that re-creates deleted default lists.
+  ///
+  /// In hu, this message translates to:
+  /// **'Alapértelmezett listák visszaállítása'**
+  String get restoreDefaultLists;
 
   /// Dialog asking whether to add the default sentence lists of another language. The language name is lowercase in Hungarian.
   ///

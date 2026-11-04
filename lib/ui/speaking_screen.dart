@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
+import '../voices/voice.dart';
+import 'settings_screen.dart';
 
 /// Main screen: list chips, big sentence rows, always-visible free text.
 class SpeakingScreen extends StatefulWidget {
@@ -12,12 +14,16 @@ class SpeakingScreen extends StatefulWidget {
     super.key,
     required this.speaker,
     required this.repo,
+    this.voice,
     this.onOpenVoicePicker,
   });
 
   final Speaker speaker;
   final ListsRepository repo;
-  final VoidCallback? onOpenVoicePicker;
+
+  /// The active voice, shown in settings. Defaults to the Hungarian system voice.
+  final Voice Function()? voice;
+  final Future<void> Function()? onOpenVoicePicker;
 
   @override
   State<SpeakingScreen> createState() => _SpeakingScreenState();
@@ -101,6 +107,19 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
     super.dispose();
   }
 
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SettingsScreen(
+          repo: widget.repo,
+          voice: widget.voice ?? () => Voice.system('hu'),
+          onOpenVoicePicker: widget.onOpenVoicePicker ?? () async {},
+          currentListId: () => _currentId,
+        ),
+      ),
+    );
+  }
+
   String _title(AppLocalizations l10n, SentenceList l) =>
       l.kind == ListKind.history && l.title.isEmpty
       ? l10n.historyTitle
@@ -114,17 +133,9 @@ class _SpeakingScreenState extends State<SpeakingScreen> {
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            tooltip: l10n.editTooltip,
-            icon: const Icon(Icons.edit),
-            // Placeholder until the editing screen (T18).
-            onPressed: () =>
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(l10n.editComingSoon))),
-          ),
-          IconButton(
-            tooltip: l10n.voiceSettingsTooltip,
-            icon: const Icon(Icons.record_voice_over),
-            onPressed: widget.onOpenVoicePicker,
+            tooltip: l10n.settingsTooltip,
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
           ),
         ],
       ),

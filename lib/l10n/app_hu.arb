@@ -56,10 +56,6 @@
   "@voicePickerTitle": {
     "description": "Title of the voice picker screen."
   },
-  "voiceSettingsTooltip": "Hang kiválasztása",
-  "@voiceSettingsTooltip": {
-    "description": "Tooltip of the app bar icon that opens the voice picker."
-  },
   "languageSelectorLabel": "Nyelv: {name}",
   "@languageSelectorLabel": {
     "description": "Button at the top of the voice picker showing the chosen language.",
@@ -151,17 +147,108 @@
   "@allLists": {
     "description": "Tooltip of the ▾ button that shows all lists."
   },
-  "editTooltip": "Szerkesztés",
-  "@editTooltip": {
-    "description": "Tooltip of the app bar icon that opens the list editor."
-  },
-  "editComingSoon": "A szerkesztés hamarosan elérhető.",
-  "@editComingSoon": {
-    "description": "Temporary message until the editing screen exists."
-  },
-  "emptyListHint": "Ez a lista üres. Szerkesztés: ✎",
+  "emptyListHint": "Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák",
   "@emptyListHint": {
     "description": "Hint shown in an empty sentence list."
+  },
+  "settingsTooltip": "Beállítások",
+  "@settingsTooltip": {
+    "description": "Tooltip of the cog in the speaking screen's app bar, and title of the settings screen."
+  },
+  "settingsVoiceTitle": "Hang és nyelv",
+  "@settingsVoiceTitle": {
+    "description": "Settings row opening the voice picker."
+  },
+  "settingsVoiceSubtitle": "{voice} · {language}",
+  "@settingsVoiceSubtitle": {
+    "description": "Subtitle of the voice row: current voice and its language.",
+    "placeholders": {"voice": {"type": "String"}, "language": {"type": "String"}}
+  },
+  "settingsListsTitle": "Listák",
+  "@settingsListsTitle": {
+    "description": "Settings row opening the lists overview; also its screen title."
+  },
+  "settingsListsSubtitle": "Listák és mondatok szerkesztése",
+  "@settingsListsSubtitle": {
+    "description": "Subtitle of the lists row."
+  },
+  "pinnedLabel": "Kitűzve",
+  "@pinnedLabel": {
+    "description": "Marker on a list that has a chip on the speaking screen."
+  },
+  "sentenceCount": "{count} mondat",
+  "@sentenceCount": {
+    "description": "Number of sentences in a list.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "currentlyOpen": "Most megnyitva",
+  "@currentlyOpen": {
+    "description": "Marker on the list that is open on the speaking screen."
+  },
+  "reorderHandle": "Mozgatás",
+  "@reorderHandle": {
+    "description": "Semantics label of the drag handle of a list row."
+  },
+  "moreActions": "További műveletek",
+  "@moreActions": {
+    "description": "Tooltip of the ⋮ button of a list row."
+  },
+  "renameList": "Átnevezés",
+  "@renameList": {
+    "description": "List action: rename."
+  },
+  "pinList": "Kitűzés",
+  "@pinList": {
+    "description": "List action: pin to the chip row."
+  },
+  "unpinList": "Kitűzés megszüntetése",
+  "@unpinList": {
+    "description": "List action: remove from the chip row."
+  },
+  "deleteList": "Törlés",
+  "@deleteList": {
+    "description": "List action: delete."
+  },
+  "deleteListQuestion": "Törlöd a(z) „{title}” listát és a {count} mondatát?",
+  "@deleteListQuestion": {
+    "description": "Confirmation before deleting a list.",
+    "placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}
+  },
+  "deleteAction": "Törlés",
+  "@deleteAction": {
+    "description": "Confirm button of a delete dialog."
+  },
+  "saveAction": "Mentés",
+  "@saveAction": {
+    "description": "Confirm button of the rename dialog."
+  },
+  "newList": "Új lista",
+  "@newList": {
+    "description": "Button and dialog title for creating a list."
+  },
+  "listNameLabel": "A lista neve",
+  "@listNameLabel": {
+    "description": "Name field of the new list / rename dialogs."
+  },
+  "kindEveryday": "Mondatlista",
+  "@kindEveryday": {
+    "description": "List kind: plain sentence list."
+  },
+  "kindConversation": "Beszélgetés",
+  "@kindConversation": {
+    "description": "List kind: prepared conversation."
+  },
+  "kindConversationInfo": "Előre megírt mondatok, Következő gombbal",
+  "@kindConversationInfo": {
+    "description": "Explains the conversation list kind."
+  },
+  "createAction": "Létrehozás",
+  "@createAction": {
+    "description": "Confirm button of the new list dialog."
+  },
+  "restoreDefaultLists": "Alapértelmezett listák visszaállítása",
+  "@restoreDefaultLists": {
+    "description": "Row that re-creates deleted default lists."
   },
   "addSeedListsQuestion": "Hozzáadjam a(z) {language} alapértelmezett listákat?",
   "@addSeedListsQuestion": {

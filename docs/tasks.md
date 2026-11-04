@@ -109,7 +109,7 @@ Do after T17a (uses its `languageName` helper and the speech-language rules). Re
 3. Download NST, switch the selector back to Magyar: Svéd shows the installed marker in the language list.
 Done → commit.
 
-### [ ] T18 (Agent): Settings screen + lists overview
+### [x] T18 (Agent): Settings screen + lists overview
 Read architecture.md "Settings and editing" first. Editing is never a mode on the speaking screen: it lives in separate screens reached through settings, so a stray tap can't leave the speaking screen silently editing.
 - **Speaking screen app bar:** remove the edit icon (and the `editComingSoon` placeholder + ARB key). Replace the voice icon (`Icons.record_voice_over`) with a cog (`Icons.settings`, tooltip "Beállítások"), the only action in the app bar. Empty-list hint becomes "Ez a lista üres. Szerkesztés: ⚙ Beállítások → Listák".
 - **New `lib/ui/settings_screen.dart`:** a plain list of large rows (≥ 72 dp, icon + title + subtitle), back arrow to leave:
