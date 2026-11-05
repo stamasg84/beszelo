@@ -185,7 +185,7 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
                     ),
                     tooltip: l10n.moreActions,
                     icon: const Icon(Icons.more_vert),
-                    onPressed: () => _actions(l10n, s),
+                    onPressed: () => _actions(l10n, s, isHistory: isHistory),
                   ),
                   if (isHistory)
                     const SizedBox(width: 4)
@@ -219,13 +219,18 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
     if (text != null) await widget.repo.updateSentenceText(s.id, text);
   }
 
-  Future<void> _actions(AppLocalizations l10n, Sentence s) async {
+  Future<void> _actions(
+    AppLocalizations l10n,
+    Sentence s, {
+    required bool isHistory,
+  }) async {
     final action = await showModalBottomSheet<String>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!isHistory) _AlarmSwitch(repo: widget.repo, sentence: s),
             _sheetRow(context, Icons.copy, l10n.copyToList, 'copy'),
             _sheetRow(
               context,
@@ -340,6 +345,38 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Alarm flag switch in the row's ⋮ sheet; writes immediately.
+class _AlarmSwitch extends StatefulWidget {
+  const _AlarmSwitch({required this.repo, required this.sentence});
+  final ListsRepository repo;
+  final Sentence sentence;
+
+  @override
+  State<_AlarmSwitch> createState() => _AlarmSwitchState();
+}
+
+class _AlarmSwitchState extends State<_AlarmSwitch> {
+  late bool _value = widget.sentence.alarm;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SwitchListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      title: Text(l10n.alarmToggle, style: const TextStyle(fontSize: 22)),
+      subtitle: Text(
+        l10n.alarmToggleHelp,
+        style: const TextStyle(fontSize: 16),
+      ),
+      value: _value,
+      onChanged: (v) {
+        setState(() => _value = v);
+        widget.repo.setSentenceAlarm(widget.sentence.id, v);
+      },
     );
   }
 }

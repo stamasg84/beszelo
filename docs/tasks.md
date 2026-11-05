@@ -33,7 +33,7 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 - Tests: alarm row tap doesn't touch history; Leállítás appears while an alarm plays and stops it (fake player); loop stops after the limit (fake timer / injectable duration).
 - **Checks:** `flutter analyze`, `flutter test`.
 
-### [ ] T23 (Agent): Alarm toggle in the list editor
+### [x] T23 (Agent): Alarm toggle in the list editor
 - In the per-row ⋮ sheet of the list editor: a switch "Riasztásként szóljon (hangosan)" that sets `alarm`. Short help text under it: "Riasztás hangerején szól, és nem kerül az előzmények közé."
 - Not offered on the history list's rows (history rows are never alarms; copying one into a list and flagging it there is fine).
 - Choosing a row's sound is not part of this task (later, with message banking).

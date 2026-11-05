@@ -63,6 +63,8 @@
   "newLinesLabel": "New line(s)",
   "newLinesHint": "One sentence per line",
   "copyToList": "Copy to list…",
+  "alarmToggle": "Play as an alarm (loud)",
+  "alarmToggleHelp": "Plays at the alarm volume and is not added to history.",
   "moveToList": "Move to list…",
   "chooseListTitle": "Which list?",
   "editSentenceTitle": "Edit sentence",

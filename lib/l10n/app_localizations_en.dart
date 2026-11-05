@@ -220,6 +220,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyToList => 'Copy to list…';
 
   @override
+  String get alarmToggle => 'Play as an alarm (loud)';
+
+  @override
+  String get alarmToggleHelp =>
+      'Plays at the alarm volume and is not added to history.';
+
+  @override
   String get moveToList => 'Move to list…';
 
   @override

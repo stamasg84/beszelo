@@ -309,6 +309,14 @@
   "@copyToList": {
     "description": "Row action: copy a sentence to another list."
   },
+  "alarmToggle": "Riasztásként szóljon (hangosan)",
+  "@alarmToggle": {
+    "description": "Switch in a row's ⋮ sheet: play this sentence as an alarm."
+  },
+  "alarmToggleHelp": "Riasztás hangerején szól, és nem kerül az előzmények közé.",
+  "@alarmToggleHelp": {
+    "description": "Help text under the alarm switch."
+  },
   "moveToList": "Áthelyezés listába…",
   "@moveToList": {
     "description": "Row action: move a sentence to another list."

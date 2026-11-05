@@ -157,6 +157,11 @@ class ListsRepository {
     )..where((s) => s.id.equals(id))).write(SentencesCompanion(body: Value(t)));
   }
 
+  Future<void> setSentenceAlarm(int id, bool alarm) =>
+      (_db.update(_sentences)..where((s) => s.id.equals(id))).write(
+        SentencesCompanion(alarm: Value(alarm)),
+      );
+
   Future<void> deleteSentence(int id) => _db.transaction(() async {
     final s = await _sentenceById(id);
     if (s == null) return;

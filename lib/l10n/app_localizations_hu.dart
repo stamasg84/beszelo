@@ -220,6 +220,13 @@ class AppLocalizationsHu extends AppLocalizations {
   String get copyToList => 'Másolás listába…';
 
   @override
+  String get alarmToggle => 'Riasztásként szóljon (hangosan)';
+
+  @override
+  String get alarmToggleHelp =>
+      'Riasztás hangerején szól, és nem kerül az előzmények közé.';
+
+  @override
   String get moveToList => 'Áthelyezés listába…';
 
   @override

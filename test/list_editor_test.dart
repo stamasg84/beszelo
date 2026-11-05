@@ -231,6 +231,35 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('alarm switch in the sheet sets and clears the flag', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    final id = (await tester.runAsync(() => repo.createList('Orvos')))!;
+    await tester.runAsync(() => repo.addSentences(id, ['Segítség!']));
+    await openEditor(tester, 'Orvos');
+    await tester.tap(find.byTooltip('További műveletek'));
+    await settle(tester);
+    expect(find.text('Riasztásként szóljon (hangosan)'), findsOneWidget);
+    await tester.tap(find.byType(Switch));
+    await settle(tester);
+    expect((await rows(tester, id)).single.alarm, isTrue);
+    await tester.tap(find.byType(Switch));
+    await settle(tester);
+    expect((await rows(tester, id)).single.alarm, isFalse);
+    await finish(tester);
+  });
+
+  testWidgets('history rows have no alarm switch', (tester) async {
+    await pumpScreen(tester);
+    await tester.runAsync(() => repo.addToHistory('Szia'));
+    await openEditor(tester, 'Előzmények');
+    await tester.tap(find.byTooltip('További műveletek'));
+    await settle(tester);
+    expect(find.text('Riasztásként szóljon (hangosan)'), findsNothing);
+    await finish(tester);
+  });
+
   testWidgets('editor: plain rows have no badge', (tester) async {
     await pumpScreen(tester);
     await openEditor(tester, 'Alap');

@@ -476,6 +476,18 @@ abstract class AppLocalizations {
   /// **'Másolás listába…'**
   String get copyToList;
 
+  /// Switch in a row's ⋮ sheet: play this sentence as an alarm.
+  ///
+  /// In hu, this message translates to:
+  /// **'Riasztásként szóljon (hangosan)'**
+  String get alarmToggle;
+
+  /// Help text under the alarm switch.
+  ///
+  /// In hu, this message translates to:
+  /// **'Riasztás hangerején szól, és nem kerül az előzmények közé.'**
+  String get alarmToggleHelp;
+
   /// Row action: move a sentence to another list.
   ///
   /// In hu, this message translates to:
