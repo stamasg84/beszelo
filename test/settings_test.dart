@@ -118,6 +118,44 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('leaving via the menu never refocuses the text field', (
+    tester,
+  ) async {
+    bool fieldFocused() => tester
+        .widget<EditableText>(find.byType(EditableText))
+        .focusNode
+        .hasFocus;
+    List<String> inputCalls() =>
+        tester.testTextInput.log.map((c) => c.method).toList();
+
+    await pumpScreen(tester);
+    await tester.tap(find.byType(TextField));
+    await settle(tester);
+    expect(fieldFocused(), isTrue);
+
+    // Drawer dismissed by tapping the scrim.
+    await tester.tap(find.byTooltip('Menü'));
+    await settle(tester);
+    tester.testTextInput.log.clear();
+    await tester.tapAt(const Offset(780, 300));
+    await settle(tester);
+    expect(find.text('Listák'), findsNothing);
+    expect(fieldFocused(), isFalse);
+    expect(inputCalls(), isNot(contains('TextInput.show')));
+
+    // Back from a page opened from the drawer.
+    await tester.tap(find.byType(TextField));
+    await settle(tester);
+    await openLists(tester);
+    tester.testTextInput.log.clear();
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(fieldFocused(), isFalse);
+    expect(inputCalls(), isNot(contains('TextInput.show')));
+    expect(tester.testTextInput.isVisible, isFalse);
+    await finish(tester);
+  });
+
   testWidgets('edge swipe does not open the drawer', (tester) async {
     await pumpScreen(tester);
     await tester.dragFrom(const Offset(2, 300), const Offset(300, 0));
