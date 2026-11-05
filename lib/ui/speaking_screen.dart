@@ -8,6 +8,7 @@ import '../storage/lists_repository.dart';
 import '../voices/voice.dart';
 import 'list_colors.dart';
 import 'main_drawer.dart';
+import 'row_badges.dart';
 
 /// Main screen: list chips, big sentence rows, always-visible free text.
 class SpeakingScreen extends StatefulWidget {
@@ -139,9 +140,14 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     if (remember) widget.repo.setLastUsedListId(id);
   }
 
-  Future<void> _speak(String text, {int? rowId}) async {
+  Future<void> _speak(String text, {Sentence? row}) async {
     final speaker = widget.speaker;
-    if (!speaker.ready || text.trim().isEmpty) return;
+    final data = row == null
+        ? null
+        : SentenceRowData(text: text, soundKey: row.soundKey, alarm: row.alarm);
+    final canPlay = data == null ? speaker.ready : speaker.canPlay(data);
+    if (!canPlay || text.trim().isEmpty) return;
+    final rowId = row?.id;
     setState(() {
       _tappedId = rowId;
       _loadArmed = false;
@@ -149,11 +155,12 @@ class _SpeakingScreenState extends State<SpeakingScreen>
     if (rowId != null && _currentIsConversation) {
       unawaited(widget.repo.setSaid(rowId, true));
     }
-    // Tapping a row in the history list must not reorder it under the finger.
-    if (rowId == null || !_currentIsHistory) {
+    // Tapping a row in the history list must not reorder it under the finger;
+    // alarm rows are never logged.
+    if ((rowId == null || !_currentIsHistory) && !(row?.alarm ?? false)) {
       unawaited(widget.repo.addToHistory(text));
     }
-    await speaker.speak(text);
+    await (data == null ? speaker.speak(text) : speaker.play(data));
     if (mounted) setState(() => _tappedId = null);
   }
 
@@ -421,7 +428,14 @@ class _SpeakingScreenState extends State<SpeakingScreen>
                 ),
               ),
             ),
-            if (conversation) _nextBar(l10n, next),
+            ListenableBuilder(
+              listenable: widget.speaker,
+              builder: (context, _) => widget.speaker.alarmPlaying
+                  ? _stopBar(l10n)
+                  : conversation
+                  ? _nextBar(l10n, next)
+                  : const SizedBox.shrink(),
+            ),
           ],
         );
       },
@@ -452,9 +466,8 @@ class _SpeakingScreenState extends State<SpeakingScreen>
   }
 
   Future<void> _speakNext(Sentence next) async {
-    if (!widget.speaker.ready) return;
     _scrollAfterId = next.id;
-    await _speak(next.body, rowId: next.id);
+    await _speak(next.body, row: next);
   }
 
   Future<void> _confirmReset(int listId) async {
@@ -479,6 +492,26 @@ class _SpeakingScreenState extends State<SpeakingScreen>
       ),
     );
     if (ok == true) await widget.repo.resetSaid(listId);
+  }
+
+  /// Replaces Következő (in any list kind) while an alarm plays.
+  Widget _stopBar(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: SizedBox(
+        width: double.infinity,
+        height: 72,
+        child: FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: Colors.red.shade700,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: widget.speaker.stop,
+          icon: const Icon(Icons.stop, size: 36),
+          label: Text(l10n.stopAlarm, style: const TextStyle(fontSize: 28)),
+        ),
+      ),
+    );
   }
 
   Widget _nextBar(AppLocalizations l10n, Sentence? next) {
@@ -537,10 +570,7 @@ class _SpeakingScreenState extends State<SpeakingScreen>
       color: active
           ? tones.rowActive
           : s.said
-          ? Color.alphaBlend(
-              scheme.surface.withValues(alpha: 0.7),
-              tones.row,
-            )
+          ? Color.alphaBlend(scheme.surface.withValues(alpha: 0.7), tones.row)
           : tones.row,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -553,7 +583,7 @@ class _SpeakingScreenState extends State<SpeakingScreen>
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () =>
-            _loadArmed ? _loadIntoField(s.body) : _speak(s.body, rowId: s.id),
+            _loadArmed ? _loadIntoField(s.body) : _speak(s.body, row: s),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minHeight: 72,
@@ -563,6 +593,11 @@ class _SpeakingScreenState extends State<SpeakingScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
+                if (s.alarm)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 12),
+                    child: AlarmBadge(),
+                  ),
                 Expanded(
                   child: Text(
                     s.body,

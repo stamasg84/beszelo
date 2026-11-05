@@ -52,6 +52,10 @@
   "@cancel": {
     "description": "Cancels a running voice download."
   },
+  "stopAlarm": "Leállítás",
+  "@stopAlarm": {
+    "description": "Large button shown while an alarm plays; stops it."
+  },
   "voicePickerTitle": "Hang kiválasztása",
   "@voicePickerTitle": {
     "description": "Title of the voice picker screen."

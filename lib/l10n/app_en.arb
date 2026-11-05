@@ -9,6 +9,7 @@
   "modelLoadTime": "Model load: {ms} ms",
   "synthesisStats": "Synthesis: {synthMs} ms, audio: {audioMs} ms, RTF: {rtf}",
   "cancel": "Cancel",
+  "stopAlarm": "Stop",
   "voicePickerTitle": "Choose a voice",
   "languageSelectorLabel": "Language: {name}",
   "installedVoicesCount": "{count} downloaded",

@@ -7,6 +7,9 @@ import 'fixture_seed.dart';
 
 import 'package:mondom/main.dart';
 import 'package:mondom/speech/speaker.dart';
+
+import 'speaker_test.dart' show FakeSoundPlayer;
+
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
 import 'package:mondom/ui/speaking_screen.dart';
@@ -403,5 +406,45 @@ void main() {
       tester0 = null;
       await finish(tester);
     });
+  });
+
+  testWidgets('alarm row: badge, not in history, Leállítás stops it', (
+    tester,
+  ) async {
+    tester0 = tester;
+    final alarms = FakeSoundPlayer();
+    final real = Speaker(
+      engineFactory: (Voice _) async => throw UnimplementedError(),
+      player: _NoPlayer(),
+      soundPlayer: FakeSoundPlayer(),
+      alarmPlayer: alarms,
+    );
+    addTearDown(real.dispose);
+    await tester.runAsync(() => repo.addSeedLists('hu'));
+    tester.platformDispatcher.localesTestValue = const [Locale('hu', 'HU')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    await tester.pumpWidget(
+      MondomApp(
+        home: SpeakingScreen(speaker: real, repo: repo),
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Riasztás'));
+    await settle(tester);
+    expect(find.byIcon(Icons.campaign), findsNWidgets(3));
+    expect(find.text('Leállítás'), findsNothing);
+
+    await tester.tap(find.text('Vészhelyzet!'));
+    await settle(tester);
+    expect(alarms.played, ['sounds/siren.wav']);
+    expect(find.text('Leállítás'), findsOneWidget);
+    expect(await historyBodies(), isEmpty);
+
+    await tester.tap(find.text('Leállítás'));
+    await settle(tester);
+    expect(find.text('Leállítás'), findsNothing);
+    expect(real.alarmPlaying, isFalse);
+    tester0 = null;
+    await finish(tester);
   });
 }

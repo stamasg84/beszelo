@@ -41,6 +41,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get stopAlarm => 'Stop';
+
+  @override
   String get voicePickerTitle => 'Choose a voice';
 
   @override

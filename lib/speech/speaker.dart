@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../voices/voice.dart';
 import '../voices/voice_engine.dart';
+import 'sounds.dart';
 
 /// Plays WAV files. Abstracted so [Speaker] can be unit-tested.
 abstract class WavPlayer {
@@ -26,6 +28,94 @@ class AudioPlayersWavPlayer implements WavPlayer {
   void dispose() => _player.dispose();
 }
 
+/// Plays built-in sounds (assets) and WAV files for rows that bypass the
+/// speech player. Two instances exist: a normal one and one with the Android
+/// alarm audio context, so the speech player's context is never changed.
+abstract class SoundPlayer {
+  Future<void> playAsset(String asset, {bool loop = false});
+  Future<void> playFile(String path);
+  Future<void> stop();
+
+  /// Fires when a non-looping sound finishes.
+  Stream<void> get onComplete;
+  void dispose();
+}
+
+/// audioplayers-backed [SoundPlayer]. The underlying player is created on
+/// first use, so merely constructing a [Speaker] touches no platform channel.
+class AudioPlayersSoundPlayer implements SoundPlayer {
+  AudioPlayersSoundPlayer({this.alarm = false});
+
+  /// Use Android's alarm usage / sonification content type / transient focus.
+  final bool alarm;
+  AudioPlayer? _player;
+  final _complete = StreamController<void>.broadcast();
+  StreamSubscription<void>? _sub;
+
+  Future<AudioPlayer> _get() async {
+    var p = _player;
+    if (p != null) return p;
+    p = _player = AudioPlayer();
+    _sub = p.onPlayerComplete.listen((_) => _complete.add(null));
+    if (alarm) {
+      await p.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            usageType: AndroidUsageType.alarm,
+            contentType: AndroidContentType.sonification,
+            audioFocus: AndroidAudioFocus.gainTransient,
+          ),
+        ),
+      );
+    }
+    return p;
+  }
+
+  @override
+  Future<void> playAsset(String asset, {bool loop = false}) async {
+    final p = await _get();
+    await p.setReleaseMode(loop ? ReleaseMode.loop : ReleaseMode.release);
+    await p.play(AssetSource(asset));
+  }
+
+  @override
+  Future<void> playFile(String path) async {
+    final p = await _get();
+    await p.setReleaseMode(ReleaseMode.release);
+    await p.play(DeviceFileSource(path));
+  }
+
+  @override
+  Future<void> stop() async => _player?.stop();
+
+  @override
+  Stream<void> get onComplete => _complete.stream;
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _player?.dispose();
+    _complete.close();
+  }
+}
+
+/// What a tapped row plays: a known [soundKey] plays its built-in sound,
+/// otherwise [text] is spoken. [alarm] rows play on the alarm stream.
+class SentenceRowData {
+  const SentenceRowData({
+    required this.text,
+    this.soundKey,
+    this.alarm = false,
+  });
+
+  final String text;
+  final String? soundKey;
+  final bool alarm;
+
+  /// The built-in sound to play, or null (unknown key = TTS).
+  BuiltInSound? get sound => soundKey == null ? null : builtInSounds[soundKey];
+}
+
 /// Trim + collapse inner whitespace. Also used as the history key.
 String normalizeText(String text) =>
     text.trim().replaceAll(RegExp(r'\s+'), ' ');
@@ -36,8 +126,26 @@ class Speaker extends ChangeNotifier {
   Speaker({
     required Future<VoiceEngine> Function(Voice) engineFactory,
     WavPlayer? player,
+    SoundPlayer? soundPlayer,
+    SoundPlayer? alarmPlayer,
+    this.loopLimit = alarmLoopLimit,
   }) : _createEngine = engineFactory,
-       _player = player ?? AudioPlayersWavPlayer();
+       _player = player ?? AudioPlayersWavPlayer(),
+       _soundPlayer = soundPlayer ?? AudioPlayersSoundPlayer(),
+       _alarmPlayer = alarmPlayer ?? AudioPlayersSoundPlayer(alarm: true) {
+    _alarmDone = _alarmPlayer.onComplete.listen((_) => _endAlarm());
+  }
+
+  /// A looping alarm stops by itself after this long.
+  final Duration loopLimit;
+  final SoundPlayer _soundPlayer;
+  final SoundPlayer _alarmPlayer;
+  StreamSubscription<void>? _alarmDone;
+  Timer? _loopTimer;
+  bool _alarmPlaying = false;
+
+  /// True while an alarm row is playing (sound, recording or TTS).
+  bool get alarmPlaying => _alarmPlaying;
 
   final Future<VoiceEngine> Function(Voice) _createEngine;
   final WavPlayer _player;
@@ -88,19 +196,48 @@ class Speaker extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> speak(String text) async {
+  /// Whether [row] can play now: a built-in sound needs no voice, so an alarm
+  /// works even while the voice is still loading.
+  bool canPlay(SentenceRowData row) => row.sound != null || ready;
+
+  /// Row-level entry: a known sound plays its asset (alarm rows on the alarm
+  /// stream), anything else is spoken. Only one thing plays at a time.
+  Future<void> play(SentenceRowData row) async {
+    final sound = row.sound;
+    if (sound == null) {
+      return row.alarm ? _speakText(row.text, alarm: true) : speak(row.text);
+    }
+    try {
+      await _stopAll();
+      _error = null;
+      if (row.alarm) {
+        await _alarmPlayer.playAsset(sound.asset, loop: sound.loops);
+        _startAlarm(loops: sound.loops);
+      } else {
+        await _soundPlayer.playAsset(sound.asset, loop: sound.loops);
+      }
+    } catch (e) {
+      _error = '$e';
+      notifyListeners();
+    }
+  }
+
+  /// Free text: speech on the normal player.
+  Future<void> speak(String text) => _speakText(text, alarm: false);
+
+  Future<void> _speakText(String text, {required bool alarm}) async {
     final normalized = normalizeText(text);
     final engine = _engine;
     final voice = _voice;
     if (normalized.isEmpty || engine == null || voice == null || _busy) return;
     final key = '${voice.id}\u0000$normalized';
     try {
-      await _player.stop();
+      await _stopAll();
       if (key == _lastKey && _lastPath != null) {
         _lastReplayed = true;
         _error = null;
         notifyListeners();
-        await _player.play(_lastPath!);
+        await _playWav(_lastPath!, alarm);
         return;
       }
       _busy = true;
@@ -115,7 +252,7 @@ class Speaker extends ChangeNotifier {
       if (old != null && old != result.path) await _deleteQuietly(old);
       _busy = false;
       notifyListeners();
-      await _player.play(result.path);
+      await _playWav(result.path, alarm);
     } catch (e) {
       _error = '$e';
       _busy = false;
@@ -123,7 +260,44 @@ class Speaker extends ChangeNotifier {
     }
   }
 
-  Future<void> stop() => _player.stop();
+  Future<void> _playWav(String path, bool alarm) async {
+    if (alarm) {
+      await _alarmPlayer.playFile(path);
+      _startAlarm(loops: false);
+    } else {
+      await _player.play(path);
+    }
+  }
+
+  void _startAlarm({required bool loops}) {
+    _loopTimer?.cancel();
+    _loopTimer = loops ? Timer(loopLimit, _stopAll) : null;
+    _alarmPlaying = true;
+    notifyListeners();
+  }
+
+  void _endAlarm() {
+    _loopTimer?.cancel();
+    _loopTimer = null;
+    if (!_alarmPlaying) return;
+    _alarmPlaying = false;
+    notifyListeners();
+  }
+
+  /// Stops speech, sounds and alarms.
+  Future<void> _stopAll() async {
+    _loopTimer?.cancel();
+    _loopTimer = null;
+    await _player.stop();
+    await _soundPlayer.stop();
+    await _alarmPlayer.stop();
+    if (_alarmPlaying) {
+      _alarmPlaying = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> stop() => _stopAll();
 
   Future<void> _forgetLast() async {
     final old = _lastPath;
@@ -141,6 +315,10 @@ class Speaker extends ChangeNotifier {
 
   @override
   void dispose() {
+    _loopTimer?.cancel();
+    _alarmDone?.cancel();
+    _soundPlayer.dispose();
+    _alarmPlayer.dispose();
     _player.dispose();
     _engine?.dispose();
     super.dispose();

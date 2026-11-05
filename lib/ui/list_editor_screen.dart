@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 import '../storage/lists_repository.dart';
+import 'row_badges.dart';
 
 /// Per-list sentence editor: edit, reorder, delete, copy/move, add lines.
 /// List-level actions (rename, pin, delete) live in the lists overview.
@@ -161,6 +162,18 @@ class _ListEditorScreenState extends State<ListEditorScreen> {
               padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
               child: Row(
                 children: [
+                  // What plays (built-in sound), then the alarm flag; the
+                  // two are independent.
+                  if (soundIcon(s.soundKey) case final icon?)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Icon(icon, size: 30),
+                    ),
+                  if (s.alarm)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: AlarmBadge(),
+                    ),
                   Expanded(
                     child: Text(s.body, style: const TextStyle(fontSize: 22)),
                   ),

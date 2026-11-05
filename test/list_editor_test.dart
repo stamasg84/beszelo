@@ -218,4 +218,24 @@ void main() {
     expect(await rows(tester, history.id), isEmpty);
     await finish(tester);
   });
+
+  testWidgets('editor: alarm rows get the megaphone, sound rows their icon', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await openEditor(tester, 'Riasztás');
+    expect(find.byIcon(Icons.campaign), findsNWidgets(3));
+    expect(find.byIcon(Icons.crisis_alert), findsOneWidget);
+    expect(find.byIcon(Icons.notifications_active), findsOneWidget);
+    expect(find.byIcon(Icons.surround_sound), findsOneWidget);
+    await finish(tester);
+  });
+
+  testWidgets('editor: plain rows have no badge', (tester) async {
+    await pumpScreen(tester);
+    await openEditor(tester, 'Alap');
+    expect(find.byIcon(Icons.campaign), findsNothing);
+    expect(find.byIcon(Icons.crisis_alert), findsNothing);
+    await finish(tester);
+  });
 }

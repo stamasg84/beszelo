@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Mégse'**
   String get cancel;
 
+  /// Large button shown while an alarm plays; stops it.
+  ///
+  /// In hu, this message translates to:
+  /// **'Leállítás'**
+  String get stopAlarm;
+
   /// Title of the voice picker screen.
   ///
   /// In hu, this message translates to:

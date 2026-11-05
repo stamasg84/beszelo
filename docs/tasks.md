@@ -21,7 +21,7 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 - Tests: migration v3→v4 keeps data; seed rows get `soundKey`/`alarm`; copy/move keep them; restore-defaults re-adds the Riasztás list.
 - **Checks:** `flutter analyze`, `flutter test`.
 
-### [ ] T22 (Agent): Alarm playback on the speaking screen
+### [x] T22 (Agent): Alarm playback on the speaking screen
 - `Speaker` gets a row-level entry, e.g. `play(SentenceRowData)` (text, soundKey, alarm), used by row taps and Következő; `speak(text)` stays for free text. What plays: known `soundKey` → its asset; otherwise TTS of the text (unknown key = TTS). Last-utterance reuse stays for TTS.
 - Alarm rows play on a **separate** `AudioPlayer` with an alarm `AudioContext` (Android usage `alarm`, content type `sonification`, transient audio focus), so the speech player's context is never changed. Non-alarm sound rows play on the normal player. Looping sounds use `ReleaseMode.loop` and are stopped by a timer after `alarmLoopLimit`.
 - Only one thing plays at a time: any row tap, Mondom, Következő or Leállítás stops what's playing (alarm or speech) first. Tapping the same alarm row again restarts it.

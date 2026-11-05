@@ -41,6 +41,9 @@ class AppLocalizationsHu extends AppLocalizations {
   String get cancel => 'Mégse';
 
   @override
+  String get stopAlarm => 'Leállítás';
+
+  @override
   String get voicePickerTitle => 'Hang kiválasztása';
 
   @override
