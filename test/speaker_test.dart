@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mondom/speech/alarm_volume.dart';
 import 'package:mondom/speech/speaker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mondom/voices/voice.dart';
 import 'package:mondom/voices/voice_engine.dart';
 
@@ -64,6 +66,7 @@ class FakeSoundPlayer implements SoundPlayer {
 }
 
 void main() {
+  group('alarm volume', volumeTests);
   late Directory dir;
   late FakeEngine engine;
   late FakePlayer player;
@@ -188,5 +191,93 @@ void main() {
     expect(speaker.alarmPlaying, isTrue);
     await Future<void>.delayed(const Duration(milliseconds: 120));
     expect(speaker.alarmPlaying, isFalse);
+  });
+}
+
+class FakeVolumeChannel implements AlarmVolumeChannel {
+  FakeVolumeChannel({this.current = 3, this.max = 7});
+  int current;
+  final int max;
+  @override
+  Future<StreamLevels?> get() async => (current: current, max: max);
+  @override
+  Future<void> set(int level) async => current = level;
+}
+
+void volumeTests() {
+  late FakeVolumeChannel channel;
+  late AlarmVolume volume;
+  late Speaker speaker;
+  late FakeSoundPlayer alarms;
+  const siren = SentenceRowData(text: 'x', soundKey: 'bell', alarm: true);
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    channel = FakeVolumeChannel();
+    volume = AlarmVolume(channel: channel);
+    alarms = FakeSoundPlayer();
+    speaker = Speaker(
+      engineFactory: (_) async => throw UnimplementedError(),
+      player: FakePlayer(),
+      soundPlayer: FakeSoundPlayer(),
+      alarmPlayer: alarms,
+      alarmVolume: volume,
+    );
+  });
+
+  test('custom mode: raises while playing, restores on stop', () async {
+    await speaker.play(siren);
+    expect(channel.current, 7);
+    await speaker.stop();
+    expect(channel.current, 3);
+    expect(
+      (await SharedPreferences.getInstance()).containsKey(AlarmVolume.savedKey),
+      isFalse,
+    );
+  });
+
+  test('restores when a one-shot alarm completes', () async {
+    await speaker.play(siren);
+    alarms.finish();
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(channel.current, 3);
+  });
+
+  test('system mode leaves the volume alone', () async {
+    await volume.setMode(AlarmVolumeMode.system);
+    await speaker.play(siren);
+    expect(channel.current, 3);
+  });
+
+  test('slider level is rounded to stream steps', () async {
+    await volume.setLevel(0.5);
+    await speaker.play(siren);
+    expect(channel.current, 4); // 0.5 * 7 = 3.5 → 4
+  });
+
+  test('no restore when the user changed the level', () async {
+    await speaker.play(siren);
+    channel.current = 5; // volume buttons
+    await speaker.stop();
+    expect(channel.current, 5);
+    expect(
+      (await SharedPreferences.getInstance()).containsKey(AlarmVolume.savedKey),
+      isFalse,
+    );
+  });
+
+  test('startup restore after a kill mid-alarm', () async {
+    await volume.raise();
+    expect(channel.current, 7);
+    await AlarmVolume(channel: channel).restore(); // new app start
+    expect(channel.current, 3);
+  });
+
+  test('second alarm while one plays keeps the original level', () async {
+    await speaker.play(siren);
+    await speaker.play(siren);
+    expect(channel.current, 7);
+    await speaker.stop();
+    expect(channel.current, 3);
   });
 }

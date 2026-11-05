@@ -1,10 +1,13 @@
 package io.github.stamasg84.mondom
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.speech.tts.TextToSpeech
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.Locale
 
@@ -20,6 +23,33 @@ class MainActivity : FlutterActivity() {
                 "availability" -> availability(call.arguments.toString(), result)
                 else -> result.notImplemented()
             }
+        }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "mondom/alarm_volume"
+        ).setMethodCallHandler { call, result -> alarmVolume(call, result) }
+    }
+
+    /** `get` → {current, max} of STREAM_ALARM; `set(level)` sets it silently. */
+    private fun alarmVolume(call: MethodCall, result: MethodChannel.Result) {
+        val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        try {
+            when (call.method) {
+                "get" -> result.success(
+                    mapOf(
+                        "current" to audio.getStreamVolume(AudioManager.STREAM_ALARM),
+                        "max" to audio.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+                    )
+                )
+                "set" -> {
+                    val level = call.arguments as Int
+                    audio.setStreamVolume(AudioManager.STREAM_ALARM, level, 0)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        } catch (e: Exception) {
+            result.error("volume", e.message, null)
         }
     }
 

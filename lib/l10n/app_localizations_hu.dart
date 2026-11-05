@@ -139,6 +139,21 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settingsListsSubtitle => 'Listák és mondatok szerkesztése';
 
   @override
+  String get alarmVolumeTitle => 'Riasztás hangereje';
+
+  @override
+  String get alarmVolumeSubtitle => 'Milyen hangosan szóljon a riasztás';
+
+  @override
+  String get alarmVolumeSystem => 'A telefon ébresztési hangereje';
+
+  @override
+  String get alarmVolumeCustom => 'Saját hangerő';
+
+  @override
+  String get alarmVolumeTest => 'Kipróbálás';
+
+  @override
   String get pinnedLabel => 'Kitűzve';
 
   @override

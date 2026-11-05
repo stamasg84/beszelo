@@ -191,6 +191,26 @@
   "@settingsListsSubtitle": {
     "description": "Subtitle of the lists row."
   },
+  "alarmVolumeTitle": "Riasztás hangereje",
+  "@alarmVolumeTitle": {
+    "description": "Drawer row and screen title for the alarm volume setting."
+  },
+  "alarmVolumeSubtitle": "Milyen hangosan szóljon a riasztás",
+  "@alarmVolumeSubtitle": {
+    "description": "Subtitle of the alarm volume row."
+  },
+  "alarmVolumeSystem": "A telefon ébresztési hangereje",
+  "@alarmVolumeSystem": {
+    "description": "Radio option: use the phone's own alarm volume."
+  },
+  "alarmVolumeCustom": "Saját hangerő",
+  "@alarmVolumeCustom": {
+    "description": "Radio option: Mondom raises the alarm volume to the slider level while an alarm plays, then restores it."
+  },
+  "alarmVolumeTest": "Kipróbálás",
+  "@alarmVolumeTest": {
+    "description": "Button that plays the bell as an alarm."
+  },
   "pinnedLabel": "Kitűzve",
   "@pinnedLabel": {
     "description": "Marker on a list that has a chip on the speaking screen."

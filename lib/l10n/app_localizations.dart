@@ -326,6 +326,36 @@ abstract class AppLocalizations {
   /// **'Listák és mondatok szerkesztése'**
   String get settingsListsSubtitle;
 
+  /// Drawer row and screen title for the alarm volume setting.
+  ///
+  /// In hu, this message translates to:
+  /// **'Riasztás hangereje'**
+  String get alarmVolumeTitle;
+
+  /// Subtitle of the alarm volume row.
+  ///
+  /// In hu, this message translates to:
+  /// **'Milyen hangosan szóljon a riasztás'**
+  String get alarmVolumeSubtitle;
+
+  /// Radio option: use the phone's own alarm volume.
+  ///
+  /// In hu, this message translates to:
+  /// **'A telefon ébresztési hangereje'**
+  String get alarmVolumeSystem;
+
+  /// Radio option: Mondom raises the alarm volume to the slider level while an alarm plays, then restores it.
+  ///
+  /// In hu, this message translates to:
+  /// **'Saját hangerő'**
+  String get alarmVolumeCustom;
+
+  /// Button that plays the bell as an alarm.
+  ///
+  /// In hu, this message translates to:
+  /// **'Kipróbálás'**
+  String get alarmVolumeTest;
+
   /// Marker on a list that has a chip on the speaking screen.
   ///
   /// In hu, this message translates to:

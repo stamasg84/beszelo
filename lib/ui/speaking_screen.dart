@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../speech/alarm_volume.dart';
 import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
 import '../voices/voice.dart';
@@ -196,6 +197,8 @@ class _SpeakingScreenState extends State<SpeakingScreen>
             voice: widget.voice ?? () => Voice.system('hu'),
             onOpenVoicePicker: widget.onOpenVoicePicker ?? () async {},
             currentListId: () => _currentId,
+            alarmVolume: widget.speaker.alarmVolume ?? AlarmVolume(),
+            speaker: widget.speaker,
           ),
           appBar: AppBar(
             leading: Builder(

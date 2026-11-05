@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../voices/voice.dart';
 import '../voices/voice_engine.dart';
+import 'alarm_volume.dart';
 import 'sounds.dart';
 
 /// Plays WAV files. Abstracted so [Speaker] can be unit-tested.
@@ -129,12 +130,17 @@ class Speaker extends ChangeNotifier {
     SoundPlayer? soundPlayer,
     SoundPlayer? alarmPlayer,
     this.loopLimit = alarmLoopLimit,
+    this.alarmVolume,
   }) : _createEngine = engineFactory,
        _player = player ?? AudioPlayersWavPlayer(),
        _soundPlayer = soundPlayer ?? AudioPlayersSoundPlayer(),
        _alarmPlayer = alarmPlayer ?? AudioPlayersSoundPlayer(alarm: true) {
     _alarmDone = _alarmPlayer.onComplete.listen((_) => _endAlarm());
   }
+
+  /// Raises the alarm stream around alarms (custom volume mode); null = never.
+  final AlarmVolume? alarmVolume;
+  bool _volumeRaised = false;
 
   /// A looping alarm stops by itself after this long.
   final Duration loopLimit;
@@ -208,9 +214,10 @@ class Speaker extends ChangeNotifier {
       return row.alarm ? _speakText(row.text, alarm: true) : speak(row.text);
     }
     try {
-      await _stopAll();
+      await _stopAll(restoreVolume: !row.alarm);
       _error = null;
       if (row.alarm) {
+        await _raiseVolume();
         await _alarmPlayer.playAsset(sound.asset, loop: sound.loops);
         _startAlarm(loops: sound.loops);
       } else {
@@ -219,6 +226,7 @@ class Speaker extends ChangeNotifier {
     } catch (e) {
       _error = '$e';
       notifyListeners();
+      await _restoreVolume();
     }
   }
 
@@ -232,7 +240,7 @@ class Speaker extends ChangeNotifier {
     if (normalized.isEmpty || engine == null || voice == null || _busy) return;
     final key = '${voice.id}\u0000$normalized';
     try {
-      await _stopAll();
+      await _stopAll(restoreVolume: !alarm);
       if (key == _lastKey && _lastPath != null) {
         _lastReplayed = true;
         _error = null;
@@ -257,11 +265,26 @@ class Speaker extends ChangeNotifier {
       _error = '$e';
       _busy = false;
       notifyListeners();
+      await _restoreVolume();
     }
+  }
+
+  Future<void> _raiseVolume() async {
+    final v = alarmVolume;
+    if (v == null) return;
+    _volumeRaised = true;
+    await v.raise();
+  }
+
+  Future<void> _restoreVolume() async {
+    if (!_volumeRaised) return;
+    _volumeRaised = false;
+    await alarmVolume?.restore();
   }
 
   Future<void> _playWav(String path, bool alarm) async {
     if (alarm) {
+      await _raiseVolume();
       await _alarmPlayer.playFile(path);
       _startAlarm(loops: false);
     } else {
@@ -279,13 +302,15 @@ class Speaker extends ChangeNotifier {
   void _endAlarm() {
     _loopTimer?.cancel();
     _loopTimer = null;
+    _restoreVolume();
     if (!_alarmPlaying) return;
     _alarmPlaying = false;
     notifyListeners();
   }
 
-  /// Stops speech, sounds and alarms.
-  Future<void> _stopAll() async {
+  /// Stops speech, sounds and alarms. [restoreVolume] is false when an alarm
+  /// is about to start, so the originally saved level survives.
+  Future<void> _stopAll({bool restoreVolume = true}) async {
     _loopTimer?.cancel();
     _loopTimer = null;
     await _player.stop();
@@ -295,6 +320,7 @@ class Speaker extends ChangeNotifier {
       _alarmPlaying = false;
       notifyListeners();
     }
+    if (restoreVolume) await _restoreVolume();
   }
 
   Future<void> stop() => _stopAll();

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../speech/alarm_volume.dart';
+import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
 import '../voices/language_names.dart';
 import '../voices/voice.dart';
+import 'alarm_volume_screen.dart';
 import 'lists_screen.dart';
 
 /// The speaking screen's menu: a plain list of large rows. Editing lives
@@ -16,7 +19,12 @@ class MainDrawer extends StatelessWidget {
     required this.voice,
     required this.onOpenVoicePicker,
     required this.currentListId,
+    required this.alarmVolume,
+    required this.speaker,
   });
+
+  final AlarmVolume alarmVolume;
+  final Speaker speaker;
 
   final ListsRepository repo;
 
@@ -72,6 +80,22 @@ class MainDrawer extends StatelessWidget {
                       repo: repo,
                       currentListId: currentListId(),
                       speechLanguage: () => voice().languageCode,
+                    ),
+                  ),
+                );
+              },
+            ),
+            _DrawerRow(
+              icon: Icons.volume_up,
+              title: l10n.alarmVolumeTitle,
+              subtitle: l10n.alarmVolumeSubtitle,
+              onTap: () {
+                navigator.pop();
+                navigator.push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AlarmVolumeScreen(
+                      alarmVolume: alarmVolume,
+                      speaker: speaker,
                     ),
                   ),
                 );

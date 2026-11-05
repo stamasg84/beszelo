@@ -39,7 +39,7 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 - Choosing a row's sound is not part of this task (later, with message banking).
 - **Checks:** `flutter analyze`, `flutter test`.
 
-### [ ] T24 (Agent): Alarm volume setting (raise and restore)
+### [x] T24 (Agent): Alarm volume setting (raise and restore)
 - Native: in `MainActivity.kt`, a small channel (e.g. `mondom/alarm_volume`): `get` (current/max of `STREAM_ALARM`), `set(level)`. No new permission. Dart wrapper `lib/speech/alarm_volume.dart`.
 - Setting in `shared_preferences`: `alarmVolumeMode` = `system` | `custom` (default `custom`), `alarmVolumeLevel` 0.0–1.0 (default 1.0).
 - Drawer row "Riasztás hangereje" → small screen: two large radio rows "A telefon ébresztési hangereje" / "Saját hangerő", a slider (enabled for Saját), and a "Kipróbálás" button that plays the bell as an alarm (stoppable).

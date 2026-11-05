@@ -138,6 +138,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsListsSubtitle => 'Edit lists and sentences';
 
   @override
+  String get alarmVolumeTitle => 'Alarm volume';
+
+  @override
+  String get alarmVolumeSubtitle => 'How loud the alarm plays';
+
+  @override
+  String get alarmVolumeSystem => 'The phone\'s alarm volume';
+
+  @override
+  String get alarmVolumeCustom => 'Own volume';
+
+  @override
+  String get alarmVolumeTest => 'Try it';
+
+  @override
   String get pinnedLabel => 'Pinned';
 
   @override

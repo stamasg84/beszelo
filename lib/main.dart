@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_localizations.dart';
+import 'speech/alarm_volume.dart';
 import 'speech/speaker.dart';
 import 'storage/database.dart';
 import 'storage/lists_repository.dart';
@@ -51,6 +52,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   static const _prefKey = 'voiceId';
 
+  final _alarmVolume = AlarmVolume();
   late final Speaker _speaker;
   AppDatabase? _db;
   ListsRepository? _repo;
@@ -63,12 +65,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _speaker = Speaker(engineFactory: _createEngine)
+    _speaker = Speaker(engineFactory: _createEngine, alarmVolume: _alarmVolume)
       ..addListener(() => setState(() {}));
     _init();
   }
 
   Future<void> _init() async {
+    // The app may have been killed during an alarm with the volume raised.
+    await _alarmVolume.restore();
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     final db = AppDatabase.open();
