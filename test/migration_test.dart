@@ -78,4 +78,58 @@ void main() {
     final meta = await db.select(db.appMeta).get();
     expect(meta.map((m) => m.key), ['seeded']);
   });
+
+  test(
+    'migration v3 -> v4 keeps data; new columns default to null/false',
+    () async {
+      final db = AppDatabase(
+        NativeDatabase.memory(
+          setup: (raw) {
+            raw.execute('''
+            CREATE TABLE sentence_lists (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              title TEXT NOT NULL,
+              kind TEXT NOT NULL,
+              pinned INTEGER NOT NULL DEFAULT 0,
+              position INTEGER NOT NULL,
+              seed_key TEXT NULL,
+              seed_language TEXT NULL,
+              color TEXT NULL,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s', CURRENT_TIMESTAMP)),
+              UNIQUE (seed_language, seed_key)
+            );
+            CREATE TABLE sentences (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              list_id INTEGER NOT NULL REFERENCES sentence_lists (id) ON DELETE CASCADE,
+              body TEXT NOT NULL,
+              position INTEGER NOT NULL,
+              said INTEGER NOT NULL DEFAULT 0,
+              recording_path TEXT NULL,
+              seed_key TEXT NULL,
+              spoken_at INTEGER NULL,
+              created_at INTEGER NOT NULL DEFAULT (strftime('%s', CURRENT_TIMESTAMP)),
+              UNIQUE (list_id, seed_key)
+            );
+            CREATE TABLE app_meta (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL);
+            INSERT INTO app_meta VALUES ('seeded', '1');
+            INSERT INTO sentence_lists (title, kind, pinned, position, seed_key, seed_language, color)
+              VALUES ('Alap', 'everyday', 1, 0, 'everyday', 'hu', 'blue');
+            INSERT INTO sentences (list_id, body, position, said, recording_path, seed_key)
+              VALUES (1, 'Kérek vizet!', 0, 1, 'a.wav', 'water');
+            PRAGMA user_version = 3;
+          ''');
+          },
+        ),
+        loadSeed: (_) async => const Seed([]),
+      );
+      addTearDown(db.close);
+      final repo = ListsRepository(db);
+      final list = (await repo.watchLists().first).single;
+      final s = (await repo.watchSentences(list.id).first).single;
+      expect(
+        (s.body, s.said, s.recordingPath, s.seedKey, s.soundKey, s.alarm),
+        ('Kérek vizet!', true, 'a.wav', 'water', null, false),
+      );
+    },
+  );
 }

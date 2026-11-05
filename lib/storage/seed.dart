@@ -5,9 +5,13 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'database.dart' show ListKind;
 
 class SeedSentence {
-  const SeedSentence(this.seedKey, this.text);
+  const SeedSentence(this.seedKey, this.text, {this.sound, this.alarm = false});
   final String seedKey;
   final String text;
+
+  /// Key into `builtInSounds`, or null for plain TTS.
+  final String? sound;
+  final bool alarm;
 }
 
 class SeedList {
@@ -48,7 +52,12 @@ class Seed {
             color: l['color'] as String?,
             sentences: [
               for (final s in l['sentences'] as List)
-                SeedSentence(s['seedKey'] as String, s['text'] as String),
+                SeedSentence(
+                  s['seedKey'] as String,
+                  s['text'] as String,
+                  sound: s['sound'] as String?,
+                  alarm: s['alarm'] as bool? ?? false,
+                ),
             ],
           ),
       ]);

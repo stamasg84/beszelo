@@ -643,6 +643,30 @@ class $SentencesTable extends Sentences
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _soundKeyMeta = const VerificationMeta(
+    'soundKey',
+  );
+  @override
+  late final GeneratedColumn<String> soundKey = GeneratedColumn<String>(
+    'sound_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _alarmMeta = const VerificationMeta('alarm');
+  @override
+  late final GeneratedColumn<bool> alarm = GeneratedColumn<bool>(
+    'alarm',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("alarm" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _seedKeyMeta = const VerificationMeta(
     'seedKey',
   );
@@ -685,6 +709,8 @@ class $SentencesTable extends Sentences
     position,
     said,
     recordingPath,
+    soundKey,
+    alarm,
     seedKey,
     spokenAt,
     createdAt,
@@ -743,6 +769,18 @@ class $SentencesTable extends Sentences
         ),
       );
     }
+    if (data.containsKey('sound_key')) {
+      context.handle(
+        _soundKeyMeta,
+        soundKey.isAcceptableOrUnknown(data['sound_key']!, _soundKeyMeta),
+      );
+    }
+    if (data.containsKey('alarm')) {
+      context.handle(
+        _alarmMeta,
+        alarm.isAcceptableOrUnknown(data['alarm']!, _alarmMeta),
+      );
+    }
     if (data.containsKey('seed_key')) {
       context.handle(
         _seedKeyMeta,
@@ -798,6 +836,14 @@ class $SentencesTable extends Sentences
         DriftSqlType.string,
         data['${effectivePrefix}recording_path'],
       ),
+      soundKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sound_key'],
+      ),
+      alarm: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}alarm'],
+      )!,
       seedKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}seed_key'],
@@ -826,6 +872,13 @@ class Sentence extends DataClass implements Insertable<Sentence> {
   final int position;
   final bool said;
   final String? recordingPath;
+
+  /// Key into `builtInSounds` (schema v4): played instead of TTS. An unknown
+  /// key falls back to TTS.
+  final String? soundKey;
+
+  /// Played loud on the alarm stream and kept out of history (schema v4).
+  final bool alarm;
   final String? seedKey;
   final DateTime? spokenAt;
   final DateTime createdAt;
@@ -836,6 +889,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     required this.position,
     required this.said,
     this.recordingPath,
+    this.soundKey,
+    required this.alarm,
     this.seedKey,
     this.spokenAt,
     required this.createdAt,
@@ -851,6 +906,10 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     if (!nullToAbsent || recordingPath != null) {
       map['recording_path'] = Variable<String>(recordingPath);
     }
+    if (!nullToAbsent || soundKey != null) {
+      map['sound_key'] = Variable<String>(soundKey);
+    }
+    map['alarm'] = Variable<bool>(alarm);
     if (!nullToAbsent || seedKey != null) {
       map['seed_key'] = Variable<String>(seedKey);
     }
@@ -871,6 +930,10 @@ class Sentence extends DataClass implements Insertable<Sentence> {
       recordingPath: recordingPath == null && nullToAbsent
           ? const Value.absent()
           : Value(recordingPath),
+      soundKey: soundKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(soundKey),
+      alarm: Value(alarm),
       seedKey: seedKey == null && nullToAbsent
           ? const Value.absent()
           : Value(seedKey),
@@ -893,6 +956,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
       position: serializer.fromJson<int>(json['position']),
       said: serializer.fromJson<bool>(json['said']),
       recordingPath: serializer.fromJson<String?>(json['recordingPath']),
+      soundKey: serializer.fromJson<String?>(json['soundKey']),
+      alarm: serializer.fromJson<bool>(json['alarm']),
       seedKey: serializer.fromJson<String?>(json['seedKey']),
       spokenAt: serializer.fromJson<DateTime?>(json['spokenAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -908,6 +973,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
       'position': serializer.toJson<int>(position),
       'said': serializer.toJson<bool>(said),
       'recordingPath': serializer.toJson<String?>(recordingPath),
+      'soundKey': serializer.toJson<String?>(soundKey),
+      'alarm': serializer.toJson<bool>(alarm),
       'seedKey': serializer.toJson<String?>(seedKey),
       'spokenAt': serializer.toJson<DateTime?>(spokenAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -921,6 +988,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     int? position,
     bool? said,
     Value<String?> recordingPath = const Value.absent(),
+    Value<String?> soundKey = const Value.absent(),
+    bool? alarm,
     Value<String?> seedKey = const Value.absent(),
     Value<DateTime?> spokenAt = const Value.absent(),
     DateTime? createdAt,
@@ -933,6 +1002,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     recordingPath: recordingPath.present
         ? recordingPath.value
         : this.recordingPath,
+    soundKey: soundKey.present ? soundKey.value : this.soundKey,
+    alarm: alarm ?? this.alarm,
     seedKey: seedKey.present ? seedKey.value : this.seedKey,
     spokenAt: spokenAt.present ? spokenAt.value : this.spokenAt,
     createdAt: createdAt ?? this.createdAt,
@@ -947,6 +1018,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
       recordingPath: data.recordingPath.present
           ? data.recordingPath.value
           : this.recordingPath,
+      soundKey: data.soundKey.present ? data.soundKey.value : this.soundKey,
+      alarm: data.alarm.present ? data.alarm.value : this.alarm,
       seedKey: data.seedKey.present ? data.seedKey.value : this.seedKey,
       spokenAt: data.spokenAt.present ? data.spokenAt.value : this.spokenAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -962,6 +1035,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
           ..write('position: $position, ')
           ..write('said: $said, ')
           ..write('recordingPath: $recordingPath, ')
+          ..write('soundKey: $soundKey, ')
+          ..write('alarm: $alarm, ')
           ..write('seedKey: $seedKey, ')
           ..write('spokenAt: $spokenAt, ')
           ..write('createdAt: $createdAt')
@@ -977,6 +1052,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
     position,
     said,
     recordingPath,
+    soundKey,
+    alarm,
     seedKey,
     spokenAt,
     createdAt,
@@ -991,6 +1068,8 @@ class Sentence extends DataClass implements Insertable<Sentence> {
           other.position == this.position &&
           other.said == this.said &&
           other.recordingPath == this.recordingPath &&
+          other.soundKey == this.soundKey &&
+          other.alarm == this.alarm &&
           other.seedKey == this.seedKey &&
           other.spokenAt == this.spokenAt &&
           other.createdAt == this.createdAt);
@@ -1003,6 +1082,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
   final Value<int> position;
   final Value<bool> said;
   final Value<String?> recordingPath;
+  final Value<String?> soundKey;
+  final Value<bool> alarm;
   final Value<String?> seedKey;
   final Value<DateTime?> spokenAt;
   final Value<DateTime> createdAt;
@@ -1013,6 +1094,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
     this.position = const Value.absent(),
     this.said = const Value.absent(),
     this.recordingPath = const Value.absent(),
+    this.soundKey = const Value.absent(),
+    this.alarm = const Value.absent(),
     this.seedKey = const Value.absent(),
     this.spokenAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1024,6 +1107,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
     required int position,
     this.said = const Value.absent(),
     this.recordingPath = const Value.absent(),
+    this.soundKey = const Value.absent(),
+    this.alarm = const Value.absent(),
     this.seedKey = const Value.absent(),
     this.spokenAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1037,6 +1122,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
     Expression<int>? position,
     Expression<bool>? said,
     Expression<String>? recordingPath,
+    Expression<String>? soundKey,
+    Expression<bool>? alarm,
     Expression<String>? seedKey,
     Expression<DateTime>? spokenAt,
     Expression<DateTime>? createdAt,
@@ -1048,6 +1135,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
       if (position != null) 'position': position,
       if (said != null) 'said': said,
       if (recordingPath != null) 'recording_path': recordingPath,
+      if (soundKey != null) 'sound_key': soundKey,
+      if (alarm != null) 'alarm': alarm,
       if (seedKey != null) 'seed_key': seedKey,
       if (spokenAt != null) 'spoken_at': spokenAt,
       if (createdAt != null) 'created_at': createdAt,
@@ -1061,6 +1150,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
     Value<int>? position,
     Value<bool>? said,
     Value<String?>? recordingPath,
+    Value<String?>? soundKey,
+    Value<bool>? alarm,
     Value<String?>? seedKey,
     Value<DateTime?>? spokenAt,
     Value<DateTime>? createdAt,
@@ -1072,6 +1163,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
       position: position ?? this.position,
       said: said ?? this.said,
       recordingPath: recordingPath ?? this.recordingPath,
+      soundKey: soundKey ?? this.soundKey,
+      alarm: alarm ?? this.alarm,
       seedKey: seedKey ?? this.seedKey,
       spokenAt: spokenAt ?? this.spokenAt,
       createdAt: createdAt ?? this.createdAt,
@@ -1099,6 +1192,12 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
     if (recordingPath.present) {
       map['recording_path'] = Variable<String>(recordingPath.value);
     }
+    if (soundKey.present) {
+      map['sound_key'] = Variable<String>(soundKey.value);
+    }
+    if (alarm.present) {
+      map['alarm'] = Variable<bool>(alarm.value);
+    }
     if (seedKey.present) {
       map['seed_key'] = Variable<String>(seedKey.value);
     }
@@ -1120,6 +1219,8 @@ class SentencesCompanion extends UpdateCompanion<Sentence> {
           ..write('position: $position, ')
           ..write('said: $said, ')
           ..write('recordingPath: $recordingPath, ')
+          ..write('soundKey: $soundKey, ')
+          ..write('alarm: $alarm, ')
           ..write('seedKey: $seedKey, ')
           ..write('spokenAt: $spokenAt, ')
           ..write('createdAt: $createdAt')
@@ -1748,6 +1849,8 @@ typedef $$SentencesTableCreateCompanionBuilder = SentencesCompanion Function({
   required int position,
   Value<bool> said,
   Value<String?> recordingPath,
+  Value<String?> soundKey,
+  Value<bool> alarm,
   Value<String?> seedKey,
   Value<DateTime?> spokenAt,
   Value<DateTime> createdAt,
@@ -1759,6 +1862,8 @@ typedef $$SentencesTableUpdateCompanionBuilder = SentencesCompanion Function({
   Value<int> position,
   Value<bool> said,
   Value<String?> recordingPath,
+  Value<String?> soundKey,
+  Value<bool> alarm,
   Value<String?> seedKey,
   Value<DateTime?> spokenAt,
   Value<DateTime> createdAt,
@@ -1817,6 +1922,16 @@ class $$SentencesTableFilterComposer
 
   ColumnFilters<String> get recordingPath => $composableBuilder(
     column: $table.recordingPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get soundKey => $composableBuilder(
+    column: $table.soundKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get alarm => $composableBuilder(
+    column: $table.alarm,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1893,6 +2008,16 @@ class $$SentencesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get soundKey => $composableBuilder(
+    column: $table.soundKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get alarm => $composableBuilder(
+    column: $table.alarm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get seedKey => $composableBuilder(
     column: $table.seedKey,
     builder: (column) => ColumnOrderings(column),
@@ -1957,6 +2082,12 @@ class $$SentencesTableAnnotationComposer
     column: $table.recordingPath,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get soundKey =>
+      $composableBuilder(column: $table.soundKey, builder: (column) => column);
+
+  GeneratedColumn<bool> get alarm =>
+      $composableBuilder(column: $table.alarm, builder: (column) => column);
 
   GeneratedColumn<String> get seedKey =>
       $composableBuilder(column: $table.seedKey, builder: (column) => column);
@@ -2025,6 +2156,8 @@ class $$SentencesTableTableManager
                 Value<int> position = const Value.absent(),
                 Value<bool> said = const Value.absent(),
                 Value<String?> recordingPath = const Value.absent(),
+                Value<String?> soundKey = const Value.absent(),
+                Value<bool> alarm = const Value.absent(),
                 Value<String?> seedKey = const Value.absent(),
                 Value<DateTime?> spokenAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -2035,6 +2168,8 @@ class $$SentencesTableTableManager
                 position: position,
                 said: said,
                 recordingPath: recordingPath,
+                soundKey: soundKey,
+                alarm: alarm,
                 seedKey: seedKey,
                 spokenAt: spokenAt,
                 createdAt: createdAt,
@@ -2047,6 +2182,8 @@ class $$SentencesTableTableManager
                 required int position,
                 Value<bool> said = const Value.absent(),
                 Value<String?> recordingPath = const Value.absent(),
+                Value<String?> soundKey = const Value.absent(),
+                Value<bool> alarm = const Value.absent(),
                 Value<String?> seedKey = const Value.absent(),
                 Value<DateTime?> spokenAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -2057,6 +2194,8 @@ class $$SentencesTableTableManager
                 position: position,
                 said: said,
                 recordingPath: recordingPath,
+                soundKey: soundKey,
+                alarm: alarm,
                 seedKey: seedKey,
                 spokenAt: spokenAt,
                 createdAt: createdAt,

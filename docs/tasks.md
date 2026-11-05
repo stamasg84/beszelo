@@ -11,7 +11,7 @@ Mark tasks done by changing `[ ]` to `[x]`. When a phase is finished, move it to
 
 Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose rows are sentences with a built-in sound, and an `alarm` flag on any row. Read `docs/architecture.md` "Alarm" first (and "Storage", "Sentence lists"). 112 / emergency SMS is dropped (`docs/TODO.md` "Emergency").
 
-### [ ] T21 (Agent): Built-in sounds, schema v4, Riasztás seed
+### [x] T21 (Agent): Built-in sounds, schema v4, Riasztás seed
 - New `tool/make_sounds.py` (Python stdlib only: `wave`, `math`, `struct`; run with `uv run` or plain `python`) generating `assets/sounds/siren.wav` (rising/falling sweep, ~2 s, loops seamlessly: start and end at zero phase/amplitude), `bell.wav` (two-tone doorbell-like chime with decaying harmonics, ~2 s), `horn.wav` (short loud two-tone horn, ~1 s). Mono, 22050 Hz, 16-bit, normalized to about -1 dBFS. Commit the script and the WAVs; register `assets/sounds/` in `pubspec.yaml`.
 - New `lib/speech/sounds.dart`: `const builtInSounds = {'siren': BuiltInSound(asset: 'sounds/siren.wav', loops: true), 'bell': …, 'horn': …}` and `const alarmLoopLimit = Duration(minutes: 2)`.
 - Schema v4: `sentences.soundKey` (text, nullable) and `sentences.alarm` (bool, default false), with a migration from v3. Regenerate `database.g.dart`.

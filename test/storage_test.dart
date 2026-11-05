@@ -36,6 +36,7 @@ void main() {
     expect(lists.map((l) => l.seedKey), [
       'everyday',
       'example-conversation',
+      'alarm',
       'history',
     ]);
     expect(lists.first.title, 'Alap');
@@ -77,15 +78,17 @@ void main() {
     expect(lists.map((l) => (l.seedLanguage, l.seedKey)), [
       ('hu', 'everyday'),
       ('hu', 'example-conversation'),
+      ('hu', 'alarm'),
       ('en', 'everyday'),
       ('en', 'example-conversation'),
+      ('en', 'alarm'),
       (null, 'history'),
     ]);
     expect(lists.where((l) => l.title == 'Basics'), hasLength(1));
     expect(await repo.seedLanguages(), {'hu', 'en'});
     // Idempotent.
     await repo.addSeedLists('en');
-    expect(await repo.watchLists().first, hasLength(5));
+    expect(await repo.watchLists().first, hasLength(7));
   });
 
   test('unknown language falls back to en', () async {
@@ -145,7 +148,7 @@ void main() {
 
     test('same-language voice switch after deleting seed lists: '
         'not asked', () async {
-      for (final key in ['everyday', 'example-conversation']) {
+      for (final key in ['everyday', 'example-conversation', 'alarm']) {
         await repo.deleteList((await listByKey(key)).id);
       }
       expect(await repo.seedLanguages(), isEmpty);
@@ -236,7 +239,7 @@ void main() {
   test('restore lists re-creates a deleted seed list', () async {
     final c = await listByKey('example-conversation');
     await repo.deleteList(c.id);
-    expect(await db.select(db.sentenceLists).get(), hasLength(2));
+    expect(await db.select(db.sentenceLists).get(), hasLength(3));
     expect(await repo.restoreDefaultLists('hu'), 1);
     final again = await listByKey('example-conversation');
     expect(await sentencesOf(again.id), hasLength(3));
@@ -249,7 +252,7 @@ void main() {
     for (final l in await repo.watchLists().first) {
       if (l.kind != ListKind.history) await repo.deleteList(l.id);
     }
-    expect(await repo.restoreDefaultLists('en'), 2);
+    expect(await repo.restoreDefaultLists('en'), 3);
     expect(await repo.seedLanguages(), {'en'});
   });
 
@@ -266,6 +269,59 @@ void main() {
     expect(after.first.body, s.first.body);
     expect(after.every((x) => !x.body.contains('Kérek')), isTrue);
   });
+
+  test('seeded alarm rows carry soundKey and alarm', () async {
+    final rows = await sentencesOf((await listByKey('alarm')).id);
+    expect(rows.map((r) => (r.body, r.soundKey, r.alarm)), [
+      ('Vészhelyzet!', 'siren', true),
+      ('Gyere ide!', 'bell', true),
+      ('Figyelj rám!', 'horn', true),
+    ]);
+    final every = await sentencesOf((await listByKey('everyday')).id);
+    expect(every.every((r) => r.soundKey == null && !r.alarm), isTrue);
+  });
+
+  test('copy and move keep soundKey and alarm', () async {
+    final alarm = await listByKey('alarm');
+    final first = (await sentencesOf(alarm.id)).first;
+    final other = await repo.createList('Orvos');
+    final copyId = (await repo.copySentence(first.id, other))!;
+    await repo.moveSentence((await sentencesOf(alarm.id))[1].id, other);
+    final rows = await sentencesOf(other);
+    expect(rows.map((r) => (r.body, r.soundKey, r.alarm)), [
+      ('Vészhelyzet!', 'siren', true),
+      ('Gyere ide!', 'bell', true),
+    ]);
+    expect(rows.first.id, copyId);
+    expect(rows.first.seedKey, isNull);
+  });
+
+  test(
+    'restore lists re-adds a deleted Riasztás list with its sounds',
+    () async {
+      await repo.deleteList((await listByKey('alarm')).id);
+      expect(await repo.hasMissingDefaultLists('hu'), isTrue);
+      expect(await repo.restoreDefaultLists('hu'), 1);
+      final rows = await sentencesOf((await listByKey('alarm')).id);
+      expect(rows.map((r) => r.soundKey), ['siren', 'bell', 'horn']);
+      expect(rows.every((r) => r.alarm), isTrue);
+    },
+  );
+
+  test(
+    'restore sentences re-adds a deleted alarm row with its sound',
+    () async {
+      final list = await listByKey('alarm');
+      final first = (await sentencesOf(list.id)).first;
+      await repo.deleteSentence(first.id);
+      expect(await repo.restoreDefaultSentences(list.id), 1);
+      final again = (await sentencesOf(list.id)).first;
+      expect(
+        (again.body, again.soundKey, again.alarm),
+        ('Vészhelyzet!', 'siren', true),
+      );
+    },
+  );
 
   test('user lists and history have nothing to restore', () async {
     final id = await repo.createList('Orvos');

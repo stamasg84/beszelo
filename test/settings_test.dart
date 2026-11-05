@@ -179,7 +179,10 @@ void main() {
     expect(find.text('Példa beszélgetés'), findsOneWidget);
     expect(find.text('Előzmények'), findsOneWidget);
     expect(find.text('Most megnyitva'), findsOneWidget);
-    expect(find.text('Kitűzve'), findsNWidgets(2)); // Alap + Előzmények
+    expect(
+      find.text('Kitűzve'),
+      findsNWidgets(3),
+    ); // Alap + Riasztás + Előzmények
     await finish(tester);
   });
 
@@ -407,7 +410,7 @@ void main() {
   testWidgets('history sheet has no Szín row', (tester) async {
     await pumpScreen(tester);
     await openLists(tester);
-    await openSheet(tester, 2);
+    await openSheet(tester, 3);
     expect(find.text('Szín'), findsNothing);
     await finish(tester);
   });

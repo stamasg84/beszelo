@@ -34,6 +34,25 @@ SeedList _conversation(String title, List<String> texts) => SeedList(
   ],
 );
 
+SeedList _alarm(String title, List<String> texts) => SeedList(
+  seedKey: 'alarm',
+  title: title,
+  kind: ListKind.everyday,
+  pinned: true,
+  color: 'red',
+  sentences: [
+    for (var i = 0; i < texts.length; i++)
+      SeedSentence(
+        _alarmKeys[i],
+        texts[i],
+        sound: _alarmSounds[i],
+        alarm: true,
+      ),
+  ],
+);
+
+const _alarmKeys = ['emergency', 'come', 'attention'];
+const _alarmSounds = ['siren', 'bell', 'horn'];
 const _everydayKeys = ['water', 'food', 'drink', 'stand', 'wait', 'yes'];
 const _conversationKeys = ['bulb', 'cheese', 'school'];
 
@@ -52,6 +71,7 @@ final _seeds = <String, Seed>{
       'Légyszi vegyetek a boltban trappistát!',
       'Mi újság a suliban?',
     ]),
+    _alarm('Riasztás', ['Vészhelyzet!', 'Gyere ide!', 'Figyelj rám!']),
   ]),
   'en': Seed(historyTitle: 'History', [
     _everyday('Basics', [
@@ -67,6 +87,7 @@ final _seeds = <String, Seed>{
       'Please pick up some cheddar at the shop!',
       "How's school going?",
     ]),
+    _alarm('Alarm', ['Emergency!', 'Come here!', 'Listen to me!']),
   ]),
   'sv': Seed(historyTitle: 'Historik', [
     _everyday('Grunder', [
@@ -82,5 +103,6 @@ final _seeds = <String, Seed>{
       'Köp lite ost i affären, tack!',
       'Hur går det i skolan?',
     ]),
+    _alarm('Larm', ['Nödläge!', 'Kom hit!', 'Lyssna på mig!']),
   ]),
 };

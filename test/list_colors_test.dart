@@ -180,6 +180,12 @@ void main() {
     expect(colors[7], 'green');
   });
 
+  test('red is in the palette but never picked automatically', () {
+    expect(listColorKeys.last, 'red');
+    expect(nextListColor(listColorKeys.where((k) => k != 'red')), 'blue');
+    expect(nextListColor(const []), 'blue');
+  });
+
   test('setColor stores a key or null; history is refused', () async {
     final db = AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
     addTearDown(db.close);

@@ -237,6 +237,33 @@
           "text": "How's school going?"
         }
       ]
+    },
+    {
+      "seedKey": "alarm",
+      "title": "Alarm",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "red",
+      "sentences": [
+        {
+          "seedKey": "emergency",
+          "text": "Emergency!",
+          "sound": "siren",
+          "alarm": true
+        },
+        {
+          "seedKey": "come",
+          "text": "Come here!",
+          "sound": "bell",
+          "alarm": true
+        },
+        {
+          "seedKey": "attention",
+          "text": "Listen to me!",
+          "sound": "horn",
+          "alarm": true
+        }
+      ]
     }
   ]
 }

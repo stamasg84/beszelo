@@ -68,6 +68,12 @@ const _light = <String, ListColor>{
     rowActive: Color(0xFFDCC2AB),
     stripe: Color(0xFF9A6B45),
   ),
+  'red': ListColor(
+    chip: Color(0xFFFFC2BD),
+    row: Color(0xFFFFE6E4),
+    rowActive: Color(0xFFFFB5AE),
+    stripe: Color(0xFFD32F2F),
+  ),
 };
 
 // Dark theme: the same hues, dark tones (text is light there).
@@ -119,6 +125,12 @@ const _dark = <String, ListColor>{
     row: Color(0xFF2E2216),
     rowActive: Color(0xFF503A29),
     stripe: Color(0xFFC49470),
+  ),
+  'red': ListColor(
+    chip: Color(0xFF52211E),
+    row: Color(0xFF361716),
+    rowActive: Color(0xFF63282A),
+    stripe: Color(0xFFF2766E),
   ),
 };
 

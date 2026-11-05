@@ -237,6 +237,33 @@
           "text": "Mi újság a suliban?"
         }
       ]
+    },
+    {
+      "seedKey": "alarm",
+      "title": "Riasztás",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "red",
+      "sentences": [
+        {
+          "seedKey": "emergency",
+          "text": "Vészhelyzet!",
+          "sound": "siren",
+          "alarm": true
+        },
+        {
+          "seedKey": "come",
+          "text": "Gyere ide!",
+          "sound": "bell",
+          "alarm": true
+        },
+        {
+          "seedKey": "attention",
+          "text": "Figyelj rám!",
+          "sound": "horn",
+          "alarm": true
+        }
+      ]
     }
   ]
 }

@@ -190,11 +190,18 @@ class ListsRepository {
     await _writeOrder(s.listId, await _sentenceIds(s.listId));
   });
 
-  /// Copies to the end of [toListId] (keeps the recording, resets `said`).
+  /// Copies to the end of [toListId] (keeps recording, sound and alarm flag,
+  /// resets `said`).
   Future<int?> copySentence(int id, int toListId) async {
     final s = await _sentenceById(id);
     if (s == null) return null;
-    return _insertSentence(toListId, s.body, recordingPath: s.recordingPath);
+    return _insertSentence(
+      toListId,
+      s.body,
+      recordingPath: s.recordingPath,
+      soundKey: s.soundKey,
+      alarm: s.alarm,
+    );
   }
 
   /// [ids] get that order; any others in the list follow in their old order.
@@ -268,7 +275,13 @@ class ListsRepository {
     final missing = await _missingSeedSentences(listId);
     for (final (index, s) in missing) {
       final ids = await _sentenceIds(listId);
-      final newId = await _insertSentence(listId, s.text, seedKey: s.seedKey);
+      final newId = await _insertSentence(
+        listId,
+        s.text,
+        soundKey: s.sound,
+        alarm: s.alarm,
+        seedKey: s.seedKey,
+      );
       ids.insert(index.clamp(0, ids.length), newId);
       await _writeOrder(listId, ids);
     }
@@ -389,6 +402,8 @@ class ListsRepository {
     int listId,
     String text, {
     String? recordingPath,
+    String? soundKey,
+    bool alarm = false,
     String? seedKey,
   }) async => _db
       .into(_sentences)
@@ -398,6 +413,8 @@ class ListsRepository {
           body: text,
           position: await _lastSentencePosition(listId) + 1,
           recordingPath: Value(recordingPath),
+          soundKey: Value(soundKey),
+          alarm: Value(alarm),
           seedKey: Value(seedKey),
         ),
       );

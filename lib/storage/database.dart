@@ -21,6 +21,13 @@ const listColorKeys = [
   'pink',
   'yellow',
   'brown',
+  'red', // last; reserved for the alarm list, never picked automatically
+];
+
+/// Palette keys [nextListColor] may pick for new lists (red is for alarms).
+final _autoColorKeys = [
+  for (final k in listColorKeys)
+    if (k != 'red') k,
 ];
 
 /// Colors of the shipped seed lists (by `seedKey`); other lists get the next
@@ -30,12 +37,12 @@ const seedListColors = {'everyday': 'blue', 'example-conversation': 'orange'};
 /// First palette key not in [used]; when all are used, round robin over how
 /// often each is used (least used first, palette order breaks ties).
 String nextListColor(Iterable<String?> used) {
-  final counts = {for (final k in listColorKeys) k: 0};
+  final counts = {for (final k in _autoColorKeys) k: 0};
   for (final u in used) {
     if (counts.containsKey(u)) counts[u!] = counts[u]! + 1;
   }
   final min = counts.values.reduce((a, b) => a < b ? a : b);
-  return listColorKeys.firstWhere((k) => counts[k] == min);
+  return _autoColorKeys.firstWhere((k) => counts[k] == min);
 }
 
 /// `seedKey` of the single history list.
@@ -75,6 +82,13 @@ class Sentences extends Table {
   IntColumn get position => integer()();
   BoolColumn get said => boolean().withDefault(const Constant(false))();
   TextColumn get recordingPath => text().nullable()();
+
+  /// Key into `builtInSounds` (schema v4): played instead of TTS. An unknown
+  /// key falls back to TTS.
+  TextColumn get soundKey => text().nullable()();
+
+  /// Played loud on the alarm stream and kept out of history (schema v4).
+  BoolColumn get alarm => boolean().withDefault(const Constant(false))();
   TextColumn get seedKey => text().nullable()();
   DateTimeColumn get spokenAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -104,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   final SeedLoader loadSeed;
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -171,6 +185,12 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 4) {
+        // The v1 -> v2 rebuild only touches sentence_lists, so sentences
+        // never had these columns.
+        await m.addColumn(sentences, sentences.soundKey);
+        await m.addColumn(sentences, sentences.alarm);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -232,6 +252,8 @@ class AppDatabase extends _$AppDatabase {
           body: s.text,
           position: i,
           seedKey: Value(s.seedKey),
+          soundKey: Value(s.sound),
+          alarm: Value(s.alarm),
         ),
       );
     }

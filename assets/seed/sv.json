@@ -237,6 +237,33 @@
           "text": "Hur går det i skolan?"
         }
       ]
+    },
+    {
+      "seedKey": "alarm",
+      "title": "Larm",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "red",
+      "sentences": [
+        {
+          "seedKey": "emergency",
+          "text": "Nödläge!",
+          "sound": "siren",
+          "alarm": true
+        },
+        {
+          "seedKey": "come",
+          "text": "Kom hit!",
+          "sound": "bell",
+          "alarm": true
+        },
+        {
+          "seedKey": "attention",
+          "text": "Lyssna på mig!",
+          "sound": "horn",
+          "alarm": true
+        }
+      ]
     }
   ]
 }
