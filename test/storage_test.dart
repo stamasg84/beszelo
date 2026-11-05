@@ -149,6 +149,23 @@ void main() {
       expect(asked, 0);
     });
 
+    test('same-language voice switch after deleting seed lists: '
+        'not asked', () async {
+      for (final key in ['everyday', 'example-conversation']) {
+        await repo.deleteList((await listByKey(key)).id);
+      }
+      expect(await repo.seedLanguages(), isEmpty);
+      expect(
+        await repo.offerSeedLists(
+          'hu',
+          ask: answer(true),
+          languageChanged: false,
+        ),
+        isFalse,
+      );
+      expect(asked, 0);
+    });
+
     test('language without a seed file: nothing', () async {
       expect(await repo.offerSeedLists('de', ask: answer(true)), isFalse);
       expect(asked, 0);

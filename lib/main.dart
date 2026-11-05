@@ -134,12 +134,17 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   Future<void> _selectVoice(Voice v) async {
+    final languageChanged = v.languageCode != _voice.languageCode;
     _voice = v;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefKey, v.id);
     await _speaker.setVoice(v);
     // After the switch, so a question doesn't delay the new voice.
-    await _repo?.offerSeedLists(v.languageCode, ask: _askAddSeedLists(v));
+    await _repo?.offerSeedLists(
+      v.languageCode,
+      ask: _askAddSeedLists(v),
+      languageChanged: languageChanged,
+    );
   }
 
   Future<bool> Function() _askAddSeedLists(Voice v) => () async {

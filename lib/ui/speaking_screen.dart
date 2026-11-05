@@ -245,7 +245,7 @@ class _SpeakingScreenState extends State<SpeakingScreen>
               foregroundColor: scheme.onPrimary,
             )
           : IconButton.styleFrom(side: BorderSide(color: scheme.outline)),
-      icon: const Icon(Icons.playlist_add),
+      icon: const Icon(Icons.arrow_downward),
       onPressed: () => setState(() => _loadArmed = !_loadArmed),
     );
   }

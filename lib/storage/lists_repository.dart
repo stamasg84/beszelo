@@ -314,17 +314,22 @@ class ListsRepository {
   }
 
   /// Called when a voice of [language] becomes the speech language. Seeds on
-  /// first use; later, asks (via [ask]) once whether to add that language's
-  /// default lists. Returns whether lists were added.
+  /// first use; later, when the speech language changed ([languageChanged]),
+  /// asks (via [ask]) once whether to add that language's default lists.
+  /// Switching between voices of the same language never asks, even if the
+  /// user deleted that language's seed lists. Returns whether lists were
+  /// added.
   Future<bool> offerSeedLists(
     String language, {
     required Future<bool> Function() ask,
+    bool languageChanged = true,
   }) async {
     await syncHistoryTitle(language);
     if (!await isSeeded()) {
       await addSeedLists(language);
       return true;
     }
+    if (!languageChanged) return false;
     if ((await seedLanguages()).contains(language)) return false;
     if (!await _db.hasSeed(language)) return false;
     final prefs = await SharedPreferences.getInstance();
