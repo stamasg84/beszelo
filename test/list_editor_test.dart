@@ -1,15 +1,14 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'fixture_seed.dart';
+
 import 'package:mondom/main.dart';
 import 'package:mondom/speech/speaker.dart';
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
-import 'package:mondom/storage/seed.dart';
 import 'package:mondom/ui/speaking_screen.dart';
 import 'package:mondom/voices/voice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,11 +36,6 @@ class _NoPlayer implements WavPlayer {
   void dispose() {}
 }
 
-Future<Seed> _fileSeed(String lang) async => Seed.fromJson(
-  jsonDecode(File('assets/seed/$lang.json').readAsStringSync())
-      as Map<String, dynamic>,
-);
-
 Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 5; i++) {
     await tester.runAsync(
@@ -59,7 +53,7 @@ void main() {
   setUp(() {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     SharedPreferences.setMockInitialValues({});
-    db = AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
+    db = AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
     repo = ListsRepository(db);
   });
 

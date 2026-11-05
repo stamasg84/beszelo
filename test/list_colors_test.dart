@@ -1,9 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'fixture_seed.dart';
+
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
 import 'package:mondom/storage/seed.dart';
@@ -14,11 +14,6 @@ double _contrast(Color a, Color b) {
   final hi = la > lb ? la : lb, lo = la > lb ? lb : la;
   return (hi + 0.05) / (lo + 0.05);
 }
-
-Future<Seed> _fileSeed(String lang) async => Seed.fromJson(
-  jsonDecode(File('assets/seed/$lang.json').readAsStringSync())
-      as Map<String, dynamic>,
-);
 
 const _tables = '''
   CREATE TABLE sentences (
@@ -144,7 +139,7 @@ void main() {
   });
 
   test('seeding sets seed colors; restoreDefaultLists keeps them', () async {
-    final db = AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
+    final db = AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
     addTearDown(db.close);
     final repo = ListsRepository(db);
     await repo.addSeedLists('hu');
@@ -162,7 +157,7 @@ void main() {
   });
 
   test('createList: first unused color, then least used', () async {
-    final db = AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
+    final db = AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
     addTearDown(db.close);
     final repo = ListsRepository(db);
     await repo.addSeedLists('hu'); // blue, orange used
@@ -186,7 +181,7 @@ void main() {
   });
 
   test('setColor stores a key or null; history is refused', () async {
-    final db = AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
+    final db = AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
     addTearDown(db.close);
     final repo = ListsRepository(db);
     final id = await repo.createList('Orvos');

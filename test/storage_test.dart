@@ -3,21 +3,15 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'fixture_seed.dart';
+
 import 'package:mondom/storage/database.dart';
 import 'package:mondom/storage/lists_repository.dart';
-import 'package:mondom/storage/seed.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<Seed> _fileSeed(String lang) async {
-  final f = File('assets/seed/$lang.json');
-  if (!f.existsSync()) throw Exception('no seed $lang');
-  return Seed.fromJson(
-    jsonDecode(f.readAsStringSync()) as Map<String, dynamic>,
-  );
-}
-
 AppDatabase _open() =>
-    AppDatabase(NativeDatabase.memory(), loadSeed: _fileSeed);
+    AppDatabase(NativeDatabase.memory(), loadSeed: fixtureSeed);
 
 void main() {
   late AppDatabase db;
