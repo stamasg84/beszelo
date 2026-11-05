@@ -2,6 +2,13 @@
 
 Loose ideas and reminders that don't belong to a task in `docs/tasks.md` yet.
 
+## Emergency: 112 / SMS to family (dropped from the MVP, 2026-11-05)
+Dropped because of the implicit responsibility: users (or families) might rely on the app instead of really calling 112, while Android limits what an app can do. Facts gathered:
+- Android apps can't inject audio into a cellular call; only speakerphone playback next to the phone would work.
+- Android sends the caller's location to 112 automatically (AML), so the app adds little there. Unknown whether Hungary's 112 accepts SMS.
+- Google Play restricts the `SEND_SMS` permission to default SMS apps and a few exceptions; sending SMS in the background would mean a policy declaration and review. iOS can't send SMS in the background at all.
+If users ask for it: the cheap, honest version is a "message family" action that opens the SMS app (`ACTION_SENDTO`, no permission) with a predefined text (+ location, which needs the location permission) filled in, and the user taps send. It never looks like the app sends anything by itself. Could be a row flag like `alarm`.
+
 ## APK size: ABIs
 The debug APK is ~293 MB because it includes sherpa-onnx's native libraries for all four ABIs (CPU types): `arm64-v8a` (64-bit ARM, nearly all modern phones), `armeabi-v7a` (32-bit ARM, old/cheap phones), `x86_64` and `x86` (emulators, rare devices). Before releasing, build with `flutter build apk --split-per-abi` (or use an app bundle for Play) so each phone only gets its own ABI. Decide whether to still support `armeabi-v7a` (very old phones), and keep F-Droid in mind: it can build and serve per-ABI APKs too. Voices are downloaded at runtime, so they don't add to the APK.
 
