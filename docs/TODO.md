@@ -27,6 +27,18 @@ Decided 2026-11-02 not to split typed text into sentences and stream them: typed
 ## Test "Más nyelvek" on the phone
 Swedish voices (`sv_SE-nst-medium`, `sv_SE-alma-medium`) were added to the catalog on 2026-11-03, so the "Más nyelvek" section now appears on a Hungarian phone. Test there: the section shows, Swedish voices download/select/delete, and a Swedish (or English) UI lists its own voices first. Seeding by voice language is tested in T17b.
 
+## Optional ElevenLabs voice (post-release idea, 2026-11-05)
+ElevenLabs' [Impact Program](https://elevenlabs.io/impact-program) gives people with permanent voice loss (ALS/MND etc.) a free, extendable 5-year Pro license, including a Professional Voice Clone of their own voice (works from a few minutes of audio, even old recordings), and its multilingual models speak Hungarian. ElevenLabs has no AAC app of its own (checked 2026-11-05); patients use the clone through AAC apps that integrate its API: Predictable, Grid (Smartbox), Spoken and Speech Assistant AAC. The last two are among Mondom's reference competitors, so this is becoming an expected feature.
+
+Idea: an optional voice source "ElevenLabs (saját hang)" in the voice picker. The user pastes their own API key and picks a voice ID from their account (or we list their voices via the API). Synthesize via the ElevenLabs TTS API; if offline, the request fails or times out (keep the timeout short, ~2–3 s), so **fall back automatically** to a chosen offline voice (Piper or system TTS) and show a small "offline, using X" indicator. Constraints:
+- Strictly opt-in and clearly labelled "needs internet + an ElevenLabs account"; the offline/no-account defaults stay unchanged.
+- Store the API key in secure storage (Android Keystore, e.g. `flutter_secure_storage`), never in backups/exports or logs.
+- Text goes to ElevenLabs' servers; say so in the picker and in the privacy notes.
+- Message-banking recordings still take precedence over any TTS.
+- Maybe cache ElevenLabs audio for preloaded/list sentences (unlike Piper, here it saves latency, API quota and gives offline playback of the user's own voice for saved sentences). Re-check the "no caching" decision for this engine only.
+- Terms or the free program could change; since it's one optional engine among several, that's acceptable.
+Ask the ALS group first: "Do you already have your voice at ElevenLabs?"
+
 ## More languages where Google's system voice has only one gender (checked 2026-11-03)
 Google's Android TTS only has a female voice for Slovak, Romanian, Serbian, Finnish and Ukrainian (Swedish has both). A Piper male voice is a real edge there. Candidates (license = training data license on the Piper model card; all are in sherpa-onnx's `tts-models` release):
 - **Romanian:** `ro_RO-mihai-medium`, male, CC0, 63 MB.
