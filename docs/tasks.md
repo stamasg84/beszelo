@@ -47,7 +47,7 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 - Tests (Dart side, fake channel): save/raise/restore; no restore when the user changed the level; startup restore; a second alarm while one plays doesn't overwrite the saved level.
 - **Checks:** `flutter analyze`, `flutter test`.
 
-### [ ] T25 (You): Try the alarm
+### [x] T25 (You): Try the alarm
 1. On the existing install: ☰ → Listák → "Alapértelmezett listák visszaállítása": the red Riasztás chip appears last.
 2. Tap each row. Bell and horn play once, the siren loops; Leállítás stops it. Let the siren run to check it stops after 2 minutes. Nothing appears in Előzmények.
 3. Turn the alarm volume low with the phone settings, set Saját hangerő to max, play the siren from another room's distance, stop it: the phone's alarm volume is back to low. Try with Do Not Disturb on, and with the phone's volume buttons pressed during the siren.

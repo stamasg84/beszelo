@@ -306,37 +306,35 @@ class _SpeakingScreenState extends State<SpeakingScreen>
       child: Row(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final l in shown)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(
-                          _title(l10n, l),
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 12,
-                        ),
-                        selected: l.id == _currentId,
-                        showCheckmark: false,
-                        backgroundColor: listColor(context, l.color).chip,
-                        selectedColor: listColor(context, l.color).chip,
-                        side: l.id == _currentId
-                            ? BorderSide(
-                                width: 4,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )
-                            : BorderSide.none,
-                        onSelected: (_) => _showList(l),
-                      ),
+            // Wraps instead of scrolling sideways: a chip scrolled off-screen
+            // (often Előzmények, the last one) is effectively invisible.
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final l in shown)
+                  ChoiceChip(
+                    label: Text(
+                      _title(l10n, l),
+                      style: const TextStyle(fontSize: 20),
                     ),
-                ],
-              ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 12,
+                    ),
+                    selected: l.id == _currentId,
+                    showCheckmark: false,
+                    backgroundColor: listColor(context, l.color).chip,
+                    selectedColor: listColor(context, l.color).chip,
+                    side: l.id == _currentId
+                        ? BorderSide(
+                            width: 4,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          )
+                        : BorderSide.none,
+                    onSelected: (_) => _showList(l),
+                  ),
+              ],
             ),
           ),
           IconButton(

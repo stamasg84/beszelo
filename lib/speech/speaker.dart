@@ -75,6 +75,12 @@ class AudioPlayersSoundPlayer implements SoundPlayer {
   @override
   Future<void> playAsset(String asset, {bool loop = false}) async {
     final p = await _get();
+    // MediaPlayer leaves an audible click/gap at each loop restart; SoundPool
+    // (lowLatency) loops gaplessly. It sends no completion events and has a
+    // ~1 MB decoded-size limit, both fine for short looping alarm sounds.
+    await p.setPlayerMode(
+      loop ? PlayerMode.lowLatency : PlayerMode.mediaPlayer,
+    );
     await p.setReleaseMode(loop ? ReleaseMode.loop : ReleaseMode.release);
     await p.play(AssetSource(asset));
   }
@@ -82,6 +88,7 @@ class AudioPlayersSoundPlayer implements SoundPlayer {
   @override
   Future<void> playFile(String path) async {
     final p = await _get();
+    await p.setPlayerMode(PlayerMode.mediaPlayer);
     await p.setReleaseMode(ReleaseMode.release);
     await p.play(DeviceFileSource(path));
   }
