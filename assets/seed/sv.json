@@ -9,120 +9,211 @@
       "color": "blue",
       "sentences": [
         {
-          "seedKey": "water",
-          "text": "Kan jag få lite vatten, tack?"
-        },
-        {
-          "seedKey": "food",
-          "text": "Jag är hungrig."
-        },
-        {
-          "seedKey": "drink",
-          "text": "Jag är törstig."
-        },
-        {
-          "seedKey": "toilet",
-          "text": "Jag behöver gå på toaletten."
-        },
-        {
-          "seedKey": "pain",
-          "text": "Det gör ont."
-        },
-        {
-          "seedKey": "pain-help",
-          "text": "Jag har ont, jag behöver något smärtstillande."
-        },
-        {
-          "seedKey": "stand",
-          "text": "Hjälp mig att resa mig!"
-        },
-        {
-          "seedKey": "position",
-          "text": "Kan du hjälpa mig att vända mig?"
-        },
-        {
-          "seedKey": "sit",
-          "text": "Kan du hjälpa mig att sätta mig upp?"
-        },
-        {
-          "seedKey": "cold",
-          "text": "Jag fryser."
-        },
-        {
-          "seedKey": "hot",
-          "text": "Jag är för varm."
-        },
-        {
-          "seedKey": "blanket",
-          "text": "Kan jag få en filt, tack?"
-        },
-        {
-          "seedKey": "glasses",
-          "text": "Kan du ge mig mina glasögon?"
-        },
-        {
-          "seedKey": "phone",
-          "text": "Kan du ge mig min telefon?"
-        },
-        {
-          "seedKey": "tv",
-          "text": "Kan du sätta på tv:n?"
-        },
-        {
-          "seedKey": "tv-off",
-          "text": "Kan du stänga av tv:n?"
-        },
-        {
-          "seedKey": "light-on",
-          "text": "Kan du tända lampan?"
-        },
-        {
-          "seedKey": "light-off",
-          "text": "Kan du släcka lampan?"
-        },
-        {
-          "seedKey": "tired",
-          "text": "Jag är trött."
-        },
-        {
-          "seedKey": "good",
-          "text": "Jag mår bra."
-        },
-        {
           "seedKey": "yes",
-          "text": "Ja."
+          "text": "Ja"
         },
         {
           "seedKey": "no",
-          "text": "Nej."
+          "text": "Nej"
         },
         {
-          "seedKey": "dont-know",
+          "seedKey": "maybe",
+          "text": "Kanske"
+        },
+        {
+          "seedKey": "later",
+          "text": "Senare"
+        },
+        {
+          "seedKey": "dontknow",
           "text": "Jag vet inte."
+        },
+        {
+          "seedKey": "ask",
+          "text": "Jag vill ha"
+        },
+        {
+          "seedKey": "nothanks",
+          "text": "Nej tack"
         },
         {
           "seedKey": "thanks",
           "text": "Tack!"
         },
         {
-          "seedKey": "wait",
-          "text": "Vänta, jag skriver."
+          "seedKey": "toomuch",
+          "text": "För mycket"
         },
         {
-          "seedKey": "repeat",
-          "text": "Kan du säga det igen?"
+          "seedKey": "notenough",
+          "text": "För lite"
         },
         {
-          "seedKey": "slower",
-          "text": "Långsammare, tack!"
+          "seedKey": "cantspeak",
+          "text": "Jag kan inte prata, bara så här."
         },
         {
-          "seedKey": "come",
-          "text": "Kan du komma hit?"
+          "seedKey": "waittyping",
+          "text": "Vänta, jag skriver!"
+        },
+        {
+          "seedKey": "hurts",
+          "text": "Det gör ont"
+        },
+        {
+          "seedKey": "fine",
+          "text": "Jag mår bra."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "Jag behöver gå på toaletten."
+        },
+        {
+          "seedKey": "help",
+          "text": "Hjälp mig!"
         },
         {
           "seedKey": "love",
           "text": "Jag älskar dig."
+        }
+      ]
+    },
+    {
+      "seedKey": "questions",
+      "title": "Frågor",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "yellow",
+      "sentences": [
+        {
+          "seedKey": "what",
+          "text": "Vad?"
+        },
+        {
+          "seedKey": "who",
+          "text": "Vem?"
+        },
+        {
+          "seedKey": "howmuch",
+          "text": "Hur mycket?"
+        },
+        {
+          "seedKey": "why",
+          "text": "Varför?"
+        },
+        {
+          "seedKey": "when",
+          "text": "När?"
+        },
+        {
+          "seedKey": "how",
+          "text": "Hur?"
+        },
+        {
+          "seedKey": "where",
+          "text": "Var?"
+        },
+        {
+          "seedKey": "whereis",
+          "text": "Var är"
+        }
+      ]
+    },
+    {
+      "seedKey": "food",
+      "title": "Mat",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "brown",
+      "sentences": [
+        {
+          "seedKey": "thirsty",
+          "text": "Jag är törstig."
+        },
+        {
+          "seedKey": "hungry",
+          "text": "Jag är hungrig."
+        },
+        {
+          "seedKey": "toomuch",
+          "text": "För mycket"
+        },
+        {
+          "seedKey": "notenough",
+          "text": "För lite"
+        },
+        {
+          "seedKey": "nosalt",
+          "text": "För lite salt"
+        },
+        {
+          "seedKey": "toosalty",
+          "text": "För salt"
+        },
+        {
+          "seedKey": "nosweet",
+          "text": "Inte tillräckligt sött"
+        },
+        {
+          "seedKey": "toosweet",
+          "text": "För sött"
+        },
+        {
+          "seedKey": "bitter",
+          "text": "Beskt"
+        },
+        {
+          "seedKey": "sour",
+          "text": "Surt"
+        },
+        {
+          "seedKey": "delicious",
+          "text": "Gott"
+        },
+        {
+          "seedKey": "ask",
+          "text": "Jag vill ha"
+        },
+        {
+          "seedKey": "askwater",
+          "text": "Vatten, tack!"
+        },
+        {
+          "seedKey": "asktea",
+          "text": "Te, tack!"
+        },
+        {
+          "seedKey": "askcoffee",
+          "text": "Kaffe, tack!"
+        },
+        {
+          "seedKey": "ingredients",
+          "text": "Vad innehåller det?"
+        }
+      ]
+    },
+    {
+      "seedKey": "shop",
+      "title": "Affär",
+      "kind": "everyday",
+      "pinned": false,
+      "color": "orange",
+      "sentences": [
+        {
+          "seedKey": "price",
+          "text": "Vad kostar det?"
+        },
+        {
+          "seedKey": "pay",
+          "text": "Jag vill betala."
+        },
+        {
+          "seedKey": "paywithcard",
+          "text": "Jag betalar med kort."
+        },
+        {
+          "seedKey": "cantspeak",
+          "text": "Jag kan inte prata, bara så här."
         }
       ]
     },

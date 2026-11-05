@@ -9,120 +9,211 @@
       "color": "blue",
       "sentences": [
         {
-          "seedKey": "water",
-          "text": "Kérek vizet!"
-        },
-        {
-          "seedKey": "food",
-          "text": "Éhes vagyok."
-        },
-        {
-          "seedKey": "drink",
-          "text": "Szomjas vagyok."
-        },
-        {
-          "seedKey": "toilet",
-          "text": "Mennem kell a mosdóba."
-        },
-        {
-          "seedKey": "pain",
-          "text": "Fáj."
-        },
-        {
-          "seedKey": "pain-help",
-          "text": "Fájdalmaim vannak, kérek fájdalomcsillapítót."
-        },
-        {
-          "seedKey": "stand",
-          "text": "Segíts felállni!"
-        },
-        {
-          "seedKey": "position",
-          "text": "Segíts, kérlek, átfordulni!"
-        },
-        {
-          "seedKey": "sit",
-          "text": "Ültess fel, kérlek!"
-        },
-        {
-          "seedKey": "cold",
-          "text": "Fázom."
-        },
-        {
-          "seedKey": "hot",
-          "text": "Melegem van."
-        },
-        {
-          "seedKey": "blanket",
-          "text": "Kérek egy takarót!"
-        },
-        {
-          "seedKey": "glasses",
-          "text": "Add ide a szemüvegemet, kérlek!"
-        },
-        {
-          "seedKey": "phone",
-          "text": "Add ide a telefonomat, kérlek!"
-        },
-        {
-          "seedKey": "tv",
-          "text": "Kapcsold be a tévét, kérlek!"
-        },
-        {
-          "seedKey": "tv-off",
-          "text": "Kapcsold ki a tévét, kérlek!"
-        },
-        {
-          "seedKey": "light-on",
-          "text": "Kapcsold fel a villanyt, kérlek!"
-        },
-        {
-          "seedKey": "light-off",
-          "text": "Kapcsold le a villanyt, kérlek!"
-        },
-        {
-          "seedKey": "tired",
-          "text": "Fáradt vagyok."
-        },
-        {
-          "seedKey": "good",
-          "text": "Jól vagyok."
-        },
-        {
           "seedKey": "yes",
-          "text": "Igen."
+          "text": "Igen"
         },
         {
           "seedKey": "no",
-          "text": "Nem."
+          "text": "Nem"
         },
         {
-          "seedKey": "dont-know",
+          "seedKey": "maybe",
+          "text": "Talán"
+        },
+        {
+          "seedKey": "later",
+          "text": "Később"
+        },
+        {
+          "seedKey": "dontknow",
           "text": "Nem tudom."
+        },
+        {
+          "seedKey": "ask",
+          "text": "Kérek"
+        },
+        {
+          "seedKey": "nothanks",
+          "text": "Nem kérek"
         },
         {
           "seedKey": "thanks",
           "text": "Köszönöm!"
         },
         {
-          "seedKey": "wait",
-          "text": "Várj, gépelek."
+          "seedKey": "toomuch",
+          "text": "Sok"
         },
         {
-          "seedKey": "repeat",
-          "text": "Ismételd meg, kérlek!"
+          "seedKey": "notenough",
+          "text": "Kevés"
         },
         {
-          "seedKey": "slower",
-          "text": "Lassabban, kérlek!"
+          "seedKey": "cantspeak",
+          "text": "Nem tudok beszélni, csak így."
         },
         {
-          "seedKey": "come",
-          "text": "Gyere ide, kérlek!"
+          "seedKey": "waittyping",
+          "text": "Várj, gépelek!"
+        },
+        {
+          "seedKey": "hurts",
+          "text": "Fáj"
+        },
+        {
+          "seedKey": "fine",
+          "text": "Jól vagyok."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "Mosdóba kell mennem."
+        },
+        {
+          "seedKey": "help",
+          "text": "Segíts!"
         },
         {
           "seedKey": "love",
           "text": "Szeretlek."
+        }
+      ]
+    },
+    {
+      "seedKey": "questions",
+      "title": "Kérdés",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "yellow",
+      "sentences": [
+        {
+          "seedKey": "what",
+          "text": "Mi?"
+        },
+        {
+          "seedKey": "who",
+          "text": "Ki?"
+        },
+        {
+          "seedKey": "howmuch",
+          "text": "Mennyi?"
+        },
+        {
+          "seedKey": "why",
+          "text": "Miért?"
+        },
+        {
+          "seedKey": "when",
+          "text": "Mikor?"
+        },
+        {
+          "seedKey": "how",
+          "text": "Hogyan?"
+        },
+        {
+          "seedKey": "where",
+          "text": "Hol?"
+        },
+        {
+          "seedKey": "whereis",
+          "text": "Hol van a"
+        }
+      ]
+    },
+    {
+      "seedKey": "food",
+      "title": "Étel",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "brown",
+      "sentences": [
+        {
+          "seedKey": "thirsty",
+          "text": "Szomjas vagyok."
+        },
+        {
+          "seedKey": "hungry",
+          "text": "Éhes vagyok."
+        },
+        {
+          "seedKey": "toomuch",
+          "text": "Sok"
+        },
+        {
+          "seedKey": "notenough",
+          "text": "Kevés"
+        },
+        {
+          "seedKey": "nosalt",
+          "text": "Sótlan"
+        },
+        {
+          "seedKey": "toosalty",
+          "text": "Túl sós"
+        },
+        {
+          "seedKey": "nosweet",
+          "text": "Nem elég édes"
+        },
+        {
+          "seedKey": "toosweet",
+          "text": "Túl édes"
+        },
+        {
+          "seedKey": "bitter",
+          "text": "Keserű"
+        },
+        {
+          "seedKey": "sour",
+          "text": "Savanyú"
+        },
+        {
+          "seedKey": "delicious",
+          "text": "Finom"
+        },
+        {
+          "seedKey": "ask",
+          "text": "Kérek"
+        },
+        {
+          "seedKey": "askwater",
+          "text": "Kérek vizet!"
+        },
+        {
+          "seedKey": "asktea",
+          "text": "Kérek teát!"
+        },
+        {
+          "seedKey": "askcoffee",
+          "text": "Kérek kávét!"
+        },
+        {
+          "seedKey": "ingredients",
+          "text": "Miből készült?"
+        }
+      ]
+    },
+    {
+      "seedKey": "shop",
+      "title": "Bolt",
+      "kind": "everyday",
+      "pinned": false,
+      "color": "orange",
+      "sentences": [
+        {
+          "seedKey": "price",
+          "text": "Mennyibe kerül?"
+        },
+        {
+          "seedKey": "pay",
+          "text": "Fizetni szeretnék."
+        },
+        {
+          "seedKey": "paywithcard",
+          "text": "Kártyával fizetek."
+        },
+        {
+          "seedKey": "cantspeak",
+          "text": "Nem tudok beszélni, csak így."
         }
       ]
     },

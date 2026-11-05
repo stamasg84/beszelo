@@ -9,120 +9,211 @@
       "color": "blue",
       "sentences": [
         {
-          "seedKey": "water",
-          "text": "I'd like some water, please!"
-        },
-        {
-          "seedKey": "food",
-          "text": "I'm hungry."
-        },
-        {
-          "seedKey": "drink",
-          "text": "I'm thirsty."
-        },
-        {
-          "seedKey": "toilet",
-          "text": "I need to go to the bathroom."
-        },
-        {
-          "seedKey": "pain",
-          "text": "It hurts."
-        },
-        {
-          "seedKey": "pain-help",
-          "text": "I'm in pain, I need some painkillers."
-        },
-        {
-          "seedKey": "stand",
-          "text": "Help me stand up!"
-        },
-        {
-          "seedKey": "position",
-          "text": "Help me turn over, please!"
-        },
-        {
-          "seedKey": "sit",
-          "text": "Sit me up, please!"
-        },
-        {
-          "seedKey": "cold",
-          "text": "I'm cold."
-        },
-        {
-          "seedKey": "hot",
-          "text": "I'm hot."
-        },
-        {
-          "seedKey": "blanket",
-          "text": "I'd like a blanket, please!"
-        },
-        {
-          "seedKey": "glasses",
-          "text": "Hand me my glasses, please!"
-        },
-        {
-          "seedKey": "phone",
-          "text": "Hand me my phone, please!"
-        },
-        {
-          "seedKey": "tv",
-          "text": "Turn the TV on, please!"
-        },
-        {
-          "seedKey": "tv-off",
-          "text": "Turn the TV off, please!"
-        },
-        {
-          "seedKey": "light-on",
-          "text": "Turn the light on, please!"
-        },
-        {
-          "seedKey": "light-off",
-          "text": "Turn the light off, please!"
-        },
-        {
-          "seedKey": "tired",
-          "text": "I'm tired."
-        },
-        {
-          "seedKey": "good",
-          "text": "I'm doing fine."
-        },
-        {
           "seedKey": "yes",
-          "text": "Yes."
+          "text": "Yes"
         },
         {
           "seedKey": "no",
-          "text": "No."
+          "text": "No"
         },
         {
-          "seedKey": "dont-know",
+          "seedKey": "maybe",
+          "text": "Maybe"
+        },
+        {
+          "seedKey": "later",
+          "text": "Later"
+        },
+        {
+          "seedKey": "dontknow",
           "text": "I don't know."
+        },
+        {
+          "seedKey": "ask",
+          "text": "I'd like"
+        },
+        {
+          "seedKey": "nothanks",
+          "text": "No, thanks"
         },
         {
           "seedKey": "thanks",
           "text": "Thank you!"
         },
         {
-          "seedKey": "wait",
-          "text": "Wait, I'm typing."
+          "seedKey": "toomuch",
+          "text": "Too much"
         },
         {
-          "seedKey": "repeat",
-          "text": "Please say that again!"
+          "seedKey": "notenough",
+          "text": "Not enough"
         },
         {
-          "seedKey": "slower",
-          "text": "Slower, please!"
+          "seedKey": "cantspeak",
+          "text": "I can't speak, only like this."
         },
         {
-          "seedKey": "come",
-          "text": "Come here, please!"
+          "seedKey": "waittyping",
+          "text": "Wait, I'm typing!"
+        },
+        {
+          "seedKey": "hurts",
+          "text": "It hurts"
+        },
+        {
+          "seedKey": "fine",
+          "text": "I'm fine."
+        },
+        {
+          "seedKey": "toilet",
+          "text": "I need to go to the bathroom."
+        },
+        {
+          "seedKey": "help",
+          "text": "Help me!"
         },
         {
           "seedKey": "love",
           "text": "I love you."
+        }
+      ]
+    },
+    {
+      "seedKey": "questions",
+      "title": "Questions",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "yellow",
+      "sentences": [
+        {
+          "seedKey": "what",
+          "text": "What?"
+        },
+        {
+          "seedKey": "who",
+          "text": "Who?"
+        },
+        {
+          "seedKey": "howmuch",
+          "text": "How much?"
+        },
+        {
+          "seedKey": "why",
+          "text": "Why?"
+        },
+        {
+          "seedKey": "when",
+          "text": "When?"
+        },
+        {
+          "seedKey": "how",
+          "text": "How?"
+        },
+        {
+          "seedKey": "where",
+          "text": "Where?"
+        },
+        {
+          "seedKey": "whereis",
+          "text": "Where is the"
+        }
+      ]
+    },
+    {
+      "seedKey": "food",
+      "title": "Food",
+      "kind": "everyday",
+      "pinned": true,
+      "color": "brown",
+      "sentences": [
+        {
+          "seedKey": "thirsty",
+          "text": "I'm thirsty."
+        },
+        {
+          "seedKey": "hungry",
+          "text": "I'm hungry."
+        },
+        {
+          "seedKey": "toomuch",
+          "text": "Too much"
+        },
+        {
+          "seedKey": "notenough",
+          "text": "Not enough"
+        },
+        {
+          "seedKey": "nosalt",
+          "text": "Not salty enough"
+        },
+        {
+          "seedKey": "toosalty",
+          "text": "Too salty"
+        },
+        {
+          "seedKey": "nosweet",
+          "text": "Not sweet enough"
+        },
+        {
+          "seedKey": "toosweet",
+          "text": "Too sweet"
+        },
+        {
+          "seedKey": "bitter",
+          "text": "Bitter"
+        },
+        {
+          "seedKey": "sour",
+          "text": "Sour"
+        },
+        {
+          "seedKey": "delicious",
+          "text": "Delicious"
+        },
+        {
+          "seedKey": "ask",
+          "text": "I'd like"
+        },
+        {
+          "seedKey": "askwater",
+          "text": "Water, please!"
+        },
+        {
+          "seedKey": "asktea",
+          "text": "Tea, please!"
+        },
+        {
+          "seedKey": "askcoffee",
+          "text": "Coffee, please!"
+        },
+        {
+          "seedKey": "ingredients",
+          "text": "What's in it?"
+        }
+      ]
+    },
+    {
+      "seedKey": "shop",
+      "title": "Shop",
+      "kind": "everyday",
+      "pinned": false,
+      "color": "orange",
+      "sentences": [
+        {
+          "seedKey": "price",
+          "text": "How much is it?"
+        },
+        {
+          "seedKey": "pay",
+          "text": "I'd like to pay."
+        },
+        {
+          "seedKey": "paywithcard",
+          "text": "I'll pay by card."
+        },
+        {
+          "seedKey": "cantspeak",
+          "text": "I can't speak, only like this."
         }
       ]
     },
