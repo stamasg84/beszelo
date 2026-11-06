@@ -55,6 +55,18 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 5. Note: is the siren too annoying / not loud enough, do the sentences fit, would a family member hear the bell from the next room?
 Done → commit.
 
+### [ ] T26 (Agent): Louder output (speech and alarms)
+Problem (2026-11-06, Pixel 6a): everything is audible but quieter than a phone call on speaker; the phone has to be turned up high. Goal: noticeably louder at the same phone volume, without audible distortion.
+Background: peak normalization alone may gain little (Piper output and the built-in sounds may already peak near 0 dBFS, the sounds are at -1 dBFS). Perceived loudness follows RMS, so the real gain comes from **compression/limiting**: raise the gain, then soft-limit the peaks. All audio already passes through WAV files, so one Dart function can handle it.
+- **Measure first:** a small debug log (or `tool/` script for assets) printing peak and RMS dBFS of a Piper sentence (imre, berta), a system TTS sentence, and the three built-in sounds. Put the numbers in the summary.
+- New `lib/speech/loudness.dart`: pure function on float samples (−1..1): normalize the peak, apply a fixed make-up gain (start around +6 dB, constant `speechGainDb`), then a smooth soft limiter (e.g. `tanh`-style or a simple look-ahead limiter) with ceiling about -1 dBFS. No per-sentence pumping: keep it static and simple. Plus a helper that reads/writes a 16-bit PCM WAV for the system TTS path.
+- Piper: apply it in the isolate on `audio.samples` before `writeWave` (`lib/voices/piper_engine.dart`). System TTS: post-process the file written by `synthesizeToFile` (`lib/voices/system_engine.dart`); if the file isn't 16-bit PCM WAV, leave it unchanged.
+- Built-in sounds: re-run `tool/make_sounds.py` with the same treatment (siren and horn can be much more compressed/square-ish, they're meant to be loud; keep the siren loop seamless). Regenerate and commit the WAVs.
+- Optional, only if the above isn't enough: Android `LoudnessEnhancer` audio effect on the player's audio session (native, `MainActivity.kt`). Note it in the summary rather than doing it unasked.
+- Out of scope: a user-facing loudness setting (add later only if someone finds it too loud or distorted). Message-banking recordings will go through the same function later.
+- Tests: the function never exceeds the ceiling; silence stays silence; a quiet sine comes out louder (RMS up); WAV read/write round-trip.
+- **Checks:** `flutter analyze`, `flutter test`. Human verifies on the Pixel 6a: compare loudness and distortion before/after with imre, berta, system TTS and the siren; compare against a speakerphone call.
+
 ---
 
 ## Later (rough)
