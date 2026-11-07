@@ -55,7 +55,8 @@ Goal: a loud alarm without a new button: a seeded, pinned "Riasztás" list whose
 5. Note: is the siren too annoying / not loud enough, do the sentences fit, would a family member hear the bell from the next room?
 Done → commit.
 
-### [ ] T26 (Agent): Louder output (speech and alarms)
+### [x] T26 (Agent): Louder output (speech and alarms)
+Done 2026-11-07, awaiting the human check on the Pixel 6a. Measured (`python tool/measure_loudness.py`, peak / RMS dBFS): imre -2.5 / -21.5, anna -4.5 / -21.4, berta **-12.8 / -28.7** (quietest), alma -4.6 / -17.8, nst -2.7 / -19.2; old sounds: bell -1 / -14.7, horn -1 / -3.4, siren -1 / -4.0. System TTS has no sample in the repo, so it wasn't measured (the same function runs on it). Piper peak-normalization alone would give +1.5 dB (imre) but +11.8 dB (berta); the +6 dB gain and soft limiter (knee -6 dBFS, ceiling -1 dBFS) add the rest. New sounds: bell -1 / -7.1, horn -1 / -2.2, siren -1 / -2.1 (tanh squash, siren loop still seamless). Not done: `LoudnessEnhancer` (only if still too quiet).
 Problem (2026-11-06, Pixel 6a): everything is audible but quieter than a phone call on speaker; the phone has to be turned up high. Goal: noticeably louder at the same phone volume, without audible distortion.
 Background: peak normalization alone may gain little (Piper output and the built-in sounds may already peak near 0 dBFS, the sounds are at -1 dBFS). Perceived loudness follows RMS, so the real gain comes from **compression/limiting**: raise the gain, then soft-limit the peaks. All audio already passes through WAV files, so one Dart function can handle it.
 - **Measure first:** a small debug log (or `tool/` script for assets) printing peak and RMS dBFS of a Piper sentence (imre, berta), a system TTS sentence, and the three built-in sounds. Put the numbers in the summary.

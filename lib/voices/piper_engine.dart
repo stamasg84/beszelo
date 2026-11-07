@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa;
 
+import '../speech/loudness.dart';
 import 'voice_engine.dart';
 
 /// Wraps sherpa-onnx OfflineTts for one Piper voice directory.
@@ -106,9 +107,11 @@ class PiperEngine implements VoiceEngine {
     await _ready!.future;
     final port = _toIsolate;
     if (_disposed || port == null) throw StateError('TTS not loaded');
+    final boost = await speechBoostEnabled();
+    if (_disposed) throw StateError('TTS not loaded');
     final id = _nextId++;
     final completer = _pending[id] = Completer<SynthResult>();
-    port.send(_SynthRequest(id, text, '$_tmpDir/tts_$id.wav'));
+    port.send(_SynthRequest(id, text, '$_tmpDir/tts_$id.wav', boost));
     return completer.future;
   }
 
@@ -162,8 +165,9 @@ class _LoadFailedMessage {
 }
 
 class _SynthRequest {
-  const _SynthRequest(this.id, this.text, this.path);
+  const _SynthRequest(this.id, this.text, this.path, this.boost);
   final int id;
+  final bool boost;
   final String text;
   final String path;
 }
@@ -226,7 +230,7 @@ void _isolateMain(_InitMessage init) {
         final synthMs = sw.elapsedMilliseconds;
         final ok = sherpa.writeWave(
           filename: msg.path,
-          samples: audio.samples,
+          samples: msg.boost ? boostLoudness(audio.samples) : audio.samples,
           sampleRate: audio.sampleRate,
         );
         if (!ok) throw FileSystemException('Failed to write WAV', msg.path);

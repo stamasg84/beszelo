@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../speech/loudness.dart';
 import 'voice.dart';
 import 'voice_engine.dart';
 
@@ -47,6 +48,7 @@ class SystemEngine implements VoiceEngine {
     if (result != 1 || !file.existsSync() || file.lengthSync() <= 44) {
       throw FileSystemException('System TTS produced no audio', path);
     }
+    if (await speechBoostEnabled()) boostWavFile(path);
     final audioMs = _wavDurationMs(file);
     debugPrint('System TTS synth: $synthMs ms for $audioMs ms of audio');
     return SynthResult(path, synthMs, audioMs);

@@ -2,7 +2,7 @@
 
 Run from the repo root:  python tool/make_sounds.py   (or: uv run tool/make_sounds.py)
 Own synthesis, so there is no third-party audio license to track.
-Mono, 22050 Hz, 16-bit, peak normalized to about -1 dBFS.
+Mono, 22050 Hz, 16-bit, peak normalized to about -1 dBFS after tanh compression (squash).
 """
 import math
 import struct
@@ -12,6 +12,14 @@ from pathlib import Path
 RATE = 22050
 PEAK = 10 ** (-1 / 20)  # -1 dBFS
 OUT = Path(__file__).resolve().parent.parent / "assets" / "sounds"
+
+
+def squash(samples, drive):
+    """Loudness by compression: peak normalize, push through tanh(drive * x),
+    renormalize. Odd symmetric, so a seamless loop stays seamless. Higher
+    drive = flatter peaks = higher RMS (towards a square wave)."""
+    top = max(abs(x) for x in samples) or 1.0
+    return [math.tanh(drive * x / top) for x in samples]
 
 
 def write(name, samples):
@@ -79,7 +87,9 @@ def horn():
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    write("siren.wav", siren())
-    write("bell.wav", bell())
-    write("horn.wav", horn())
+    # Drive per sound (see squash): the siren and horn are meant to be harsh
+    # and loud; the bell keeps some of its decay but gets much denser.
+    write("siren.wav", squash(siren(), 3.0))
+    write("bell.wav", squash(bell(), 4.0))
+    write("horn.wav", squash(horn(), 2.0))
     print("wrote", ", ".join(sorted(p.name for p in OUT.glob("*.wav"))))
