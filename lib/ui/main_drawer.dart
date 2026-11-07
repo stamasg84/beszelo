@@ -6,8 +6,8 @@ import '../speech/speaker.dart';
 import '../storage/lists_repository.dart';
 import '../voices/language_names.dart';
 import '../voices/voice.dart';
-import 'alarm_volume_screen.dart';
 import 'lists_screen.dart';
+import 'settings_screen.dart';
 
 /// The speaking screen's menu: a plain list of large rows. Editing lives
 /// behind it, never on the speaking screen itself. Opened only by the app bar
@@ -57,18 +57,6 @@ class MainDrawer extends StatelessWidget {
               ),
             ),
             _DrawerRow(
-              icon: Icons.record_voice_over,
-              title: l10n.settingsVoiceTitle,
-              subtitle: l10n.settingsVoiceSubtitle(
-                voiceName,
-                languageName(v.languageCode, ui),
-              ),
-              onTap: () {
-                navigator.pop();
-                onOpenVoicePicker();
-              },
-            ),
-            _DrawerRow(
               icon: Icons.list_alt,
               title: l10n.settingsListsTitle,
               subtitle: l10n.settingsListsSubtitle,
@@ -86,19 +74,31 @@ class MainDrawer extends StatelessWidget {
               },
             ),
             _DrawerRow(
-              icon: Icons.volume_up,
-              title: l10n.alarmVolumeTitle,
-              subtitle: l10n.alarmVolumeSubtitle,
+              icon: Icons.tune,
+              title: l10n.settingsTitle,
+              subtitle: l10n.settingsSubtitle,
               onTap: () {
                 navigator.pop();
                 navigator.push(
                   MaterialPageRoute<void>(
-                    builder: (_) => AlarmVolumeScreen(
+                    builder: (_) => SettingsScreen(
                       alarmVolume: alarmVolume,
                       speaker: speaker,
                     ),
                   ),
                 );
+              },
+            ),
+            _DrawerRow(
+              icon: Icons.record_voice_over,
+              title: l10n.settingsVoiceTitle,
+              subtitle: l10n.settingsVoiceSubtitle(
+                voiceName,
+                languageName(v.languageCode, ui),
+              ),
+              onTap: () {
+                navigator.pop();
+                onOpenVoicePicker();
               },
             ),
           ],

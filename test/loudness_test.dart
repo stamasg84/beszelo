@@ -18,11 +18,17 @@ void main() {
   test('never exceeds the ceiling', () {
     for (final amp in [0.01, 0.2, 0.9, 1.0]) {
       final out = boostLoudness(sine(amp));
-      expect(out.map((x) => x.abs()).reduce(math.max), lessThanOrEqualTo(ceiling));
+      expect(
+        out.map((x) => x.abs()).reduce(math.max),
+        lessThanOrEqualTo(ceiling),
+      );
     }
     // Extra gain still can't pass the ceiling.
     final loud = boostLoudness(sine(1.0), gainDb: 30);
-    expect(loud.map((x) => x.abs()).reduce(math.max), lessThanOrEqualTo(ceiling));
+    expect(
+      loud.map((x) => x.abs()).reduce(math.max),
+      lessThanOrEqualTo(ceiling),
+    );
   });
 
   test('silence stays silence', () {

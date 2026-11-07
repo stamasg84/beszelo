@@ -191,13 +191,29 @@
   "@settingsListsSubtitle": {
     "description": "Subtitle of the lists row."
   },
-  "alarmVolumeTitle": "Riasztás hangereje",
-  "@alarmVolumeTitle": {
-    "description": "Drawer row and screen title for the alarm volume setting."
+  "settingsTitle": "Beállítások",
+  "@settingsTitle": {
+    "description": "Drawer row and screen title for the sound settings."
   },
-  "alarmVolumeSubtitle": "Milyen hangosan szóljon a riasztás",
-  "@alarmVolumeSubtitle": {
-    "description": "Subtitle of the alarm volume row."
+  "settingsSubtitle": "Hangosítás, riasztás hangereje",
+  "@settingsSubtitle": {
+    "description": "Subtitle of the settings drawer row."
+  },
+  "settingsSpeechSection": "Beszéd",
+  "@settingsSpeechSection": {
+    "description": "Section header for speech settings."
+  },
+  "settingsBoostTitle": "Hangosítás",
+  "@settingsBoostTitle": {
+    "description": "Switch: louder speech."
+  },
+  "settingsBoostHelp": "Hangosabb beszéd. Kapcsold ki, ha torznak hallod.",
+  "@settingsBoostHelp": {
+    "description": "Help text under the speech boost switch."
+  },
+  "settingsAlarmSection": "Riasztás",
+  "@settingsAlarmSection": {
+    "description": "Section header for alarm settings."
   },
   "alarmVolumeSystem": "A telefon ébresztési hangereje",
   "@alarmVolumeSystem": {

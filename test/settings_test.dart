@@ -112,6 +112,43 @@ void main() {
     await finish(tester);
   });
 
+  testWidgets('drawer order: Listák, Beállítások, Hang és nyelv', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await tester.tap(find.byTooltip('Menü'));
+    await settle(tester);
+    double y(String t) => tester.getTopLeft(find.text(t)).dy;
+    expect(y('Listák'), lessThan(y('Beállítások')));
+    expect(y('Beállítások'), lessThan(y('Hang és nyelv')));
+    await finish(tester);
+  });
+
+  testWidgets('Beállítások: the Hangosítás switch persists speechBoost', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await tester.tap(find.byTooltip('Menü'));
+    await settle(tester);
+    await tester.tap(find.text('Beállítások'));
+    await settle(tester);
+    expect(find.text('Beszéd'), findsOneWidget);
+    expect(find.text('Riasztás'), findsWidgets);
+    expect(
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      true,
+    );
+    await tester.tap(find.byType(SwitchListTile));
+    await settle(tester);
+    final prefs = await tester.runAsync(SharedPreferences.getInstance);
+    expect(prefs!.getBool('speechBoost'), false);
+    expect(
+      find.text('Kipróbálás'),
+      findsOneWidget,
+    ); // alarm controls still there
+    await finish(tester);
+  });
+
   testWidgets('leaving via the menu never refocuses the text field', (
     tester,
   ) async {

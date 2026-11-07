@@ -69,7 +69,7 @@ Background: peak normalization alone may gain little (Piper output and the built
 - Tests: the function never exceeds the ceiling; silence stays silence; a quiet sine comes out louder (RMS up); WAV read/write round-trip.
 - **Checks:** `flutter analyze`, `flutter test`. Human verifies on the Pixel 6a: compare loudness and distortion before/after with imre, berta, system TTS and the siren; compare against a speakerphone call.
 
-### [ ] T27 (Agent): "Beállítások" screen (replaces the alarm volume screen)
+### [x] T27 (Agent): "Beállítások" screen (replaces the alarm volume screen)
 Do after T26. Goal: one screen for the small sound settings, instead of a drawer row per setting (the drawer would otherwise grow with speech speed, loudness, alarm volume, …).
 - Drawer row "Riasztás hangereje" → **"Beállítások"** (`Icons.tune`, subtitle e.g. "Hangosítás, riasztás hangereje"). "Hang és nyelv" and "Listák" stay separate rows (they're whole screens of their own); About will be its own row too.
 - **Drawer order:** Listák, Beállítások, Hang és nyelv (Listák is used most, so it goes first; it was in the middle). About will go last.
@@ -86,6 +86,6 @@ Do after T26. Goal: one screen for the small sound settings, instead of a drawer
 ## Later (rough)
 - Carry unsaid sentences of a conversation over to a new one.
 - Offer new default lists/sentences added in later app versions to existing users (seed version).
-- Message banking (record your own audio for a sentence). Loudness: recordings vary a lot (distance from the mic), so normalize them, but don't compress them hard (it would raise background noise and breathing). Process on playback so the original file stays untouched. If it needs a switch, add it to Beállítások (T27).
+- Message banking (record your own audio for a sentence). Loudness: recordings vary a lot (distance from the mic), so normalize them, but don't compress them hard (it would raise background noise and breathing). Process on playback so the original file stays untouched. If it needs a switch, add it to the Beállítások screen.
 - Speech speed setting (lengthScale): a slider in the Beállítások screen (T27), section Beszéd.
 - About screen (a row in the settings screen, T18) with licenses; needed before the Play Store release (Alma is CC BY 4.0 and needs credit) (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).

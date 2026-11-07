@@ -138,10 +138,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsListsSubtitle => 'Edit lists and sentences';
 
   @override
-  String get alarmVolumeTitle => 'Alarm volume';
+  String get settingsTitle => 'Settings';
 
   @override
-  String get alarmVolumeSubtitle => 'How loud the alarm plays';
+  String get settingsSubtitle => 'Louder speech, alarm volume';
+
+  @override
+  String get settingsSpeechSection => 'Speech';
+
+  @override
+  String get settingsBoostTitle => 'Louder speech';
+
+  @override
+  String get settingsBoostHelp =>
+      'Makes speech louder. Turn off if it sounds distorted.';
+
+  @override
+  String get settingsAlarmSection => 'Alarm';
 
   @override
   String get alarmVolumeSystem => 'The phone\'s alarm volume';

@@ -139,10 +139,23 @@ class AppLocalizationsHu extends AppLocalizations {
   String get settingsListsSubtitle => 'Listák és mondatok szerkesztése';
 
   @override
-  String get alarmVolumeTitle => 'Riasztás hangereje';
+  String get settingsTitle => 'Beállítások';
 
   @override
-  String get alarmVolumeSubtitle => 'Milyen hangosan szóljon a riasztás';
+  String get settingsSubtitle => 'Hangosítás, riasztás hangereje';
+
+  @override
+  String get settingsSpeechSection => 'Beszéd';
+
+  @override
+  String get settingsBoostTitle => 'Hangosítás';
+
+  @override
+  String get settingsBoostHelp =>
+      'Hangosabb beszéd. Kapcsold ki, ha torznak hallod.';
+
+  @override
+  String get settingsAlarmSection => 'Riasztás';
 
   @override
   String get alarmVolumeSystem => 'A telefon ébresztési hangereje';

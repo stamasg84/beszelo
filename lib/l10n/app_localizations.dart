@@ -326,17 +326,41 @@ abstract class AppLocalizations {
   /// **'Listák és mondatok szerkesztése'**
   String get settingsListsSubtitle;
 
-  /// Drawer row and screen title for the alarm volume setting.
+  /// Drawer row and screen title for the sound settings.
   ///
   /// In hu, this message translates to:
-  /// **'Riasztás hangereje'**
-  String get alarmVolumeTitle;
+  /// **'Beállítások'**
+  String get settingsTitle;
 
-  /// Subtitle of the alarm volume row.
+  /// Subtitle of the settings drawer row.
   ///
   /// In hu, this message translates to:
-  /// **'Milyen hangosan szóljon a riasztás'**
-  String get alarmVolumeSubtitle;
+  /// **'Hangosítás, riasztás hangereje'**
+  String get settingsSubtitle;
+
+  /// Section header for speech settings.
+  ///
+  /// In hu, this message translates to:
+  /// **'Beszéd'**
+  String get settingsSpeechSection;
+
+  /// Switch: louder speech.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hangosítás'**
+  String get settingsBoostTitle;
+
+  /// Help text under the speech boost switch.
+  ///
+  /// In hu, this message translates to:
+  /// **'Hangosabb beszéd. Kapcsold ki, ha torznak hallod.'**
+  String get settingsBoostHelp;
+
+  /// Section header for alarm settings.
+  ///
+  /// In hu, this message translates to:
+  /// **'Riasztás'**
+  String get settingsAlarmSection;
 
   /// Radio option: use the phone's own alarm volume.
   ///
