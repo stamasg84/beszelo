@@ -63,15 +63,28 @@ Background: peak normalization alone may gain little (Piper output and the built
 - Piper: apply it in the isolate on `audio.samples` before `writeWave` (`lib/voices/piper_engine.dart`). System TTS: post-process the file written by `synthesizeToFile` (`lib/voices/system_engine.dart`); if the file isn't 16-bit PCM WAV, leave it unchanged.
 - Built-in sounds: re-run `tool/make_sounds.py` with the same treatment (siren and horn can be much more compressed/square-ish, they're meant to be loud; keep the siren loop seamless). Regenerate and commit the WAVs.
 - Optional, only if the above isn't enough: Android `LoudnessEnhancer` audio effect on the player's audio session (native, `MainActivity.kt`). Note it in the summary rather than doing it unasked.
-- Out of scope: a user-facing loudness setting (add later only if someone finds it too loud or distorted). Message-banking recordings will go through the same function later.
+- Apply it on the fly, behind one flag `speechBoost` (`shared_preferences`, default `true`, no UI yet: T27 adds the switch). The flag covers TTS speech only, including TTS-spoken alarm rows. Built-in sounds are fixed assets, already loud by design, so they're processed offline in `tool/make_sounds.py` (above), not at runtime, and the flag doesn't affect them. Message-banking recordings are out of scope here (that task decides how to treat them).
+- Out of scope: the settings UI (T27).
 - Tests: the function never exceeds the ceiling; silence stays silence; a quiet sine comes out louder (RMS up); WAV read/write round-trip.
 - **Checks:** `flutter analyze`, `flutter test`. Human verifies on the Pixel 6a: compare loudness and distortion before/after with imre, berta, system TTS and the siren; compare against a speakerphone call.
+
+### [ ] T27 (Agent): "Beállítások" screen (replaces the alarm volume screen)
+Do after T26. Goal: one screen for the small sound settings, instead of a drawer row per setting (the drawer would otherwise grow with speech speed, loudness, alarm volume, …).
+- Drawer row "Riasztás hangereje" → **"Beállítások"** (`Icons.tune`, subtitle e.g. "Hangosítás, riasztás hangereje"). "Hang és nyelv" and "Listák" stay separate rows (they're whole screens of their own); About will be its own row too.
+- **Drawer order:** Listák, Beállítások, Hang és nyelv (Listák is used most, so it goes first; it was in the middle). About will go last.
+- The screen (rename `alarm_volume_screen.dart` → `settings_screen.dart`), large rows, section headers:
+  - **Beszéd**: switch "Hangosítás" (`speechBoost` from T26), help text "Hangosabb beszéd. Kapcsold ki, ha torznak hallod." Room for the speech speed slider later.
+  - **Riasztás**: the current alarm volume controls unchanged (radio rows, slider, Kipróbálás).
+- ARB (hu + en) for the new texts; drop unused alarm-volume drawer strings.
+- Update `docs/architecture.md` "Settings and editing" (drawer rows) and the "Later" notes in this file that say "a row in the drawer".
+- Tests: the switch persists `speechBoost`; the alarm volume widget tests still pass on the new screen.
+- **Checks:** `flutter analyze`, `flutter test`.
 
 ---
 
 ## Later (rough)
 - Carry unsaid sentences of a conversation over to a new one.
 - Offer new default lists/sentences added in later app versions to existing users (seed version).
-- Message banking (record your own audio for a sentence).
-- Speech speed setting (lengthScale): a row in the drawer (T19b).
+- Message banking (record your own audio for a sentence). Loudness: recordings vary a lot (distance from the mic), so normalize them, but don't compress them hard (it would raise background noise and breathing). Process on playback so the original file stays untouched. If it needs a switch, add it to Beállítások (T27).
+- Speech speed setting (lengthScale): a slider in the Beállítások screen (T27), section Beszéd.
 - About screen (a row in the settings screen, T18) with licenses; needed before the Play Store release (Alma is CC BY 4.0 and needs credit) (GPL-3.0 app; per-voice licenses from the catalog; Apache-2.0 sherpa-onnx).
