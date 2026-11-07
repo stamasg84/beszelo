@@ -245,6 +245,9 @@ class _SpeakingScreenState extends State<SpeakingScreen>
   /// the full width of the bottom bar.
   Widget _loadButton(AppLocalizations l10n) {
     final scheme = Theme.of(context).colorScheme;
+    // Same corner radius as the sentence rows and the banner, not the
+    // default circular IconButton shape.
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12));
     return IconButton(
       iconSize: 32,
       tooltip: l10n.loadSentence,
@@ -253,8 +256,12 @@ class _SpeakingScreenState extends State<SpeakingScreen>
           ? IconButton.styleFrom(
               backgroundColor: scheme.primary,
               foregroundColor: scheme.onPrimary,
+              shape: shape,
             )
-          : IconButton.styleFrom(side: BorderSide(color: scheme.outline)),
+          : IconButton.styleFrom(
+              side: BorderSide(color: scheme.outline),
+              shape: shape,
+            ),
       icon: const Icon(Icons.arrow_downward),
       onPressed: () => setState(() => _loadArmed = !_loadArmed),
     );
