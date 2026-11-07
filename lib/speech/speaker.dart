@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../voices/voice.dart';
 import '../voices/voice_engine.dart';
 import 'alarm_volume.dart';
+import 'loudness.dart';
 import 'sounds.dart';
 
 /// Plays WAV files. Abstracted so [Speaker] can be unit-tested.
@@ -245,7 +246,9 @@ class Speaker extends ChangeNotifier {
     final engine = _engine;
     final voice = _voice;
     if (normalized.isEmpty || engine == null || voice == null || _busy) return;
-    final key = '${voice.id}\u0000$normalized';
+    // The boost setting is part of the key, so toggling it re-synthesizes.
+    final boost = await speechBoostEnabled();
+    final key = '${voice.id}\u0000$boost\u0000$normalized';
     try {
       await _stopAll(restoreVolume: !alarm);
       if (key == _lastKey && _lastPath != null) {
